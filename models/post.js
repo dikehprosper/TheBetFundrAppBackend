@@ -10,11 +10,13 @@ const PostSchema = new mongoose.Schema({
     image: { type: String },
     profileImage: { type: String },
     likeCount: { type: Number } ,
+    viewCount: { type: Number },
     commentCount: { type: Number },
     likes: {
         type: [
             {
                 id: { type: String, required: true },
+                userEmail: { type: String, },
                 name: { type: String },
                 image: { type: String },
             },
@@ -24,8 +26,19 @@ const PostSchema = new mongoose.Schema({
         type: [
             {
                 id: { type: String, required: true },
+                userEmail: { type: String, },
                 name: { type: String },
                 description: { type: String },
+                image: { type: String },
+            },
+        ],
+    },
+    views: {
+        type: [
+            {
+                id: { type: String, required: true },
+                userEmail: { type: String },
+                name: { type: String },
                 image: { type: String },
             },
         ],
