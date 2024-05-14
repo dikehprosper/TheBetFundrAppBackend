@@ -12,14 +12,14 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-const post = require('./routes/post');
-const authRoutes = require('./routes/userAuth');
-const editProfileRoutes = require('./routes/editProfile');
-const sendNotificationRoutes = require('./routes/sendNotifications');
-const genarateQRCodeRoutes = require('./routes/QRCode');
-const actionRoutes = require('./routes/action');
+const post = require('../routes/post');
+const authRoutes = require('../routes/userAuth');
+const editProfileRoutes = require('../routes/editProfile');
+const sendNotificationRoutes = require('../routes/sendNotifications');
+const genarateQRCodeRoutes = require('../routes/QRCode');
+const actionRoutes = require('../routes/action');
 
-const verifyToken = require('./verifyToken');
+const verifyToken = require('../verifyToken');
 
 // Welcome route
 app.get('/', (req, res) => {
