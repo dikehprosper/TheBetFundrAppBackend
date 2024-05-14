@@ -233,6 +233,8 @@ const UserSchema = new mongoose.Schema({
 
   forgotPasswordToken: String,
   forgotPasswordTokenExpiry: Date,
+  pinreset: String,
+  pinExpiryTime: Date,
 });
 
 

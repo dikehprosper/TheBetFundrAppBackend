@@ -450,8 +450,7 @@ router.post('/verifyUserPin', checkOngoingTransaction, loginValidate, async (req
 router.post('/resetPassword', async (req, res) => {
 
     try {
-        const {  email } = req.body;
-console.log("first check")
+        const { email } = req.body;
         // Check if the user already exists
         const existingUser = await User.findOne({ email });
         if (!existingUser) {
@@ -478,6 +477,188 @@ console.log("first check")
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
+router.post('/resetPasswordForLoggedInUser', async (req, res) => {
+
+    try {
+        const { email, password, newPassword } = req.body;
+
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (!existingUser) {
+            transactionInProgress = false;
+            return res.status(501).send({ success: 501, message: 'User does not exists', status: 501 });
+        }
+
+        if (!existingUser.isActivated) {
+            transactionInProgress = false;
+            return res.status(502).send({ success: 502, message: 'User is deactivated', status: 502 });
+        }
+
+        const validPassword = await bcryptjs.compare(password, existingUser.password);
+        if (!validPassword) {
+            transactionInProgress = false;
+            return res.status(503).send({ success: 503, message: 'Invalid password', status: 503 });
+        }
+
+        const hashedPassword = await bcryptjs.hash(newPassword, 10);
+
+        existingUser.password = hashedPassword
+
+        // console.log("second check")
+        // await SendEmail({
+        //     email,
+        //     userId: existingUser._id,
+        //     emailType: "RESET",
+        //     fullname: existingUser.fullname,
+        // });
+        await existingUser.save()
+        transactionInProgress = false;
+        return res.status(201).send({ success: true, message: 'successful', status: 201 });
+
+
+    } catch (error) {
+        transactionInProgress = false;
+        console.error('Error logining in user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.post('/requestPin', async (req, res) => {
+
+    try {
+        const { email } = req.body;
+
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (!existingUser) {
+            transactionInProgress = false;
+            return res.status(501).send({ success: 501, message: 'User does not exists', status: 501 });
+        }
+
+        if (!existingUser.isActivated) {
+            transactionInProgress = false;
+            return res.status(502).send({ success: 502, message: 'User is deactivated', status: 502 });
+        }
+
+
+        await SendEmail({
+            email,
+            userId: existingUser._id,
+            emailType: "RESETPINFORAPP",
+            fullname: existingUser.fullname,
+        });
+
+        await existingUser.save()
+        transactionInProgress = false;
+        return res.status(201).send({ success: true, message: 'successful', status: 201 });
+
+
+    } catch (error) {
+        transactionInProgress = false;
+        console.error('Error logining in user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+router.post('/checkPin', async (req, res) => {
+
+    try {
+        const submittedPin = req.body.pin;
+        const userId = req.body.id;
+
+        console.log(submittedPin, userId)
+        const user = await User.findById(userId);
+
+        if (user && user.pinreset === submittedPin) {
+            if (user.pinExpiryTime > Date.now()) {
+                return res.status(201).send({ success: true, message: 'PIN verification successful', status: 201 });
+            } else {
+                res.status(401).send("PIN has expired. Please request a new one.");
+            }
+        } else {
+
+            res.status(402).send("Invalid PIN or user ID.");
+        }
+    } catch (error) {
+
+        console.error('Error logining in user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+router.post('/changeColorScheme', async (req, res) => {
+
+    try {
+        const email = req.body.email;
+        console.log(email, "ertyuioiuyt")
+        const existingUser = await User.findOne({ email });
+        console.log(existingUser.colorScheme)
+        if (existingUser.colorScheme === 2) {
+            existingUser.colorScheme = 1;
+            await existingUser.save()
+        } else if (existingUser.colorScheme === 1) {
+            existingUser.colorScheme = 2;
+            await existingUser.save()
+        }
+
+
+        res.status(201).send({ success: true, message: "colorScheme changed succesfully", status: 201, existingUser })
+
+    } catch (error) {
+
+        console.error('Error logining in user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.post('/changeUserPin', async (req, res) => {
+    try {
+        const { pin, email } = req.body;
+        console.log(pin, email, "email")
+
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (!existingUser) {
+            transactionInProgress = false;
+            return res.status(501).send({ success: 501, message: 'User does not exists', status: 501 });
+        }
+
+        if (!existingUser.isActivated) {
+            transactionInProgress = false;
+            return res.status(502).send({ success: 502, message: 'User is deactivated', status: 502 });
+        }
+
+        // Hash the pin
+        const hashedPin = await bcryptjs.hash(pin, 10);
+
+
+        // Set the user's session ID and isLoggedIn status
+        existingUser.pin = hashedPin;
+
+        await existingUser.save();
+
+
+        res.status(201).send({ success: true, message: "set Pin succesfully", status: 201 })
+
+    } catch (error) {
+        transactionInProgress = false;
+        console.error('Error ligining in user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+
+
+
+
+
+
+
 
 
 

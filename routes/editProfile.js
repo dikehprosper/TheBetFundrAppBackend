@@ -153,7 +153,7 @@ router.post('/changeUserDetails', checkOngoingTransaction, signInValidate, async
                 await user.save()
                 // Return the updated information
                 transactionInProgress = false
-                return res.status(201).send({ success: true, message: 'updated information successfully', status: 210 });
+                return res.status(201).send({ success: true, message: 'updated information successfully', status: 210, user });
             }
             if (response.status !== 200) {
                 transactionInProgress = false
