@@ -2,12 +2,16 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // /* eslint-disable @typescript-eslint/no-var-requires */
 // /* eslint-disable no-undef */
-import {
+const {
   commentOnPost,
   getComments,
   likePost,
   getLikes,
-} from "../controllers/post.js";
+  addToView,
+  getFollowingPosts,
+  getRandomPosts,
+  getViews,
+} = require("../controllers/post.js");
 const express = require("express");
 
 // const Post = require('../models/post');
@@ -26,10 +30,17 @@ function checkRequestProcessing(req, res, next) {
   }
 }
 
-router.post("/like", likePost);
-router.post("/comment", commentOnPost);
+// get endpoints
+router.get("/", getRandomPosts);
+router.get("/following", getFollowingPosts);
 router.get("/like", getLikes);
 router.get("/comments", getComments);
+router.get("/view", getViews);
+
+// post endpoints
+router.post("/like", likePost);
+router.post("/comment", commentOnPost);
+router.post("/view", addToView);
 
 // /api/houses
 router.get("/", checkRequestProcessing, (req, res) => {

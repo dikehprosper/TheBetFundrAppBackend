@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-undef */
 
-
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
   fullname: {
@@ -33,9 +32,11 @@ const UserSchema = new mongoose.Schema({
   pin: {
     type: String,
   },
-  image: { type: String, default: '' },
-  imageFileName: { type: String, default: '' },
-   pinState: {
+  following: { type: Array },
+  followers: { type: Array },
+  image: { type: String, default: "" },
+  imageFileName: { type: String, default: "" },
+  pinState: {
     type: Boolean,
     default: false,
   },
@@ -151,7 +152,7 @@ const UserSchema = new mongoose.Schema({
   },
   bonusBalance: {
     type: Number,
-    default: 0 
+    default: 0,
   },
   colorScheme: {
     type: Number,
@@ -181,8 +182,7 @@ const UserSchema = new mongoose.Schema({
         bonusBalance: Number,
         paymentConfirmation: String,
         fedapayTransactionId: String || Number,
-        
-      }
+      },
     ],
   },
   transactionHistory: {
@@ -207,8 +207,8 @@ const UserSchema = new mongoose.Schema({
 
         betId: String,
         amount: Number,
-        fundingType: String,       
-         identifierId: String,
+        fundingType: String,
+        identifierId: String,
         withdrawalCode: String,
         momoName: String,
         momoNumber: Number,
@@ -235,9 +235,4 @@ const UserSchema = new mongoose.Schema({
   forgotPasswordTokenExpiry: Date,
 });
 
-
-
-module.exports = mongoose.model('User', UserSchema);
-
-
-
+module.exports = mongoose.model("User", UserSchema);
