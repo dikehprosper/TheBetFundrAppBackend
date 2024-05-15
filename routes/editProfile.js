@@ -201,19 +201,24 @@ router.post(
           await user.save();
           // Return the updated information
           transactionInProgress = false;
-          return res.status(201).send({
-            success: true,
-            message: "updated information successfully",
-            status: 210,
-          });
+          return res
+            .status(201)
+            .send({
+              success: true,
+              message: "updated information successfully",
+              status: 210,
+              user,
+            });
         }
         if (response.status !== 200) {
           transactionInProgress = false;
-          return res.status(402).send({
-            success: 402,
-            message: "failed to update information on fedapay",
-            status: 402,
-          });
+          return res
+            .status(402)
+            .send({
+              success: 402,
+              message: "failed to update information on fedapay",
+              status: 402,
+            });
         }
       }
     } catch (error) {

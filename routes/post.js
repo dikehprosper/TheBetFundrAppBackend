@@ -11,6 +11,11 @@ const {
   getFollowingPosts,
   getRandomPosts,
   getViews,
+  getMyPosts,
+  deleteComment,
+  updatePost,
+  deletePost,
+  getMyLikedPosts,
 } = require("../controllers/post.js");
 const express = require("express");
 
@@ -32,15 +37,24 @@ function checkRequestProcessing(req, res, next) {
 
 // get endpoints
 router.get("/", getRandomPosts);
+router.get("/my-posts", getMyPosts);
+router.get("/liked-posts", getMyLikedPosts);
 router.get("/following", getFollowingPosts);
 router.get("/like", getLikes);
-router.get("/comments", getComments);
+router.get("/comment", getComments);
 router.get("/view", getViews);
 
 // post endpoints
 router.post("/like", likePost);
 router.post("/comment", commentOnPost);
 router.post("/view", addToView);
+
+// delete endpoints
+router.delete("/", deletePost);
+router.delete("/comment", deleteComment);
+
+// patch endpoints
+router.patch("/", updatePost);
 
 // /api/houses
 router.get("/", checkRequestProcessing, (req, res) => {
