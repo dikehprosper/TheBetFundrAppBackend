@@ -5,15 +5,15 @@ const mongoose = require("mongoose");
 
 const PostSchema = new mongoose.Schema({
   // id: { type: String, required: true },
-  userId: { type: String, required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   name: { type: String },
   body: { type: String, required: true },
   createdAt: { type: Date, default: Date() },
   image: { type: String },
   profileImage: { type: String },
-  likeCount: { type: Number },
-  viewCount: { type: Number },
-  commentCount: { type: Number },
+  likeCount: { type: Number, default: 0 },
+  viewCount: { type: Number, default: 0 },
+  commentCount: { type: Number, default: 0 },
   likes: [
     {
       userId: { type: String, required: true },
@@ -26,7 +26,7 @@ const PostSchema = new mongoose.Schema({
     type: [
       {
         id: { type: String, required: true },
-        userId: { type: mongoose.Types.ObjectId },
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         userEmail: { type: String },
         name: { type: String },
         description: { type: String },

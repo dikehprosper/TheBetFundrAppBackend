@@ -19,9 +19,30 @@ admin.initializeApp(
 );
 
 // getters
+
+const getPostDetails = async (req, res) => {
+  const postId = req.query.postId;
+
+  try {
+    const post = await Post.findById(postId)
+      .populate("user")
+      .populate("comments.user")
+      .exec();
+
+    return successResponse(res, "Post returned successfully", { post });
+  } catch (err) {
+    return serverErrorResponse(res, err);
+  }
+};
+
 const getRandomPosts = async (req, res) => {
   try {
-    const posts = await Post.find().limit(20).sort({ createdAt: -1 });
+    const posts = await Post.find()
+      .limit(20)
+      .sort({ createdAt: -1 })
+      .populate("user")
+      .populate("comments.user")
+      .exec();
 
     return successResponse(res, "Posts returned", { posts });
   } catch (err) {
@@ -37,7 +58,10 @@ const getFollowingPosts = async (req, res) => {
 
     const followingPosts = await Post.find({ _id: { $in: user.following } })
       .limit(20)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .populate("user")
+      .populate("comments.user")
+      .exec();
 
     return successResponse(res, "Following Posts returned", { followingPosts });
   } catch (err) {
@@ -49,7 +73,10 @@ const getMyPosts = async (req, res) => {
   const userId = req.query.userId;
 
   try {
-    const userPosts = await Post.find({ userId: userId });
+    const userPosts = await Post.find({ user: userId })
+      .populate("user")
+      .populate("comments.user")
+      .exec();
 
     return successResponse(res, "User posts returned", { posts: userPosts });
   } catch (err) {
@@ -63,7 +90,10 @@ const getMyLikedPosts = async (req, res) => {
   try {
     const likedPosts = await Post.find({
       likes: { $elemMatch: { userId: userId } },
-    });
+    })
+      .populate("user")
+      .populate("comments.user")
+      .exec();
 
     return successResponse(res, "Liked Posts returned", { posts: likedPosts });
   } catch (err) {
@@ -88,10 +118,10 @@ const getLikes = async (req, res) => {
 };
 
 const getComments = async (req, res) => {
-  const { postId } = req.body;
+  const postId = req.query.postId;
 
   try {
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate("comments.user").exec();
 
     if (!post) return failedResponse(res, "Post not found");
 
@@ -159,7 +189,7 @@ const createPost = async (req, res) => {
     }
 
     const createdPost = await Post.create({
-      userId,
+      user: existingUser.id,
       ...postDetails,
       image: publicUrl,
     });
@@ -174,7 +204,10 @@ const deletePost = async (req, res) => {
   const { postId, userId } = req.body;
 
   try {
-    const deletedPost = await Post.findOneAndDelete({ _id: postId, userId });
+    const deletedPost = await Post.findOneAndDelete({
+      _id: postId,
+      user: userId,
+    });
 
     return successResponse(res, "Post deleted");
   } catch (err) {
@@ -241,7 +274,7 @@ const commentOnPost = async (req, res) => {
 
     const commentDetails = {
       id: newId,
-      userId: userId,
+      user: userId,
       userEmail: user.email,
       name: user.fullname,
       image: user.image,
@@ -316,4 +349,6 @@ module.exports = {
   updatePost,
   getMyPosts,
   getMyLikedPosts,
+  createPost,
+  getPostDetails,
 };
