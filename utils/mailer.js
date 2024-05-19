@@ -1,86 +1,86 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
-require('dotenv').config();
+require("dotenv").config();
 const AWS = require("aws-sdk");
-const bcryptjs = require('bcryptjs');
-const User = require('../models/user');
+const bcryptjs = require("bcryptjs");
+const User = require("../models/user");
 
 async function SendEmail({ email, emailType, userId, fullname }) {
-    console.log("third check")
-    try {
-        const hashedToken = await bcryptjs.hash(userId.toString(), 10);
-        const randomNumbers = Array.from(
-            { length: 4 },
-            () => Math.floor(Math.random() * 9) + 1
-        );
-        const randomNumbersString = randomNumbers.join("");
+  console.log("third check");
+  try {
+    const hashedToken = await bcryptjs.hash(userId.toString(), 10);
+    const randomNumbers = Array.from(
+      { length: 4 },
+      () => Math.floor(Math.random() * 9) + 1
+    );
+    const randomNumbersString = randomNumbers.join("");
 
-        const twoHoursInMillis = 2 * 60 * 60 * 1000; // Convert 2 hours to milliseconds
+    const twoHoursInMillis = 2 * 60 * 60 * 1000; // Convert 2 hours to milliseconds
 
-        const expiryTime = Date.now() + twoHoursInMillis;
+    const expiryTime = Date.now() + twoHoursInMillis;
 
-        if (emailType === "RESET") {
-            await User.findByIdAndUpdate(userId, {
-                forgotPasswordToken: hashedToken,
-                forgotPasswordTokenExpiry: expiryTime,
-            });
-        }
+    if (emailType === "RESET") {
+      await User.findByIdAndUpdate(userId, {
+        forgotPasswordToken: hashedToken,
+        forgotPasswordTokenExpiry: expiryTime,
+      });
+    }
 
-        const generateRandomPin = () => {
-            const pinDigits = Array.from({ length: 5 }, () => Math.floor(Math.random() * 10)); // Generate 5 random digits (0-9)
-            return pinDigits.join(""); // Concatenate the digits into a string
-        };
+    const generateRandomPin = () => {
+      const pinDigits = Array.from({ length: 5 }, () =>
+        Math.floor(Math.random() * 10)
+      ); // Generate 5 random digits (0-9)
+      return pinDigits.join(""); // Concatenate the digits into a string
+    };
 
-        // Generate the PIN and calculate its expiry time
-        const pin = generateRandomPin();
-        const pinExpiryTime = Date.now() + (2 * 60 * 60 * 1000); // Set expiry time to 2 hours from now
+    // Generate the PIN and calculate its expiry time
+    const pin = generateRandomPin();
+    const pinExpiryTime = Date.now() + 2 * 60 * 60 * 1000; // Set expiry time to 2 hours from now
 
-        // Update the document in the database with the generated PIN and expiry time
-        if (emailType === "RESETPINFORAPP") {
-            await User.findByIdAndUpdate(userId, {
-                pinreset: pin, // Save the generated PIN
-                pinExpiryTime: pinExpiryTime, // Save the expiry time for the PIN
-            });
-        }
+    // Update the document in the database with the generated PIN and expiry time
+    if (emailType === "RESETPINFORAPP") {
+      await User.findByIdAndUpdate(userId, {
+        pinreset: pin, // Save the generated PIN
+        pinExpiryTime: pinExpiryTime, // Save the expiry time for the PIN
+      });
+    }
 
-        if (emailType === "VERIFY") {
-            await User.findByIdAndUpdate(userId, {
-                verifyToken: hashedToken,
-                verifyTokenExpiry: Date.now() + 86400000,
-            });
-        }
+    if (emailType === "VERIFY") {
+      await User.findByIdAndUpdate(userId, {
+        verifyToken: hashedToken,
+        verifyTokenExpiry: Date.now() + 86400000,
+      });
+    }
 
-        if (emailType === "SEND") {
-            await User.findByIdAndUpdate(userId, {
-                faToken: randomNumbersString,
-                faTokenExpiry: Date.now() + 7200000,
-            });
-        }
+    if (emailType === "SEND") {
+      await User.findByIdAndUpdate(userId, {
+        faToken: randomNumbersString,
+        faTokenExpiry: Date.now() + 7200000,
+      });
+    }
 
-        const adminEmail = process.env.EMAIL;
+    const adminEmail = process.env.EMAIL;
 
-        const SES_CONFIG = {
-            accessKeyId: process.env.AWS_ACCESS_KEY,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-            region: process.env.AWS_SES_REGION,
-        };
+    const SES_CONFIG = {
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_SES_REGION,
+    };
 
-        const AWS_SES = new AWS.SES(SES_CONFIG);
+    const AWS_SES = new AWS.SES(SES_CONFIG);
 
-
-
-        if (emailType === "RESETPINFORAPP") {
-            let params = {
-                Source: adminEmail,
-                Destination: {
-                    ToAddresses: ["dikehprosper@gmail.com"],
-                },
-                ReplyToAddresses: [],
-                Message: {
-                    Body: {
-                        Html: {
-                            Charset: "UTF-8",
-                            Data: `<!DOCTYPE html>
+    if (emailType === "RESETPINFORAPP") {
+      let params = {
+        Source: adminEmail,
+        Destination: {
+          ToAddresses: ["dikehprosper@gmail.com"],
+        },
+        ReplyToAddresses: [],
+        Message: {
+          Body: {
+            Html: {
+              Charset: "UTF-8",
+              Data: `<!DOCTYPE html>
 <html>
 <head>
     <style>
@@ -236,10 +236,10 @@ async function SendEmail({ email, emailType, userId, fullname }) {
 </html>
 
           `,
-                        },
-                        Text: {
-                            Charset: "UTF-8",
-                            Data: `<!DOCTYPE html>
+            },
+            Text: {
+              Charset: "UTF-8",
+              Data: `<!DOCTYPE html>
 <html>
 <head>
     <style>
@@ -371,8 +371,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
             <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous</p>
             <div class="reset-link">
 
-                <a href="${process.env
-                                    .DOMAIN}/resetpassword?token=${hashedToken}">
+                <a href="${process.env.DOMAIN}/resetpassword?token=${hashedToken}">
                               <div class="reset-link-inner">
                              RÉINITIALISEZ VOTRE MOT DE PASSE
                                           </div>
@@ -395,29 +394,29 @@ async function SendEmail({ email, emailType, userId, fullname }) {
 </html>
 
           `,
-                        },
-                    },
-                    Subject: {
-                        Charset: "UTF-8",
-                        Data: `Bonjour, ${fullname},  Réinitialisez votre mot de passe`,
-                    },
-                },
-            };
-            const mailresponse = await AWS_SES.sendEmail(params).promise();
-            console.log(mailresponse, "Email has been Sent");
-            return mailresponse;
-        } else {
-            let params = {
-                Source: adminEmail,
-                Destination: {
-                    ToAddresses: [email],
-                },
-                ReplyToAddresses: [],
-                Message: {
-                    Body: {
-                        Html: {
-                            Charset: "UTF-8",
-                            Data: `<!DOCTYPE html>
+            },
+          },
+          Subject: {
+            Charset: "UTF-8",
+            Data: `Bonjour, ${fullname},  Réinitialisez votre mot de passe`,
+          },
+        },
+      };
+      const mailresponse = await AWS_SES.sendEmail(params).promise();
+      console.log(mailresponse, "Email has been Sent");
+      return mailresponse;
+    } else {
+      let params = {
+        Source: adminEmail,
+        Destination: {
+          ToAddresses: [email],
+        },
+        ReplyToAddresses: [],
+        Message: {
+          Body: {
+            Html: {
+              Charset: "UTF-8",
+              Data: `<!DOCTYPE html>
 <html>
 <head>
     <style>
@@ -549,8 +548,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
             <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous</p>
             <div class="reset-link">
 
-                <a href="${process.env
-                                    .DOMAIN}/resetpassword?token=${hashedToken}">
+                <a href="${process.env.DOMAIN}/resetpassword?token=${hashedToken}">
                               <div class="reset-link-inner">
                              RÉINITIALISEZ VOTRE MOT DE PASSE
                                           </div>
@@ -573,10 +571,10 @@ async function SendEmail({ email, emailType, userId, fullname }) {
 </html>
 
           `,
-                        },
-                        Text: {
-                            Charset: "UTF-8",
-                            Data: `<!DOCTYPE html>
+            },
+            Text: {
+              Charset: "UTF-8",
+              Data: `<!DOCTYPE html>
 <html>
 <head>
     <style>
@@ -708,8 +706,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
             <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous</p>
             <div class="reset-link">
 
-                <a href="${process.env
-                                    .DOMAIN}/resetpassword?token=${hashedToken}">
+                <a href="${process.env.DOMAIN}/resetpassword?token=${hashedToken}">
                               <div class="reset-link-inner">
                              RÉINITIALISEZ VOTRE MOT DE PASSE
                                           </div>
@@ -732,23 +729,21 @@ async function SendEmail({ email, emailType, userId, fullname }) {
 </html>
 
           `,
-                        },
-                    },
-                    Subject: {
-                        Charset: "UTF-8",
-                        Data: `Bonjour, ${fullname},  Réinitialisez votre mot de passe`,
-                    },
-                },
-            };
-            const mailresponse = await AWS_SES.sendEmail(params).promise();
-            console.log(mailresponse, "Email has been Sent");
-            return mailresponse;
-        }
-
-
-    } catch (error) {
-        throw new Error(error.message);
+            },
+          },
+          Subject: {
+            Charset: "UTF-8",
+            Data: `Bonjour, ${fullname},  Réinitialisez votre mot de passe`,
+          },
+        },
+      };
+      const mailresponse = await AWS_SES.sendEmail(params).promise();
+      console.log(mailresponse, "Email has been Sent");
+      return mailresponse;
     }
+  } catch (error) {
+    throw new Error(error.message);
+  }
 }
 
 module.exports = SendEmail;
