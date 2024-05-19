@@ -53,6 +53,7 @@ router.post(
   checkOngoingTransaction,
   signInValidate,
   async (req, res) => {
+    console.log("fullname");
     checkOngoingTransaction;
     const errors = validationResult(req);
 
@@ -65,7 +66,7 @@ router.post(
     try {
       transactionInProgress = true;
       const { fullname, betId, number, email, password, referrerId } = req.body;
-
+      console.log(fullname);
       // Check if the user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -666,13 +667,11 @@ router.post("/checkPin", async (req, res) => {
 
     if (user && user.pinreset === submittedPin) {
       if (user.pinExpiryTime > Date.now()) {
-        return res
-          .status(201)
-          .send({
-            success: true,
-            message: "PIN verification successful",
-            status: 201,
-          });
+        return res.status(201).send({
+          success: true,
+          message: "PIN verification successful",
+          status: 201,
+        });
       } else {
         res.status(401).send("PIN has expired. Please request a new one.");
       }
@@ -699,14 +698,12 @@ router.post("/changeColorScheme", async (req, res) => {
       await existingUser.save();
     }
 
-    res
-      .status(201)
-      .send({
-        success: true,
-        message: "colorScheme changed succesfully",
-        status: 201,
-        existingUser,
-      });
+    res.status(201).send({
+      success: true,
+      message: "colorScheme changed succesfully",
+      status: 201,
+      existingUser,
+    });
   } catch (error) {
     console.error("Error logining in user:", error);
     res.status(500).json({ error: "Internal server error" });

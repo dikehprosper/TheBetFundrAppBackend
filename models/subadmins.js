@@ -166,7 +166,8 @@ const subAdminSchema = new mongoose.Schema({
                 userEmail: String,
                 subadminEmail: String,
                 paymentConfirmation: String,
-                
+                totalAmount: Number,
+                service: String,
                 isSubmitted: {
                     type: Boolean,
                     default: false,
