@@ -42,6 +42,7 @@ const checkOngoingTransaction = (req, res, next) => {
 
 
 router.post('/register', checkOngoingTransaction,  signInValidate , async (req, res) => {
+    console.log("fullname")
     checkOngoingTransaction
     const errors = validationResult(req);
 
@@ -52,7 +53,7 @@ router.post('/register', checkOngoingTransaction,  signInValidate , async (req, 
     try {
         transactionInProgress = true;
         const { fullname, betId, number, email, password, referrerId } = req.body;
-
+        console.log(fullname)
         // Check if the user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {

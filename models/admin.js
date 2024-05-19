@@ -189,6 +189,10 @@ const adminSchema = new mongoose.Schema({
     transactionHistory: {
         type: [
             {
+               senderName: String,
+                recipientName: String,
+                recipientTag: String,
+                recipientid: String,
                 username: String,
                 userNumber: Number,
                 userid: String,
@@ -208,7 +212,7 @@ const adminSchema = new mongoose.Schema({
                 service: String,
                 paymentConfirmation: String,
                 bonusBalance: Number,
-                totalAmount: String,
+                totalAmount: Number,
                 QrCodeDepositsId: String,
                 fedapayTransactionId: String || Number,
                 authenticatedDeposit: {

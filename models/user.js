@@ -181,7 +181,7 @@ const UserSchema = new mongoose.Schema({
         bonusBalance: Number,
         paymentConfirmation: String,
         fedapayTransactionId: String || Number,
-        
+        recipientid: String
       }
     ],
   },
@@ -204,7 +204,10 @@ const UserSchema = new mongoose.Schema({
         // identifierId: String,
         // userEmail: String,
         // subadminEmail: String,
-
+        senderName: String,
+        recipientName: String,
+        recipientTag: String,
+        recipientid: String,
         betId: String,
         amount: Number,
         fundingType: String,       
