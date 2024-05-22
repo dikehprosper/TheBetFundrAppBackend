@@ -1627,7 +1627,7 @@ router.post("/searchSendingPage", async (req, res) => {
           message: "User(s) found",
           status: true,
           search,
-        });
+        })
     }
 
     const search2 = users
