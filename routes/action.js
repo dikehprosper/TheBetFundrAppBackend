@@ -781,7 +781,6 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
       //       status: 505,
       //     });
       // }
-
       const date = new Date();
       const newUuid = uuidv4();
       user.pendingDeposit.push({
