@@ -8,7 +8,7 @@ const PostSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   name: { type: String },
   body: { type: String, required: true },
-  createdAt: { type: Date, default: Date() },
+  createdAt: { type: Date, default: Date.now },
   image: { type: String },
   profileImage: { type: String },
   likeCount: { type: Number, default: 0 },

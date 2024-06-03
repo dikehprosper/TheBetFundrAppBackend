@@ -11,6 +11,7 @@ const QrCodeDeposits = require("../models/generateQrCode");
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 const { FedaPay, Transaction, Customer } = require("fedapay");
+const { createTag, followUser, getFollowers } = require("../controllers/userActions.js")
 // add the current transaction to the user
 
 let transactionInProgress = false;
@@ -25,6 +26,10 @@ const checkOngoingTransaction = (req, res, next) => {
   // If no transaction is in progress, allow the route handler to proceed
   next();
 };
+
+router.post("/create-tag", createTag)
+router.post("/follow", followUser)
+router.get("/followers", getFollowers)
 
 router.post("/deposit", checkOngoingTransaction, async (req, res) => {
   try {

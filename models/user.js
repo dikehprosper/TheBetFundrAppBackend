@@ -32,8 +32,8 @@ const UserSchema = new mongoose.Schema({
   pin: {
     type: String,
   },
-  following: { type: Array },
-  followers: { type: Array },
+  following: [mongoose.Schema.Types.ObjectId],
+  followers: [mongoose.Schema.Types.ObjectId],
   image: { type: String, default: "" },
   imageFileName: { type: String, default: "" },
   pinState: {

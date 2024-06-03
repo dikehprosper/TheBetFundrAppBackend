@@ -25,6 +25,7 @@ const getPostDetails = async (req, res) => {
 
   try {
     const post = await Post.findById(postId)
+      .sort({ createdAt: -1 })
       .populate("user")
       .populate("comments.user")
       .exec();
@@ -74,6 +75,7 @@ const getMyPosts = async (req, res) => {
 
   try {
     const userPosts = await Post.find({ user: userId })
+      .sort({ creatdAt: -1 })
       .populate("user")
       .populate("comments.user")
       .exec();
@@ -91,6 +93,7 @@ const getMyLikedPosts = async (req, res) => {
     const likedPosts = await Post.find({
       likes: { $elemMatch: { userId: userId } },
     })
+      .sort({ createdAt: -1 })
       .populate("user")
       .populate("comments.user")
       .exec();
@@ -182,9 +185,8 @@ const createPost = async (req, res) => {
 
       blobStream.on("finish", async () => {
         await fileUpload.makePublic();
-        publicUrl = `https://storage.googleapis.com/${
-          bucket.name
-        }/postImages/${encodeURIComponent(newFileName)}`;
+        publicUrl = `https://storage.googleapis.com/${bucket.name
+          }/postImages/${encodeURIComponent(newFileName)}`;
       });
     }
 

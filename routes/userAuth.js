@@ -108,7 +108,7 @@ router.post(
       let firstName = parts[0];
       const name = firstName.replace(/\d/g, "");
 
-      const tag = `betfundr-${name}${count + 1}`;
+      // const tag = `betfundr-${name}${count + 1}`;
 
       // Create a new user
       const newUser = new User({
@@ -124,7 +124,7 @@ router.post(
         registrationDateTime: date,
         fedapayId: customer.id,
         image: "",
-        tag: tag,
+        // tag: tag,
         colorScheme: 2,
       });
 
