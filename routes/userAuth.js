@@ -108,7 +108,7 @@ router.post(
       let firstName = parts[0];
       const name = firstName.replace(/\d/g, "");
 
-      // const tag = `betfundr-${name}${count + 1}`;
+      const tag = `betfundr-${name}${count + 1}`;
 
       // Create a new user
       const newUser = new User({
@@ -124,7 +124,7 @@ router.post(
         registrationDateTime: date,
         fedapayId: customer.id,
         image: "",
-        // tag: tag,
+        tag: tag,
         colorScheme: 2,
       });
 
@@ -179,7 +179,7 @@ router.post(
         .status(500)
         .send({ success: false, message: "Internal server error" });
     }
-  }
+  },
 );
 
 router.post(
@@ -217,7 +217,7 @@ router.post(
       // Check if password is correct
       const validPassword = await bcryptjs.compare(
         password,
-        existingUser.password
+        existingUser.password,
       );
       if (!validPassword) {
         transactionInProgress = false;
@@ -280,7 +280,7 @@ router.post(
       console.error("Error ligining in user:", error);
       res.status(500).json({ error: "Internal server error" });
     }
-  }
+  },
 );
 
 router.post("/setPin", checkOngoingTransaction, async (req, res) => {
@@ -328,7 +328,7 @@ router.post("/setPin", checkOngoingTransaction, async (req, res) => {
     // create token
     const token = await jwt.sign(
       tokenData,
-      tokenVlaue
+      tokenVlaue,
       //     {
       //     expiresIn: "1d", // "1m" stands for 1 minute
       // }
@@ -509,7 +509,7 @@ router.post(
       // create token
       const token = await jwt.sign(
         tokenData,
-        tokenVlaue
+        tokenVlaue,
         //     {
         //     expiresIn: "1d", // "1m" stands for 1 minute
         // }
@@ -527,7 +527,7 @@ router.post(
       console.error("Error logining in user:", error);
       res.status(500).json({ error: "Internal server error" });
     }
-  }
+  },
 );
 
 router.post("/resetPassword", async (req, res) => {
@@ -586,7 +586,7 @@ router.post("/resetPasswordForLoggedInUser", async (req, res) => {
 
     const validPassword = await bcryptjs.compare(
       password,
-      existingUser.password
+      existingUser.password,
     );
     if (!validPassword) {
       transactionInProgress = false;
@@ -756,7 +756,7 @@ async function invalidateSession(sessionId) {
     const user = await User.findOneAndUpdate(
       { sessionId },
       { $set: { sessionId: null, isLoggedIn: false } },
-      { new: true }
+      { new: true },
     );
 
     if (!user) {

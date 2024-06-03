@@ -11,7 +11,11 @@ const QrCodeDeposits = require("../models/generateQrCode");
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 const { FedaPay, Transaction, Customer } = require("fedapay");
-const { createTag, followUser, getFollowers } = require("../controllers/userActions.js")
+const {
+  createTag,
+  followUser,
+  getFollowers,
+} = require("../controllers/userActions.js");
 // add the current transaction to the user
 
 let transactionInProgress = false;
@@ -27,419 +31,71 @@ const checkOngoingTransaction = (req, res, next) => {
   next();
 };
 
-router.post("/create-tag", createTag)
-router.post("/follow", followUser)
-router.get("/followers", getFollowers)
+router.post("/create-tag", createTag);
+router.post("/follow", followUser);
+router.get("/followers", getFollowers);
 
-router.post("/deposit", checkOngoingTransaction, async (req, res) => {
-  try {
-    transactionInProgress = true;
-    const { email, betId, amount, momoNumber, network, service, bonusBalance } =
-      req.body;
-    console.log(bonusBalance);
-    let updatedAmount;
+router.post(
+  "/depositWithFedapay",
+  checkOngoingTransaction,
+  async (req, res) => {
+    try {
+      transactionInProgress = true;
+      const {
+        email,
+        betId,
+        amount,
+        momoNumber,
+        network,
+        service,
+        bonusBalance,
+      } = req.body;
+      console.log(bonusBalance);
+      let updatedAmount;
 
-    if (bonusBalance === null) {
-      updatedAmount = amount;
+      if (bonusBalance === null) {
+        updatedAmount = amount;
 
-      // Uncomment below code to fetch user and perform additional checks if required
-      const user = await User.findOne({ email });
-      if (!user) {
-        transactionInProgress = false;
-        return res
-          .status(401)
-          .json({ success: 401, message: "User not found", status: 401 });
-      }
-      if (!user.isActivated) {
-        transactionInProgress = false;
-        return res
-          .status(502)
-          .json({ success: 502, message: "User is deactivated", status: 502 });
-      }
+        // Uncomment below code to fetch user and perform additional checks if required
+        const user = await User.findOne({ email });
+        if (!user) {
+          transactionInProgress = false;
+          return res
+            .status(401)
+            .json({ success: 401, message: "User not found", status: 401 });
+        }
+        if (!user.isActivated) {
+          transactionInProgress = false;
+          return res
+            .status(502)
+            .json({
+              success: 502,
+              message: "User is deactivated",
+              status: 502,
+            });
+        }
 
-      // Find the subadmin user by cashdeskId
-      const adminUser = await SubAdminUser.find({
-        isSubAdminDeposits: true,
-        isOutOfFunds: false,
-      });
-      if (!adminUser || adminUser.length === 0) {
-        transactionInProgress = false;
-        return res
-          .status(503)
-          .json({ success: 503, message: "no subadmin user", status: 503 });
-      }
+        // Find the subadmin user by cashdeskId
+        const adminUser = await SubAdminUser.find({
+          isSubAdminDeposits: true,
+          isOutOfFunds: false,
+        });
+        if (!adminUser || adminUser.length === 0) {
+          transactionInProgress = false;
+          return res
+            .status(503)
+            .json({ success: 503, message: "no subadmin user", status: 503 });
+        }
 
-      // Find available admin
-      const admin = await AdminUser.findOne({ isAdmin: true });
-      if (admin.isDepositsOpen === false) {
-        transactionInProgress = false;
-        return res
-          .status(504)
-          .json({
+        // Find available admin
+        const admin = await AdminUser.findOne({ isAdmin: true });
+        if (admin.isDepositsOpen === false) {
+          transactionInProgress = false;
+          return res.status(504).json({
             success: 504,
             message: "currently under maintainance",
             status: 504,
           });
-      }
-
-      // calculate the percentage of amount
-      const deductionPercentage = 1.8;
-      const deductionAmount = (deductionPercentage / 100) * updatedAmount;
-
-      // Calculate the new amount after deduction and round to the nearest whole number
-      const newAmount = Math.round(updatedAmount - deductionAmount);
-
-      FedaPay.setApiKey(process.env.FEDAPAY_KEY1);
-      FedaPay.setEnvironment(process.env.ENVIRONMENT1);
-
-      // Change number if originally saved number is different from number sent in
-      if (momoNumber !== user.number) {
-        console.log("phone number wasn't the original or has to be edited");
-        const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
-        const apiKey = process.env.FEDAPAY_KEY1;
-
-        const response = await fetch(apiUrl, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            // firstname: momoName.split(" ")[0],
-            // lastname: momoName.split(" ")[1],
-            email: email,
-            phone_number: {
-              number: `+229${momoNumber}`,
-              country: "BJ",
-            },
-          }),
-        });
-        console.log(response, "response");
-      }
-
-      // Generate token and Create the transaction on Fedapay
-      const transaction = await Transaction.create({
-        description: "Description",
-        amount: newAmount,
-        callback_url: `${process.env.DOMAIN}/payments`,
-        currency: {
-          iso: "XOF",
-        },
-        customer: {
-          email: email,
-        },
-      });
-
-      const token = await transaction.generateToken();
-      const apiUrl1 = `${process.env.SECONDAPIURL1}${network}`;
-      const apiKey1 = process.env.FEDAPAY_KEY1;
-
-      const response1 = await fetch(apiUrl1, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey1}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: token.token,
-        }),
-      });
-      console.log(response1);
-
-      if (response1.status !== 200) {
-        const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
-        const apiKey = process.env.FEDAPAY_KEY1;
-
-        const response2 = await fetch(apiUrl, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            // firstname: momoName.split(" ")[0],
-            // lastname: momoName.split(" ")[1],
-            email: email,
-            phone_number: {
-              number: `+229${user.number}`,
-              country: "BJ",
-            },
-          }),
-        });
-        transactionInProgress = false;
-        return res
-          .status(505)
-          .json({
-            success: 505,
-            message: "Unable to initiate transaction",
-            status: 505,
-          });
-      }
-
-      const date = new Date();
-      const newUuid = uuidv4();
-      user.pendingDeposit.push({
-        fedapayTransactionId: transaction.id,
-        transactionId: newUuid,
-        createdAt: date,
-        status: "Pending",
-        amount: amount,
-        totalAmount: amount,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        service: service,
-        paymentConfirmation: "Pending",
-      });
-
-      const userTransaction = {
-        status: "Pending",
-        registrationDateTime: date,
-        amount: amount,
-        totalAmount: amount,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        fedapayTransactionId: transaction.id,
-        identifierId: newUuid,
-        service: service,
-        paymentConfirmation: "Pending",
-      };
-      user.transactionHistory.push(userTransaction);
-
-      admin.transactionHistory.push({
-        userid: user._id,
-        status: "Pending",
-        registrationDateTime: date,
-        amount: amount,
-        totalAmount: amount,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        identifierId: newUuid,
-        userEmail: email,
-        subadminEmail: "none",
-        service: service,
-        paymentConfirmation: "Pending",
-        fedapayTransactionId: transaction.id,
-      });
-
-      if (!user.supplementaryBetId.includes(betId)) {
-        user.supplementaryBetId.push(betId);
-      }
-
-      await admin.save();
-      await user.save();
-
-      // Change number back to original
-      if (momoNumber !== user.number) {
-        console.log("phone number wasn't the original and has to be edited");
-        const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
-        const apiKey = process.env.FEDAPAY_KEY1;
-
-        const response2 = await fetch(apiUrl, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            // firstname: momoName.split(" ")[0],
-            // lastname: momoName.split(" ")[1],
-            email: email,
-            phone_number: {
-              number: `+229${user.number}`,
-              country: "BJ",
-            },
-          }),
-        });
-        console.log(response2);
-      }
-
-      // Return a JSON response with the transaction status
-      transactionInProgress = false;
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "transaction generated successfully",
-          userTransaction,
-        });
-    }
-
-    if (bonusBalance !== null) {
-      if (bonusBalance >= amount) {
-        // Uncomment below code to fetch user and perform additional checks if required
-        const user = await User.findOne({ email });
-        if (user.bonusBalance < amount) {
-          return res
-            .status(506)
-            .json({
-              success: 506,
-              message: "wallet balance not sufficient",
-              status: 506,
-            });
-        }
-        const updatedBonusBalance = user.bonusBalance - amount;
-        if (!user) {
-          transactionInProgress = false;
-          return res
-            .status(401)
-            .json({ success: 401, message: "User not found", status: 401 });
-        }
-        if (!user.isActivated) {
-          transactionInProgress = false;
-          return res
-            .status(502)
-            .json({
-              success: 502,
-              message: "User is deactivated",
-              status: 502,
-            });
-        }
-        // Find the subadmin user by cashdeskId
-        const adminUser = await SubAdminUser.find({
-          isSubAdminDeposits: true,
-          isOutOfFunds: false,
-        });
-        if (!adminUser || adminUser.length === 0) {
-          transactionInProgress = false;
-          return res
-            .status(503)
-            .json({ success: 503, message: "no subadmin user", status: 503 });
-        }
-
-        // Find available admin
-        const admin = await AdminUser.findOne({ isAdmin: true });
-        if (admin.isDepositsOpen === false) {
-          transactionInProgress = false;
-          return res
-            .status(504)
-            .json({
-              success: 504,
-              message: "currently under maintainance",
-              status: 504,
-            });
-        }
-        const date = new Date();
-        const newUuid = uuidv4();
-        user.pendingDeposit.push({
-          transactionId: newUuid,
-          createdAt: date,
-          status: "Pending",
-          amount: 0,
-          betId: betId,
-          // momoName: momoName,
-          momoNumber: momoNumber,
-          service: service,
-          bonusBalance: amount,
-          paymentConfirmation: "Pending",
-          totalAmount: amount,
-        });
-
-        const userTransaction = {
-          status: "Pending",
-          registrationDateTime: date,
-          amount: 0,
-          betId: betId,
-          // momoName: momoName,
-          momoNumber: momoNumber,
-          fundingType: "deposits",
-          identifierId: newUuid,
-          service: service,
-          bonusBalance: amount,
-          totalAmount: amount,
-          paymentConfirmation: "Pending",
-        };
-        user.transactionHistory.push(userTransaction);
-        user.bonus.push(userTransaction);
-        user.bonusBalance = updatedBonusBalance;
-
-        if (!user.supplementaryBetId.includes(betId)) {
-          user.supplementaryBetId.push(betId);
-        }
-        await user.save();
-        const newUserBonus = user.bonusBalance;
-        admin.transactionHistory.push({
-          userid: user._id,
-          status: "Pending",
-          registrationDateTime: date,
-          amount: 0,
-          totalAmount: amount,
-          betId: betId,
-          // momoName: momoName,
-          momoNumber: momoNumber,
-          fundingType: "deposits",
-          identifierId: newUuid,
-          userEmail: email,
-          subadminEmail: "none",
-          service: service,
-          paymentConfirmation: "Pending",
-          bonusBalance: amount,
-        });
-
-        await admin.save();
-
-        // Return a JSON response with the transaction status
-        transactionInProgress = false;
-        res
-          .status(200)
-          .json({
-            success: true,
-            message: "transaction generated successfully",
-            newUserBonus,
-            userTransaction,
-          });
-      }
-
-      if (bonusBalance < amount) {
-        console.log(updatedAmount, "lllll"); // Uncomment below code to fetch user and perform additional checks if required
-        const user = await User.findOne({ email });
-
-        updatedAmount = amount - user.bonusBalance;
-
-        if (!user) {
-          transactionInProgress = false;
-          return res
-            .status(401)
-            .json({ success: 401, message: "User not found", status: 401 });
-        }
-        if (!user.isActivated) {
-          transactionInProgress = false;
-          return res
-            .status(502)
-            .json({
-              success: 502,
-              message: "User is deactivated",
-              status: 502,
-            });
-        }
-
-        // Find the subadmin user by cashdeskId
-        const adminUser = await SubAdminUser.find({
-          isSubAdminDeposits: true,
-          isOutOfFunds: false,
-        });
-        if (!adminUser || adminUser.length === 0) {
-          transactionInProgress = false;
-          return res
-            .status(503)
-            .json({ success: 503, message: "no subadmin user", status: 503 });
-        }
-
-        // Find available admin
-        const admin = await AdminUser.findOne({ isAdmin: true });
-        if (admin.isDepositsOpen === false) {
-          transactionInProgress = false;
-          return res
-            .status(504)
-            .json({
-              success: 504,
-              message: "currently under maintainance",
-              status: 504,
-            });
         }
 
         // calculate the percentage of amount
@@ -527,13 +183,947 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             }),
           });
           transactionInProgress = false;
-          return res
-            .status(505)
-            .json({
+          return res.status(505).json({
+            success: 505,
+            message: "Unable to initiate transaction",
+            status: 505,
+          });
+        }
+
+        const date = new Date();
+        const newUuid = uuidv4();
+        user.pendingDeposit.push({
+          fedapayTransactionId: transaction.id,
+          transactionId: newUuid,
+          createdAt: date,
+          status: "Pending",
+          amount: amount,
+          totalAmount: amount,
+          betId: betId,
+          // momoName: momoName,
+          momoNumber: momoNumber,
+          service: service,
+          paymentConfirmation: "Pending",
+        });
+
+        const userTransaction = {
+          status: "Pending",
+          registrationDateTime: date,
+          amount: amount,
+          totalAmount: amount,
+          betId: betId,
+          // momoName: momoName,
+          momoNumber: momoNumber,
+          fundingType: "deposits",
+          fedapayTransactionId: transaction.id,
+          identifierId: newUuid,
+          service: service,
+          paymentConfirmation: "Pending",
+        };
+        user.transactionHistory.push(userTransaction);
+
+        admin.transactionHistory.push({
+          userid: user._id,
+          status: "Pending",
+          registrationDateTime: date,
+          amount: amount,
+          totalAmount: amount,
+          betId: betId,
+          // momoName: momoName,
+          momoNumber: momoNumber,
+          fundingType: "deposits",
+          identifierId: newUuid,
+          userEmail: email,
+          subadminEmail: "none",
+          service: service,
+          paymentConfirmation: "Pending",
+          fedapayTransactionId: transaction.id,
+        });
+
+        if (!user.supplementaryBetId.includes(betId)) {
+          user.supplementaryBetId.push(betId);
+        }
+
+        await admin.save();
+        await user.save();
+
+        // Change number back to original
+        if (momoNumber !== user.number) {
+          console.log("phone number wasn't the original and has to be edited");
+          const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
+          const apiKey = process.env.FEDAPAY_KEY1;
+
+          const response2 = await fetch(apiUrl, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              // firstname: momoName.split(" ")[0],
+              // lastname: momoName.split(" ")[1],
+              email: email,
+              phone_number: {
+                number: `+229${user.number}`,
+                country: "BJ",
+              },
+            }),
+          });
+          console.log(response2);
+        }
+
+        // Return a JSON response with the transaction status
+        transactionInProgress = false;
+        res.status(200).json({
+          success: true,
+          message: "transaction generated successfully",
+          userTransaction,
+        });
+      }
+
+      if (bonusBalance !== null) {
+        if (bonusBalance >= amount) {
+          // Uncomment below code to fetch user and perform additional checks if required
+          const user = await User.findOne({ email });
+          if (user.bonusBalance < amount) {
+            return res.status(506).json({
+              success: 506,
+              message: "wallet balance not sufficient",
+              status: 506,
+            });
+          }
+          const updatedBonusBalance = user.bonusBalance - amount;
+          if (!user) {
+            transactionInProgress = false;
+            return res
+              .status(401)
+              .json({ success: 401, message: "User not found", status: 401 });
+          }
+          if (!user.isActivated) {
+            transactionInProgress = false;
+            return res.status(502).json({
+              success: 502,
+              message: "User is deactivated",
+              status: 502,
+            });
+          }
+          // Find the subadmin user by cashdeskId
+          const adminUser = await SubAdminUser.find({
+            isSubAdminDeposits: true,
+            isOutOfFunds: false,
+          });
+          if (!adminUser || adminUser.length === 0) {
+            transactionInProgress = false;
+            return res
+              .status(503)
+              .json({ success: 503, message: "no subadmin user", status: 503 });
+          }
+
+          // Find available admin
+          const admin = await AdminUser.findOne({ isAdmin: true });
+          if (admin.isDepositsOpen === false) {
+            transactionInProgress = false;
+            return res.status(504).json({
+              success: 504,
+              message: "currently under maintainance",
+              status: 504,
+            });
+          }
+          const date = new Date();
+          const newUuid = uuidv4();
+          user.pendingDeposit.push({
+            transactionId: newUuid,
+            createdAt: date,
+            status: "Pending",
+            amount: 0,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            service: service,
+            bonusBalance: amount,
+            paymentConfirmation: "Pending",
+            totalAmount: amount,
+          });
+
+          const userTransaction = {
+            status: "Pending",
+            registrationDateTime: date,
+            amount: 0,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            service: service,
+            bonusBalance: amount,
+            totalAmount: amount,
+            paymentConfirmation: "Pending",
+          };
+          user.transactionHistory.push(userTransaction);
+          user.bonus.push(userTransaction);
+          user.bonusBalance = updatedBonusBalance;
+
+          if (!user.supplementaryBetId.includes(betId)) {
+            user.supplementaryBetId.push(betId);
+          }
+          await user.save();
+          const newUserBonus = user.bonusBalance;
+          admin.transactionHistory.push({
+            userid: user._id,
+            status: "Pending",
+            registrationDateTime: date,
+            amount: 0,
+            totalAmount: amount,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            userEmail: email,
+            subadminEmail: "none",
+            service: service,
+            paymentConfirmation: "Pending",
+            bonusBalance: amount,
+          });
+
+          await admin.save();
+
+          // Return a JSON response with the transaction status
+          transactionInProgress = false;
+          res.status(200).json({
+            success: true,
+            message: "transaction generated successfully",
+            newUserBonus,
+            userTransaction,
+          });
+        }
+
+        if (bonusBalance < amount) {
+          console.log(updatedAmount, "lllll"); // Uncomment below code to fetch user and perform additional checks if required
+          const user = await User.findOne({ email });
+
+          updatedAmount = amount - user.bonusBalance;
+
+          if (!user) {
+            transactionInProgress = false;
+            return res
+              .status(401)
+              .json({ success: 401, message: "User not found", status: 401 });
+          }
+          if (!user.isActivated) {
+            transactionInProgress = false;
+            return res.status(502).json({
+              success: 502,
+              message: "User is deactivated",
+              status: 502,
+            });
+          }
+
+          // Find the subadmin user by cashdeskId
+          const adminUser = await SubAdminUser.find({
+            isSubAdminDeposits: true,
+            isOutOfFunds: false,
+          });
+          if (!adminUser || adminUser.length === 0) {
+            transactionInProgress = false;
+            return res
+              .status(503)
+              .json({ success: 503, message: "no subadmin user", status: 503 });
+          }
+
+          // Find available admin
+          const admin = await AdminUser.findOne({ isAdmin: true });
+          if (admin.isDepositsOpen === false) {
+            transactionInProgress = false;
+            return res.status(504).json({
+              success: 504,
+              message: "currently under maintainance",
+              status: 504,
+            });
+          }
+
+          // calculate the percentage of amount
+          const deductionPercentage = 1.8;
+          const deductionAmount = (deductionPercentage / 100) * updatedAmount;
+
+          // Calculate the new amount after deduction and round to the nearest whole number
+          const newAmount = Math.round(updatedAmount - deductionAmount);
+
+          FedaPay.setApiKey(process.env.FEDAPAY_KEY1);
+          FedaPay.setEnvironment(process.env.ENVIRONMENT1);
+
+          // Change number if originally saved number is different from number sent in
+          if (momoNumber !== user.number) {
+            console.log("phone number wasn't the original or has to be edited");
+            const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
+            const apiKey = process.env.FEDAPAY_KEY1;
+
+            const response = await fetch(apiUrl, {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                // firstname: momoName.split(" ")[0],
+                // lastname: momoName.split(" ")[1],
+                email: email,
+                phone_number: {
+                  number: `+229${momoNumber}`,
+                  country: "BJ",
+                },
+              }),
+            });
+            console.log(response, "response");
+          }
+
+          // Generate token and Create the transaction on Fedapay
+          const transaction = await Transaction.create({
+            description: "Description",
+            amount: newAmount,
+            callback_url: `${process.env.DOMAIN}/payments`,
+            currency: {
+              iso: "XOF",
+            },
+            customer: {
+              email: email,
+            },
+          });
+
+          const token = await transaction.generateToken();
+          const apiUrl1 = `${process.env.SECONDAPIURL1}${network}`;
+          const apiKey1 = process.env.FEDAPAY_KEY1;
+
+          const response1 = await fetch(apiUrl1, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey1}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              token: token.token,
+            }),
+          });
+          console.log(response1);
+
+          if (response1.status !== 200) {
+            const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
+            const apiKey = process.env.FEDAPAY_KEY1;
+
+            const response2 = await fetch(apiUrl, {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                // firstname: momoName.split(" ")[0],
+                // lastname: momoName.split(" ")[1],
+                email: email,
+                phone_number: {
+                  number: `+229${user.number}`,
+                  country: "BJ",
+                },
+              }),
+            });
+            transactionInProgress = false;
+            return res.status(505).json({
               success: 505,
               message: "Unable to initiate transaction",
               status: 505,
             });
+          }
+          const date = new Date();
+          const newUuid = uuidv4();
+          user.pendingDeposit.push({
+            fedapayTransactionId: transaction.id,
+            transactionId: newUuid,
+            createdAt: date,
+            status: "Pending",
+            amount: updatedAmount,
+            totalAmount: amount,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            service: service,
+            bonusBalance: user.bonusBalance,
+            paymentConfirmation: "Pending",
+          });
+
+          const userTransaction = {
+            status: "Pending",
+            registrationDateTime: date,
+            amount: updatedAmount,
+            totalAmount: amount,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            fedapayTransactionId: transaction.id,
+            identifierId: newUuid,
+            service: service,
+            bonusBalance: user.bonusBalance,
+            paymentConfirmation: "Pending",
+          };
+          user.transactionHistory.push(userTransaction);
+          user.bonus.push(userTransaction);
+          user.bonusBalance = 0;
+
+          if (!user.supplementaryBetId.includes(betId)) {
+            user.supplementaryBetId.push(betId);
+          }
+          await user.save();
+          const newUserBonus = user.bonusBalance;
+          admin.transactionHistory.push({
+            userid: user._id,
+            status: "Pending",
+            registrationDateTime: date,
+            amount: updatedAmount,
+            betId: betId,
+            totalAmount: amount,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            userEmail: email,
+            subadminEmail: "none",
+            service: service,
+            paymentConfirmation: "Pending",
+            bonusBalance: user.bonusBalance,
+            fedapayTransactionId: transaction.id,
+          });
+
+          await admin.save();
+
+          // Change number back to original
+          if (momoNumber !== user.number) {
+            console.log(
+              "phone number wasn't the original and has to be edited",
+            );
+            const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
+            const apiKey = process.env.FEDAPAY_KEY1;
+
+            const response2 = await fetch(apiUrl, {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                // firstname: momoName.split(" ")[0],
+                // lastname: momoName.split(" ")[1],
+                email: email,
+                phone_number: {
+                  number: `+229${user.number}`,
+                  country: "BJ",
+                },
+              }),
+            });
+            console.log(response2);
+          }
+
+          transactionInProgress = false;
+          res.status(200).json({
+            success: true,
+            message: "transaction generated successfully",
+            newUserBonus,
+            userTransaction,
+          });
+        }
+      }
+    } catch (error) {
+      transactionInProgress = false;
+      console.error("Error completing the request for deposit:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
+router.post("/deposit", checkOngoingTransaction, async (req, res) => {
+  try {
+    transactionInProgress = true;
+    const { email, betId, amount, momoNumber, network, service, bonusBalance } =
+      req.body;
+    console.log(bonusBalance);
+    let updatedAmount;
+
+    if (bonusBalance === null) {
+      updatedAmount = amount;
+
+      // Uncomment below code to fetch user and perform additional checks if required
+      const user = await User.findOne({ email });
+      if (!user) {
+        transactionInProgress = false;
+        return res
+          .status(401)
+          .json({ success: 401, message: "User not found", status: 401 });
+      }
+      if (!user.isActivated) {
+        transactionInProgress = false;
+        return res
+          .status(502)
+          .json({ success: 502, message: "User is deactivated", status: 502 });
+      }
+
+      // Find the subadmin user by cashdeskId
+      const adminUser = await SubAdminUser.find({
+        isSubAdminDeposits: true,
+        isOutOfFunds: false,
+      });
+      if (!adminUser || adminUser.length === 0) {
+        transactionInProgress = false;
+        return res
+          .status(503)
+          .json({ success: 503, message: "no subadmin user", status: 503 });
+      }
+
+      // Find available admin
+      const admin = await AdminUser.findOne({ isAdmin: true });
+      if (admin.isDepositsOpen === false) {
+        transactionInProgress = false;
+        return res.status(504).json({
+          success: 504,
+          message: "currently under maintainance",
+          status: 504,
+        });
+      }
+
+      // // calculate the percentage of amount
+      // const deductionPercentage = 1.8;
+      // const deductionAmount = (deductionPercentage / 100) * updatedAmount;
+
+      // // Calculate the new amount after deduction and round to the nearest whole number
+      // const newAmount = Math.round(updatedAmount - deductionAmount);
+
+      // FedaPay.setApiKey(process.env.FEDAPAY_KEY1);
+      // FedaPay.setEnvironment(process.env.ENVIRONMENT1);
+
+      // // Change number if originally saved number is different from number sent in
+      // if (momoNumber !== user.number) {
+      //   console.log("phone number wasn't the original or has to be edited");
+      //   const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
+      //   const apiKey = process.env.FEDAPAY_KEY1;
+
+      //   const response = await fetch(apiUrl, {
+      //     method: "PUT",
+      //     headers: {
+      //       Authorization: `Bearer ${apiKey}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       // firstname: momoName.split(" ")[0],
+      //       // lastname: momoName.split(" ")[1],
+      //       email: email,
+      //       phone_number: {
+      //         number: `+229${momoNumber}`,
+      //         country: "BJ",
+      //       },
+      //     }),
+      //   });
+      //   console.log(response, "response");
+      // }
+
+      // // Generate token and Create the transaction on Fedapay
+      // const transaction = await Transaction.create({
+      //   description: "Description",
+      //   amount: newAmount,
+      //   callback_url: `${process.env.DOMAIN}/payments`,
+      //   currency: {
+      //     iso: "XOF",
+      //   },
+      //   customer: {
+      //     email: email,
+      //   },
+      // });
+
+      // const token = await transaction.generateToken();
+      // const apiUrl1 = `${process.env.SECONDAPIURL1}${network}`;
+      // const apiKey1 = process.env.FEDAPAY_KEY1;
+
+      // const response1 = await fetch(apiUrl1, {
+      //   method: "POST",
+      //   headers: {
+      //     Authorization: `Bearer ${apiKey1}`,
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     token: token.token,
+      //   }),
+      // });
+      // console.log(response1);
+
+      // if (response1.status !== 200) {
+      //   const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
+      //   const apiKey = process.env.FEDAPAY_KEY1;
+
+      //   const response2 = await fetch(apiUrl, {
+      //     method: "PUT",
+      //     headers: {
+      //       Authorization: `Bearer ${apiKey}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       // firstname: momoName.split(" ")[0],
+      //       // lastname: momoName.split(" ")[1],
+      //       email: email,
+      //       phone_number: {
+      //         number: `+229${user.number}`,
+      //         country: "BJ",
+      //       },
+      //     }),
+      //   });
+      //   transactionInProgress = false;
+      //   return res
+      //     .status(505)
+      //     .json({
+      //       success: 505,
+      //       message: "Unable to initiate transaction",
+      //       status: 505,
+      //     });
+      // }
+
+      const date = new Date();
+      const newUuid = uuidv4();
+      user.pendingDeposit.push({
+        fedapayTransactionId: transaction.id,
+        transactionId: newUuid,
+        createdAt: date,
+        status: "Pending",
+        amount: amount,
+        totalAmount: amount,
+        betId: betId,
+        // momoName: momoName,
+        momoNumber: momoNumber,
+        service: service,
+        paymentConfirmation: "Pending",
+      });
+
+      const userTransaction = {
+        status: "Pending",
+        registrationDateTime: date,
+        amount: amount,
+        totalAmount: amount,
+        betId: betId,
+        // momoName: momoName,
+        momoNumber: momoNumber,
+        fundingType: "deposits",
+        fedapayTransactionId: transaction.id,
+        identifierId: newUuid,
+        service: service,
+        paymentConfirmation: "Pending",
+      };
+      user.transactionHistory.push(userTransaction);
+
+      admin.transactionHistory.push({
+        userid: user._id,
+        status: "Pending",
+        registrationDateTime: date,
+        amount: amount,
+        totalAmount: amount,
+        betId: betId,
+        // momoName: momoName,
+        momoNumber: momoNumber,
+        fundingType: "deposits",
+        identifierId: newUuid,
+        userEmail: email,
+        subadminEmail: "none",
+        service: service,
+        paymentConfirmation: "Pending",
+        fedapayTransactionId: transaction.id,
+      });
+
+      if (!user.supplementaryBetId.includes(betId)) {
+        user.supplementaryBetId.push(betId);
+      }
+
+      await admin.save();
+      await user.save();
+
+      // Change number back to original
+      if (momoNumber !== user.number) {
+        console.log("phone number wasn't the original and has to be edited");
+        const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
+        const apiKey = process.env.FEDAPAY_KEY1;
+
+        const response2 = await fetch(apiUrl, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            // firstname: momoName.split(" ")[0],
+            // lastname: momoName.split(" ")[1],
+            email: email,
+            phone_number: {
+              number: `+229${user.number}`,
+              country: "BJ",
+            },
+          }),
+        });
+        console.log(response2);
+      }
+
+      // Return a JSON response with the transaction status
+      transactionInProgress = false;
+      res.status(200).json({
+        success: true,
+        message: "transaction generated successfully",
+        userTransaction,
+      });
+    }
+
+    if (bonusBalance !== null) {
+      if (bonusBalance >= amount) {
+        // Uncomment below code to fetch user and perform additional checks if required
+        const user = await User.findOne({ email });
+        if (user.bonusBalance < amount) {
+          return res.status(506).json({
+            success: 506,
+            message: "wallet balance not sufficient",
+            status: 506,
+          });
+        }
+        const updatedBonusBalance = user.bonusBalance - amount;
+        if (!user) {
+          transactionInProgress = false;
+          return res
+            .status(401)
+            .json({ success: 401, message: "User not found", status: 401 });
+        }
+        if (!user.isActivated) {
+          transactionInProgress = false;
+          return res.status(502).json({
+            success: 502,
+            message: "User is deactivated",
+            status: 502,
+          });
+        }
+        // Find the subadmin user by cashdeskId
+        const adminUser = await SubAdminUser.find({
+          isSubAdminDeposits: true,
+          isOutOfFunds: false,
+        });
+        if (!adminUser || adminUser.length === 0) {
+          transactionInProgress = false;
+          return res
+            .status(503)
+            .json({ success: 503, message: "no subadmin user", status: 503 });
+        }
+
+        // Find available admin
+        const admin = await AdminUser.findOne({ isAdmin: true });
+        if (admin.isDepositsOpen === false) {
+          transactionInProgress = false;
+          return res.status(504).json({
+            success: 504,
+            message: "currently under maintainance",
+            status: 504,
+          });
+        }
+        const date = new Date();
+        const newUuid = uuidv4();
+        user.pendingDeposit.push({
+          transactionId: newUuid,
+          createdAt: date,
+          status: "Pending",
+          amount: 0,
+          betId: betId,
+          // momoName: momoName,
+          momoNumber: momoNumber,
+          service: service,
+          bonusBalance: amount,
+          paymentConfirmation: "Pending",
+          totalAmount: amount,
+        });
+
+        const userTransaction = {
+          status: "Pending",
+          registrationDateTime: date,
+          amount: 0,
+          betId: betId,
+          // momoName: momoName,
+          momoNumber: momoNumber,
+          fundingType: "deposits",
+          identifierId: newUuid,
+          service: service,
+          bonusBalance: amount,
+          totalAmount: amount,
+          paymentConfirmation: "Pending",
+        };
+        user.transactionHistory.push(userTransaction);
+        user.bonus.push(userTransaction);
+        user.bonusBalance = updatedBonusBalance;
+
+        if (!user.supplementaryBetId.includes(betId)) {
+          user.supplementaryBetId.push(betId);
+        }
+        await user.save();
+        const newUserBonus = user.bonusBalance;
+        admin.transactionHistory.push({
+          userid: user._id,
+          status: "Pending",
+          registrationDateTime: date,
+          amount: 0,
+          totalAmount: amount,
+          betId: betId,
+          // momoName: momoName,
+          momoNumber: momoNumber,
+          fundingType: "deposits",
+          identifierId: newUuid,
+          userEmail: email,
+          subadminEmail: "none",
+          service: service,
+          paymentConfirmation: "Pending",
+          bonusBalance: amount,
+        });
+
+        await admin.save();
+
+        // Return a JSON response with the transaction status
+        transactionInProgress = false;
+        res.status(200).json({
+          success: true,
+          message: "transaction generated successfully",
+          newUserBonus,
+          userTransaction,
+        });
+      }
+
+      if (bonusBalance < amount) {
+        console.log(updatedAmount, "lllll"); // Uncomment below code to fetch user and perform additional checks if required
+        const user = await User.findOne({ email });
+
+        updatedAmount = amount - user.bonusBalance;
+
+        if (!user) {
+          transactionInProgress = false;
+          return res
+            .status(401)
+            .json({ success: 401, message: "User not found", status: 401 });
+        }
+        if (!user.isActivated) {
+          transactionInProgress = false;
+          return res.status(502).json({
+            success: 502,
+            message: "User is deactivated",
+            status: 502,
+          });
+        }
+
+        // Find the subadmin user by cashdeskId
+        const adminUser = await SubAdminUser.find({
+          isSubAdminDeposits: true,
+          isOutOfFunds: false,
+        });
+        if (!adminUser || adminUser.length === 0) {
+          transactionInProgress = false;
+          return res
+            .status(503)
+            .json({ success: 503, message: "no subadmin user", status: 503 });
+        }
+
+        // Find available admin
+        const admin = await AdminUser.findOne({ isAdmin: true });
+        if (admin.isDepositsOpen === false) {
+          transactionInProgress = false;
+          return res.status(504).json({
+            success: 504,
+            message: "currently under maintainance",
+            status: 504,
+          });
+        }
+
+        // calculate the percentage of amount
+        const deductionPercentage = 1.8;
+        const deductionAmount = (deductionPercentage / 100) * updatedAmount;
+
+        // Calculate the new amount after deduction and round to the nearest whole number
+        const newAmount = Math.round(updatedAmount - deductionAmount);
+
+        FedaPay.setApiKey(process.env.FEDAPAY_KEY1);
+        FedaPay.setEnvironment(process.env.ENVIRONMENT1);
+
+        // Change number if originally saved number is different from number sent in
+        if (momoNumber !== user.number) {
+          console.log("phone number wasn't the original or has to be edited");
+          const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
+          const apiKey = process.env.FEDAPAY_KEY1;
+
+          const response = await fetch(apiUrl, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              // firstname: momoName.split(" ")[0],
+              // lastname: momoName.split(" ")[1],
+              email: email,
+              phone_number: {
+                number: `+229${momoNumber}`,
+                country: "BJ",
+              },
+            }),
+          });
+          console.log(response, "response");
+        }
+
+        // Generate token and Create the transaction on Fedapay
+        const transaction = await Transaction.create({
+          description: "Description",
+          amount: newAmount,
+          callback_url: `${process.env.DOMAIN}/payments`,
+          currency: {
+            iso: "XOF",
+          },
+          customer: {
+            email: email,
+          },
+        });
+
+        const token = await transaction.generateToken();
+        const apiUrl1 = `${process.env.SECONDAPIURL1}${network}`;
+        const apiKey1 = process.env.FEDAPAY_KEY1;
+
+        const response1 = await fetch(apiUrl1, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey1}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: token.token,
+          }),
+        });
+        console.log(response1);
+
+        if (response1.status !== 200) {
+          const apiUrl = `${process.env.APIURL1}${user.fedapayId}`;
+          const apiKey = process.env.FEDAPAY_KEY1;
+
+          const response2 = await fetch(apiUrl, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              // firstname: momoName.split(" ")[0],
+              // lastname: momoName.split(" ")[1],
+              email: email,
+              phone_number: {
+                number: `+229${user.number}`,
+                country: "BJ",
+              },
+            }),
+          });
+          transactionInProgress = false;
+          return res.status(505).json({
+            success: 505,
+            message: "Unable to initiate transaction",
+            status: 505,
+          });
         }
         const date = new Date();
         const newUuid = uuidv4();
@@ -623,14 +1213,12 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         }
 
         transactionInProgress = false;
-        res
-          .status(200)
-          .json({
-            success: true,
-            message: "transaction generated successfully",
-            newUserBonus,
-            userTransaction,
-          });
+        res.status(200).json({
+          success: true,
+          message: "transaction generated successfully",
+          newUserBonus,
+          userTransaction,
+        });
       }
     }
   } catch (error) {
@@ -660,13 +1248,11 @@ router.post("/noLogindeposit", checkOngoingTransaction, async (req, res) => {
       updatedAmount = qrCodeData.amount;
       if (qrCodeData.qrcodeStatus === "Expired") {
         transactionInProgress = false;
-        return res
-          .status(505)
-          .json({
-            success: 505,
-            message: "transaction is expired",
-            status: 505,
-          });
+        return res.status(505).json({
+          success: 505,
+          message: "transaction is expired",
+          status: 505,
+        });
       }
 
       if (!user) {
@@ -698,13 +1284,11 @@ router.post("/noLogindeposit", checkOngoingTransaction, async (req, res) => {
       const admin = await AdminUser.findOne({ isAdmin: true });
       if (admin.isDepositsOpen === false) {
         transactionInProgress = false;
-        return res
-          .status(504)
-          .json({
-            success: 504,
-            message: "currently under maintainance",
-            status: 504,
-          });
+        return res.status(504).json({
+          success: 504,
+          message: "currently under maintainance",
+          status: 504,
+        });
       }
 
       // calculate the percentage of amount
@@ -792,13 +1376,11 @@ router.post("/noLogindeposit", checkOngoingTransaction, async (req, res) => {
           }),
         });
         transactionInProgress = false;
-        return res
-          .status(505)
-          .json({
-            success: 505,
-            message: "Unable to initiate transaction",
-            status: 505,
-          });
+        return res.status(505).json({
+          success: 505,
+          message: "Unable to initiate transaction",
+          status: 505,
+        });
       }
 
       // Change number back to original
@@ -939,26 +1521,22 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
     const admin = await AdminUser.findOne({ isAdmin: true });
     if (admin.isDepositsOpen === false) {
       transactionInProgress = false;
-      return res
-        .status(504)
-        .json({
-          success: 504,
-          message: "currently under maintainance",
-          status: 504,
-        });
+      return res.status(504).json({
+        success: 504,
+        message: "currently under maintainance",
+        status: 504,
+      });
     }
 
     const getBalance = user.bonusBalance;
 
     if (getBalance < amount) {
       transactionInProgress = false;
-      return res
-        .status(506)
-        .json({
-          success: 506,
-          message: "wallet balance not sufficient",
-          status: 506,
-        });
+      return res.status(506).json({
+        success: 506,
+        message: "wallet balance not sufficient",
+        status: 506,
+      });
     }
     const newBalance = getBalance - amount;
     user.bonusBalance = newBalance;
@@ -1059,7 +1637,7 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
 
       // Find the subadmin that is currently receiving requests
       const currentSubadmin = adminUser.find(
-        (subadmin) => subadmin.current === true
+        (subadmin) => subadmin.current === true,
       );
       console.log(currentSubadmin, "kkkkk");
       // Check if the request count for the current subadmin is divisible by 10
@@ -1135,14 +1713,12 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
     const newUserBonus = user.bonusBalance;
     // Return a JSON response with the transaction status
     transactionInProgress = false;
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "transaction generated successfully",
-        newUserBonus,
-        userTransaction,
-      });
+    res.status(200).json({
+      success: true,
+      message: "transaction generated successfully",
+      newUserBonus,
+      userTransaction,
+    });
   } catch (error) {
     transactionInProgress = false;
     console.error("Error completing the request for deposit:", error);
@@ -1169,13 +1745,11 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
 
       if (admin.isWithdrawalsOpen === false) {
         transactionInProgress = false;
-        return res
-          .status(405)
-          .json({
-            success: 405,
-            message: "We are currently under maintainance",
-            status: 405,
-          });
+        return res.status(405).json({
+          success: 405,
+          message: "We are currently under maintainance",
+          status: 405,
+        });
       }
 
       // Check if the User already exists
@@ -1199,25 +1773,21 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
       });
       if (!adminUser || adminUser.length === 0) {
         transactionInProgress = false;
-        return res
-          .status(402)
-          .json({
-            success: 402,
-            message: "No available Subadmin User",
-            status: 402,
-          });
+        return res.status(402).json({
+          success: 402,
+          message: "No available Subadmin User",
+          status: 402,
+        });
       }
 
       const getBalance = user.bonusBalance;
       if (getBalance < amount) {
         transactionInProgress = false;
-        return res
-          .status(506)
-          .json({
-            success: 506,
-            message: "wallet balance not sufficient",
-            status: 506,
-          });
+        return res.status(506).json({
+          success: 506,
+          message: "wallet balance not sufficient",
+          status: 506,
+        });
       }
       const newBalance = getBalance - amount;
       user.bonusBalance = newBalance;
@@ -1269,7 +1839,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
 
       // Find the subadmin that is currently receiving requests
       const currentSubadmin = adminUser.find(
-        (subadmin) => subadmin.current === true
+        (subadmin) => subadmin.current === true,
       );
 
       // Check if the request count for the current subadmin is divisible by 10
@@ -1369,13 +1939,11 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
 
       if (admin.isWithdrawalsOpen === false) {
         transactionInProgress = false;
-        return res
-          .status(405)
-          .json({
-            success: 405,
-            message: "We are currently under maintainance",
-            status: 405,
-          });
+        return res.status(405).json({
+          success: 405,
+          message: "We are currently under maintainance",
+          status: 405,
+        });
       }
 
       // Check if the User already exists
@@ -1419,13 +1987,11 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
       });
       if (!adminUser || adminUser.length === 0) {
         transactionInProgress = false;
-        return res
-          .status(402)
-          .json({
-            success: 402,
-            message: "No available Subadmin User",
-            status: 402,
-          });
+        return res.status(402).json({
+          success: 402,
+          message: "No available Subadmin User",
+          status: 402,
+        });
       }
 
       const subadminTransaction = {
@@ -1454,7 +2020,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
 
       // Find the subadmin that is currently receiving requests
       const currentSubadmin = adminUser.find(
-        (subadmin) => subadmin.current === true
+        (subadmin) => subadmin.current === true,
       );
 
       console.log(currentSubadmin, "currentSubadmin");
@@ -1564,13 +2130,11 @@ router.post("/searchSendingPage", async (req, res) => {
 
     if (!value) {
       transactionInProgress = false;
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Search value cannot be empty",
-          status: 400,
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Search value cannot be empty",
+        status: 400,
+      });
     }
 
     const admin = await AdminUser.findOne({ isAdmin: true });
@@ -1584,13 +2148,11 @@ router.post("/searchSendingPage", async (req, res) => {
 
     if (!admin.isWithdrawalsOpen) {
       transactionInProgress = false;
-      return res
-        .status(405)
-        .json({
-          success: 405,
-          message: "We are currently under maintenance",
-          status: 405,
-        });
+      return res.status(405).json({
+        success: 405,
+        message: "We are currently under maintenance",
+        status: 405,
+      });
     }
 
     const user = await User.findOne({ _id });
@@ -1625,14 +2187,12 @@ router.post("/searchSendingPage", async (req, res) => {
 
     if (search.length > 0) {
       transactionInProgress = false;
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "User(s) found",
-          status: true,
-          search,
-        });
+      return res.status(200).json({
+        success: true,
+        message: "User(s) found",
+        status: true,
+        search,
+      });
     }
 
     const search2 = users
@@ -1648,14 +2208,12 @@ router.post("/searchSendingPage", async (req, res) => {
     if (search2.length > 0) {
       const search = search2;
       transactionInProgress = false;
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "User(s) found",
-          status: true,
-          search,
-        });
+      return res.status(200).json({
+        success: true,
+        message: "User(s) found",
+        status: true,
+        search,
+      });
     }
 
     transactionInProgress = false;
@@ -1712,13 +2270,11 @@ router.post("/walletSend", async (req, res) => {
 
     if (!recipient.isActivated) {
       transactionInProgress = false;
-      return res
-        .status(503)
-        .json({
-          success: 503,
-          message: "receipient is deactivated",
-          status: 503,
-        });
+      return res.status(503).json({
+        success: 503,
+        message: "receipient is deactivated",
+        status: 503,
+      });
     }
 
     const getWalletBalanceForSender = user.bonusBalance;
@@ -1793,15 +2349,13 @@ router.post("/walletSend", async (req, res) => {
 
     const updatedBalance = user.bonusBalance;
     transactionInProgress = false;
-    return res
-      .status(201)
-      .json({
-        success: true,
-        message: "Successful",
-        status: 201,
-        updatedBalance,
-        userTransaction,
-      });
+    return res.status(201).json({
+      success: true,
+      message: "Successful",
+      status: 201,
+      updatedBalance,
+      userTransaction,
+    });
   } catch (error) {
     transactionInProgress = false;
     console.error("Error completing the request:", error);
