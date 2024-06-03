@@ -783,7 +783,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
       //     });
       // }
 
-        hf  wsa 
+
       const date = new Date();
       const newUuid = uuidv4();
       user.pendingDeposit.push({
