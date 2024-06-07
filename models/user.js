@@ -91,7 +91,7 @@ const UserSchema = new mongoose.Schema({
     default: 0,
   },
   registrationDateTime: {
-    type: String,
+    type: Date,
   },
 
   isOutOfFunds: {

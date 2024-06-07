@@ -9,13 +9,13 @@ const bcryptjs = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 const date = new Date();
-const { FedaPay, Customer } = require("fedapay");
+// const { FedaPay, Customer } = require("fedapay");
 const { check, validationResult } = require("express-validator");
 const SendEmail = require("../utils/mailer");
 
 require("dotenv").config();
-FedaPay.setApiKey(process.env.FEDAPAY_KEY1);
-FedaPay.setEnvironment(process.env.ENVIRONMENT1);
+// FedaPay.setApiKey(process.env.FEDAPAY_KEY1);
+// FedaPay.setEnvironment(process.env.ENVIRONMENT1);
 const tokenVlaue = process.env.TOKEN_SECRET;
 
 const signInValidate = [
@@ -66,7 +66,7 @@ router.post(
     try {
       transactionInProgress = true;
       const { fullname, betId, number, email, password, referrerId } = req.body;
-      console.log(fullname);
+      console.log(fullname, betId, number, email, password, referrerId, "jjjj");
       // Check if the user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -76,32 +76,55 @@ router.post(
           .send({ success: 400, message: "User already exists", status: 400 });
       }
 
+      if (referrerId) {
+        const user2 = await User.findOne({ tag: referrerId });
+        if (user2) {
+          user2.referrals.push(email);
+          await user2.save();
+        } else if (!user2) {
+          transactionInProgress = false;
+          return res.send({
+            success: 503,
+            message: "Referer does not exist",
+            status: 503,
+          });
+        }
+      }
+
+
+
       // Hash the password
       const hashedPassword = await bcryptjs.hash(password, 10);
 
-      let customer;
-      try {
-        // Create Fedapay customer
-        customer = await Customer.create({
-          firstname: fullname.split(" ")[0],
-          lastname: fullname.split(" ")[1],
-          email: email,
-          phone_number: {
-            number: `+229${number}`,
-            country: "BJ",
-          },
-        });
-        console.log(customer, "customer");
-      } catch (customerError) {
-        // Handle Fedapay customer creation error
-        console.error("Error creating Fedapay customer:", customerError);
-        transactionInProgress = false;
-        return res.status(501).send({
-          success: 501,
-          message: "Failed to create Fedapay customer",
-          status: 501,
-        });
-      }
+
+      // CREATE FEDAPAY
+      // let customer;
+      // try {
+      //   // Create Fedapay customer
+      //   customer = await Customer.create({
+      //     firstname: fullname.split(" ")[0],
+      //     lastname: fullname.split(" ")[1],
+      //     email: email,
+      //     phone_number: {
+      //       number: `+229${number}`,
+      //       country: "BJ",
+      //     },
+      //   });
+      //   console.log(customer, "customer");
+      // } catch (customerError) {
+      //   // Handle Fedapay customer creation error
+      //   console.error("Error creating Fedapay customer:", customerError);
+      //   transactionInProgress = false;
+      //   return res.status(501).send({
+      //     success: 501,
+      //     message: "Failed to create Fedapay customer",
+      //     status: 501,
+      //   });
+      // }
+
+
+
+
 
       const count = await User.countDocuments();
       const parts = fullname.split(" ");
@@ -122,7 +145,7 @@ router.post(
         sessionId: generateUniqueSessionId(),
         supplementaryBetId: [betId],
         registrationDateTime: date,
-        fedapayId: customer.id,
+        // fedapayId: customer.id,
         image: "",
         tag: tag,
         colorScheme: 2,
@@ -133,21 +156,7 @@ router.post(
 
       console.log(savedUser, "saved user");
 
-      if (referrerId) {
-        const user2 = await User.findOne({ tag: referrerId });
-        if (user2) {
-          user2.referrals.push(email);
-          await user2.save();
-        }
-        if (!user2) {
-          transactionInProgress = false;
-          return res.send({
-            success: 503,
-            message: "Referer does not exist",
-            status: 503,
-          });
-        }
-      }
+
 
       //create token data
       const tokenData = {
@@ -282,7 +291,6 @@ router.post(
     }
   }
 );
-
 router.post("/setPin", checkOngoingTransaction, async (req, res) => {
   try {
     transactionInProgress = true;
@@ -748,6 +756,140 @@ router.post("/changeUserPin", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+
+
+
+
+
+
+router.post("/setTag", async (req, res) => {
+  try {
+    const { email, tag } = req.body;
+
+
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      return res.status(501).send({ success: 501, message: "User does not exist", status: 501 });
+    }
+
+    if (!existingUser.isActivated) {
+      return res.status(502).send({ success: 502, message: "User is deactivated", status: 502 });
+    }
+
+    if (existingUser.tag === tag) {
+      return res.status(503).send({ success: 503, message: "Tag is the same as old", status: 503 });
+    }
+
+    // Fetch all existing tags once
+    const allUsers = await User.find({}, { tag: 1 });
+    const existingTags = allUsers.map(user => user.tag);
+
+    // Check if the incoming tag matches any user's tag
+    if (existingTags.includes(tag)) {
+      // Generate tag suggestions
+      const suggestions = await generateTagSuggestions(tag, existingTags);
+      return res.status(504).send({
+        success: 504,
+        message: "Tag already exists",
+        suggestions,
+        status: 504
+      });
+    }
+
+    // Update the user's tag if no conflicts
+    existingUser.tag = tag;
+    await existingUser.save();
+    const updatedTag = tag
+
+    return res.status(201).send({ success: true, message: "Tag successfully updated", status: 201, updatedTag });
+  } catch (error) {
+    console.error("Error updating user tag:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+// Function to generate tag suggestions
+const generateTagSuggestions = async (tag, existingTags) => {
+  let suggestions = [];
+  const baseTag = tag.slice(0, 10); // Get the first 10 characters of the incoming tag
+  let i = 1;
+  while (suggestions.length < 3) {
+    const newTag = `${baseTag}${i}`;
+    if (!existingTags.includes(newTag)) {
+      suggestions.push(newTag);
+    }
+    i++;
+  }
+  return suggestions;
+};
+
+
+
+router.post("/getTotalReferral", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      return res.status(501).send({ success: 501, message: "User does not exist", status: 501 });
+    }
+
+    if (!existingUser.isActivated) {
+      return res.status(502).send({ success: 502, message: "User is deactivated", status: 502 });
+    }
+
+
+    const referralUsers = await Promise.all(
+      existingUser.referrals.map(async (referralEmail) => {
+        const user = await User.findOne(
+          { email: referralEmail }
+        );
+        if (user) {
+          return {
+            _id: uuidv4(),
+            fullname: user.fullname,
+            image: user.image === "" ? "https://firebasestorage.googleapis.com/v0/b/groupchat-d6de7.appspot.com/o/Untitled%20design%20(4)%20(1).png?alt=media&token=7f06a2ba-e4c5-49a2-a029-b6688c9be61d" : user.image,
+            status: user.pinState === false ? "completed" : "pending",
+            time: user.registrationDateTime,
+          };
+        }
+        return null; // Handle the case where user is not found
+      })
+    );
+
+    // Filter out any null values in case some users were not found
+    const filteredReferralUsers = referralUsers.filter(user => user !== null);
+
+
+    return res.status(201).send({ success: true, message: "Referral fetched", status: 201, filteredReferralUsers });
+  } catch (error) {
+    console.error("Error updating user tag:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+
+
+
+
+
+
+
+module.exports = router;
+
+
+
+
+
+
+
+
 
 // Function to invalidate a session (update the database record)
 async function invalidateSession(sessionId) {

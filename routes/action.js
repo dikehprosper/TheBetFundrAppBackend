@@ -1987,9 +1987,11 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
             status: 405,
           });
       }
-
+    
       // Check if the User already exists
       const user = await User.findOne({ _id });
+
+      console.log(user, "gggg")
       if (!user) {
         transactionInProgress = false;
         return res
