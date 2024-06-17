@@ -5,7 +5,8 @@
   "main": "./api/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./api/index.js"
+    "start": "node ./api/index.js",
+    "dev": "nodemon ./api/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -28,8 +29,5 @@
     "multer-s3": "^3.0.1",
     "sharp": "^0.33.3",
     "uuid": "^9.0.1"
-  },
-  "engines": {
-    "node": "20"
   }
 }
