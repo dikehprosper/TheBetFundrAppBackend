@@ -8,9 +8,7 @@ const User = require("../models/user");
 const bcryptjs = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
-const date = new Date();
-// const { FedaPay, Customer } = require("fedapay");
-const { check, validationResult } = require("express-validator");
+const { check, } = require("express-validator");
 const SendEmail = require("../utils/mailer");
 
 require("dotenv").config();
@@ -18,15 +16,6 @@ require("dotenv").config();
 // FedaPay.setEnvironment(process.env.ENVIRONMENT1);
 const tokenVlaue = process.env.TOKEN_SECRET;
 
-const signInValidate = [
-  check("fullname")
-    .isLength({ min: 2 })
-    .withMessage("Your full name is required"),
-  check("email").isEmail().withMessage("Please provide a valid email"),
-  check("password")
-    .isLength({ min: 4 })
-    .withMessage("Password must be at least six characters"),
-];
 
 const loginValidate = [
   check("email").isEmail().withMessage("Please provide a valid email"),
@@ -48,254 +37,11 @@ const checkOngoingTransaction = (req, res, next) => {
   next();
 };
 
-router.post(
-  "/register",
-  checkOngoingTransaction,
-  signInValidate,
-  async (req, res) => {
-    console.log("fullname");
-    checkOngoingTransaction;
-    const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-      {
-        return res.status(422).json({ errors: errors.array() });
-      }
-    }
-
-    try {
-      transactionInProgress = true;
-      const { fullname, betId, number, email, password, referrerId } = req.body;
-      console.log(fullname, betId, number, email, password, referrerId, "jjjj");
-      // Check if the user already exists
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        transactionInProgress = false;
-        return res
-          .status(400)
-          .send({ success: 400, message: "User already exists", status: 400 });
-      }
-
-      if (referrerId) {
-        const user2 = await User.findOne({ tag: referrerId });
-        if (user2) {
-          user2.referrals.push(email);
-          await user2.save();
-        } else if (!user2) {
-          transactionInProgress = false;
-          return res.send({
-            success: 503,
-            message: "Referer does not exist",
-            status: 503,
-          });
-        }
-      }
-
-
-
-      // Hash the password
-      const hashedPassword = await bcryptjs.hash(password, 10);
-
-
-      // CREATE FEDAPAY
-      // let customer;
-      // try {
-      //   // Create Fedapay customer
-      //   customer = await Customer.create({
-      //     firstname: fullname.split(" ")[0],
-      //     lastname: fullname.split(" ")[1],
-      //     email: email,
-      //     phone_number: {
-      //       number: `+229${number}`,
-      //       country: "BJ",
-      //     },
-      //   });
-      //   console.log(customer, "customer");
-      // } catch (customerError) {
-      //   // Handle Fedapay customer creation error
-      //   console.error("Error creating Fedapay customer:", customerError);
-      //   transactionInProgress = false;
-      //   return res.status(501).send({
-      //     success: 501,
-      //     message: "Failed to create Fedapay customer",
-      //     status: 501,
-      //   });
-      // }
-
-
-
-
-
-      const count = await User.countDocuments();
-      const parts = fullname.split(" ");
-      let firstName = parts[0];
-      const name = firstName.replace(/\d/g, "");
-
-      const tag = `betfundr-${name}${count + 1}`;
-
-      // Create a new user
-      const newUser = new User({
-        fullname,
-        betId,
-        number,
-        email,
-        password: hashedPassword,
-        isUser: true,
-        isLoggedIn: true,
-        sessionId: generateUniqueSessionId(),
-        supplementaryBetId: [betId],
-        registrationDateTime: date,
-        // fedapayId: customer.id,
-        image: "",
-        tag: tag,
-        colorScheme: 2,
-      });
-
-      // Save the user to the database
-      const savedUser = await newUser.save();
-
-      console.log(savedUser, "saved user");
-
-
-
-      //create token data
-      const tokenData = {
-        _id: savedUser._id,
-        fullname: savedUser.fullname,
-        email: savedUser.email,
-        isAdmin: savedUser.isAdmin,
-        isUser: savedUser.isUser,
-        isSubAdminDeposits: savedUser.isSubAdminDeposits,
-        isSubAdminWithdrawals: savedUser.isSubAdminWithdrawals,
-        sessionId: savedUser.sessionId,
-        pinState: savedUser.pinState,
-      };
-
-      // create token
-      const token = await jwt.sign(tokenData, tokenVlaue);
-      transactionInProgress = false;
-      res.header("auth-token", token).send({
-        message: "registered succesfully",
-        token,
-        success: true,
-        savedUser: savedUser,
-        status: 201,
-      });
-    } catch (error) {
-      transactionInProgress = false;
-      console.error("Error registering user:", error);
-      return res
-        .status(500)
-        .send({ success: false, message: "Internal server error" });
-    }
-  }
-);
-
-router.post(
-  "/login",
-  checkOngoingTransaction,
-  loginValidate,
-  async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      {
-        return res.status(422).json({ errors: errors.array() });
-      }
-    }
-    try {
-      transactionInProgress = true;
-      const { email, password } = req.body;
-      console.log(email);
-      // Check if the user already exists
-      const existingUser = await User.findOne({ email });
-      if (!existingUser) {
-        transactionInProgress = false;
-        return res
-          .status(501)
-          .send({ success: 501, message: "User does not exists", status: 501 });
-      }
-
-      if (!existingUser.isActivated) {
-        transactionInProgress = false;
-        return res
-          .status(502)
-          .send({ success: 502, message: "User is deactivated", status: 502 });
-      }
-
-      // Check if password is correct
-      const validPassword = await bcryptjs.compare(
-        password,
-        existingUser.password
-      );
-      if (!validPassword) {
-        transactionInProgress = false;
-        return res
-          .status(503)
-          .send({ success: 503, message: "Invalid password", status: 503 });
-      }
-
-      if (!existingUser.pinState) {
-        transactionInProgress = false;
-        return res.status(504).send({
-          success: 504,
-          message: "Pin not set",
-          status: 504,
-          email: existingUser.email,
-        });
-      }
-
-      // Generate a new session ID using the 'uuid' library
-      const newSessionId = generateUniqueSessionId();
-
-      // Check for existing session and invalidate it
-      if (existingUser.isAdmin === false) {
-        if (existingUser.sessionId) {
-          // Implement your session invalidation logic here (e.g., update the database record)
-          invalidateSession(existingUser.sessionId);
-        }
-      }
-
-      // Set the user's session ID and isLoggedIn status
-      existingUser.sessionId = newSessionId;
-      existingUser.isLoggedIn = true;
-      const savedUser = await existingUser.save();
-
-      //create token data
-      const tokenData = {
-        _id: savedUser._id,
-        fullname: savedUser.fullname,
-        email: savedUser.email,
-        isAdmin: savedUser.isAdmin,
-        isUser: savedUser.isUser,
-        isSubAdminDeposits: savedUser.isSubAdminDeposits,
-        isSubAdminWithdrawals: savedUser.isSubAdminWithdrawals,
-        sessionId: savedUser.sessionId,
-        pinState: savedUser.pinState,
-      };
-
-      // create token
-      const token = await jwt.sign(tokenData, tokenVlaue);
-      transactionInProgress = false;
-      res.header("auth-token", token).send({
-        success: true,
-        message: "Logged in succesfully",
-        token,
-        status: 201,
-        savedUser,
-      });
-    } catch (error) {
-      transactionInProgress = false;
-      console.error("Error ligining in user:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  }
-);
 router.post("/setPin", checkOngoingTransaction, async (req, res) => {
   try {
     transactionInProgress = true;
     const { pin, email } = req.body;
-    console.log(email, pin, "ggggggg");
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
@@ -358,6 +104,7 @@ router.post("/setPin", checkOngoingTransaction, async (req, res) => {
 
 router.post("/getUser", checkOngoingTransaction, async (req, res) => {
   try {
+    console.log("processed")
     transactionInProgress = true;
     const { token } = req.body;
 
@@ -461,6 +208,8 @@ router.post(
       transactionInProgress = true;
       const { pin, email } = req.body;
 
+      console.log(pin, email, "pin, email")
+
       // Check if the user already exists
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
@@ -538,39 +287,7 @@ router.post(
   }
 );
 
-router.post("/resetPassword", async (req, res) => {
-  try {
-    const { email } = req.body;
-    // Check if the user already exists
-    const existingUser = await User.findOne({ email });
-    if (!existingUser) {
-      return res
-        .status(501)
-        .send({ success: 501, message: "User does not exists", status: 501 });
-    }
 
-    if (!existingUser.isActivated) {
-      return res
-        .status(502)
-        .send({ success: 502, message: "User is deactivated", status: 502 });
-    }
-
-    console.log("second check");
-    await SendEmail({
-      email,
-      userId: existingUser._id,
-      emailType: "RESET",
-      fullname: existingUser.fullname,
-    });
-
-    return res
-      .status(201)
-      .send({ success: true, message: "successful", status: 201 });
-  } catch (error) {
-    console.error("Error logining in user:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
 
 router.post("/resetPasswordForLoggedInUser", async (req, res) => {
   try {
@@ -758,12 +475,6 @@ router.post("/changeUserPin", async (req, res) => {
 });
 
 
-
-
-
-
-
-
 router.post("/setTag", async (req, res) => {
   try {
     const { email, tag } = req.body;
@@ -872,17 +583,6 @@ router.post("/getTotalReferral", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-
-
-
-
-
-
-
-
-module.exports = router;
-
 
 
 

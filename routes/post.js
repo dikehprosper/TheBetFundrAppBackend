@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
 // /* eslint-disable @typescript-eslint/no-var-requires */
@@ -17,7 +18,6 @@ const {
   deletePost,
   getMyLikedPosts,
   createPost,
-  getAuthorDetails,
   getPostDetails,
 } = require("../controllers/post.js");
 const express = require("express");

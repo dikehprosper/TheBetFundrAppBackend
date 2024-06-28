@@ -215,6 +215,7 @@ const adminSchema = new mongoose.Schema({
                 totalAmount: Number,
                 QrCodeDepositsId: String,
                 fedapayTransactionId: String || Number,
+                customErrorCode: Number,
                 authenticatedDeposit: {
                     type: Boolean,
                     default: true,

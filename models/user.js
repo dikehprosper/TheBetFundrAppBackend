@@ -183,6 +183,7 @@ const UserSchema = new mongoose.Schema({
         paymentConfirmation: String,
         fedapayTransactionId: String || Number,
         recipientid: String,
+        customErrorCode: Number,
       },
     ],
   },
@@ -227,6 +228,7 @@ const UserSchema = new mongoose.Schema({
         fedapayTransactionId: String || Number,
         paymentConfirmation: String,
         QrCodeDepositsId: String,
+        customErrorCode: Number,
         authenticatedDeposit: {
           type: Boolean,
           default: true,
