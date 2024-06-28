@@ -13,6 +13,7 @@ app.use(express.json());
 
 // Routes
 const post = require("../routes/post");
+const fixtures = require("../routes/fixtures");
 const authRoutes = require("../routes/userAuth");
 const editProfileRoutes = require("../routes/editProfile");
 const sendNotificationRoutes = require("../routes/sendNotifications");
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
 
 // API routes
 app.use("/api/posts", post);
+app.use("/api/fixtures", fixtures);
 app.use("/api/users", authRoutes);
 app.use("/api/users", editProfileRoutes);
 app.use("/api/users", sendNotificationRoutes);

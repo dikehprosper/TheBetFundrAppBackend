@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./api/index.js",
-    "dev": "nodemon ./api/index.js"
+    "dev": "nodemon"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.1613.0",
+    "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
