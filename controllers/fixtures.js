@@ -7,13 +7,27 @@ const {
   getGameData,
   getStatisticsData,
 } = require("../utils/sportsApi");
+const moment = require("moment");
+const Fixtures = require("../models/fixtures");
+const Leagues = require("../models/leagues");
+const Standings = require("../models/standings");
 
 const getFixturesForADate = async (req, res) => {
   const date = req.query.date;
   try {
+    const fixtures = await Fixtures.findOne({ date });
+
+    if (fixtures)
+      return res.status(200).json({
+        success: true,
+        message: "Fixtures fetched",
+        data: fixtures.fixtures,
+      });
     const {
       data: { response },
     } = await getFixturesForDate(date);
+
+    await Fixtures.create({ date, fixtures: response });
 
     return res
       .status(200)
@@ -27,9 +41,35 @@ const getFixturesForADate = async (req, res) => {
 
 const getLeagues = async (req, res) => {
   try {
+    const leagues = await Leagues.findOne({ title: "leagueList" });
+
+    if (leagues) {
+      const currentDate = moment();
+      const lastCallDate = moment(leagues.lastCall);
+
+      const duration = currentDate.diff(lastCallDate, "minute");
+
+      if (duration < 60) {
+        return res.status(200).json({
+          success: true,
+          message: "Leagues returned",
+          data: leagues.leagues,
+        });
+      }
+    }
+
     const {
       data: { response },
     } = await getLeaguesData();
+
+    await Leagues.findOneAndUpdate(
+      { title: "leagueList" },
+      {
+        $set: {
+          leagues: response,
+        },
+      },
+    );
 
     return res
       .status(200)
@@ -80,6 +120,11 @@ const getStandings = async (req, res) => {
   const season = req.query.season;
 
   try {
+    const standings = await Standings.findOne({ league, season });
+
+    if (standings) {
+    }
+
     const {
       data: { response },
     } = await getStandingsData(league, season);
