@@ -13,6 +13,7 @@ app.use(express.json());
 
 // Routes
 const post = require("../routes/post");
+const fixtures = require("../routes/fixtures");
 const authRoutes = require("../routes/userAuth");
 const authRoutesWithoutToken = require("../routes/userAuthWithoutToken");
 const editProfileRoutes = require("../routes/editProfile");
@@ -26,16 +27,13 @@ app.get("/", (req, res) => {
   res.send("Welcome to express");
 });
 
-// Apply the verifyToken middleware to protected routes
 app.use("/api/posts", verifyToken, post);
 app.use("/api/users", verifyToken, editProfileRoutes);
 app.use("/api/users", verifyToken, sendNotificationRoutes);
 app.use("/api/users", verifyToken, genarateQRCodeRoutes);
 app.use("/api/users", verifyToken, actionRoutes);
 app.use("/api/usersWithoutToken", authRoutesWithoutToken);
-
-// Unprotected route
-app.use("/api/users", authRoutes);
+app.use("/api/fixtures", fixtures);
 
 // MongoDB connection and server start
 const port = process.env.PORT || 5001;
