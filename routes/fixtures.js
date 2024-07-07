@@ -8,6 +8,7 @@ const {
   getGame,
   getStatistics,
 } = require("../controllers/fixtures");
+const verifyToken = require("../verifyToken");
 
 const router = express.Router();
 

@@ -3,8 +3,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const express = require("express");
 const mongoose = require("mongoose");
+const { Server } = require("socket.io");
 const cors = require("cors");
+const { createServer } = require("http");
 const app = express();
+const server = createServer(app);
+const io = new Server(server);
+
 require("dotenv").config();
 
 // Apply CORS to allow all origins
@@ -27,6 +32,14 @@ app.get("/", (req, res) => {
   res.send("Welcome to express");
 });
 
+io.on("connection", (socket) => {
+  console.log("user connected");
+  socket.on("fixtures", (msg) => {
+    console.log("fixtures updated")
+    io.emit("fixtures", msg);
+  });
+});
+
 app.use("/api/posts", verifyToken, post);
 app.use("/api/users", verifyToken, editProfileRoutes);
 app.use("/api/users", verifyToken, sendNotificationRoutes);
@@ -40,6 +53,6 @@ const port = process.env.PORT || 5001;
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
-    app.listen(port, () => console.log(`Server is running on port ${port}`));
+    server.listen(port, () => console.log(`Server is running on port ${port}`));
   })
   .catch((err) => console.log(err));
