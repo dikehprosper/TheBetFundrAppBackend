@@ -35,16 +35,16 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("user connected");
   socket.on("fixtures", (msg) => {
-    console.log("fixtures updated")
+    console.log("fixtures updated");
     io.emit("fixtures", msg);
   });
 });
 
-app.post("/emit-fixtures", (req, res)=> {
-  const {data} = req.body
-  io.emit("fixtures", data)
-  res.sendStatus(200)
-})
+app.post("/emit-fixtures", (req, res) => {
+  const { data } = req.body;
+  io.emit("fixtures", { fixture: data });
+  res.sendStatus(200);
+});
 
 app.use("/api/posts", verifyToken, post);
 app.use("/api/users", verifyToken, editProfileRoutes);
