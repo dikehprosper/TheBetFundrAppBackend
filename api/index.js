@@ -40,6 +40,12 @@ io.on("connection", (socket) => {
   });
 });
 
+app.post("/emit-fixtures", (req, res)=> {
+  const {data} = req.body
+  io.emit("fixtures", data)
+  res.sendStatus(200)
+})
+
 app.use("/api/posts", verifyToken, post);
 app.use("/api/users", verifyToken, editProfileRoutes);
 app.use("/api/users", verifyToken, sendNotificationRoutes);
