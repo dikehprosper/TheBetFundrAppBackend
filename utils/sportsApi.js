@@ -14,10 +14,6 @@ const getFixturesForDate = async (date) =>
 // leagues
 const getLeaguesData = async () => await sportsClient.get(`leagues`);
 
-// events
-
-// lineups
-
 // standings
 const getStandingsData = async (league, season) =>
   await sportsClient.get(`standings?league=${league}&season=${season}`);
@@ -30,7 +26,7 @@ const getEventsData = async (fixture) =>
 const getLineupsData = async (fixture) =>
   await sportsClient.get(`fixtures/lineups?fixture=${fixture}`);
 const getStatisticsData = async (fixture) =>
-  await sportsClient.get(`fixture/statistics?fixture=${fixture}`);
+  await sportsClient.get(`fixtures/statistics?fixture=${fixture}`);
 
 module.exports = {
   getFixturesForDate,
