@@ -14,7 +14,7 @@ require("dotenv").config();
 
 // Apply CORS to allow all origins
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10000kb" }));
 
 // Routes
 const post = require("../routes/post");
