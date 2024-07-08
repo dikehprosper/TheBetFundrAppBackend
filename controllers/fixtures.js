@@ -28,7 +28,7 @@ const getFixturesForADate = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Fixtures fetched",
-        data: fixtures,
+        data: fixtures.fixtures,
       });
     }
     const {
