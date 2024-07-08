@@ -18,59 +18,13 @@ const Events = require("../models/event");
 const { liveStatus, finishedStatus } = require("../helpers/fixtures");
 
 const getFixturesForADate = async (req, res) => {
-  const skip = (1 - 1) * 20;
   const date = req.query.date;
   const lastCall = new Date();
 
   try {
-    const fixtures = await Fixtures.aggregate([
-      // Match documents with the specified date
-      { $match: { date: date } },
-      // Unwind the fixtures array
-      { $unwind: "$fixtures" },
-      {
-        $addFields: {
-          sortKey: {
-            $cond: {
-              if: { $in: ["$fixtures.fixture.status.short", liveStatus] },
-              then: 0,
-              else: 1,
-            },
-          },
-        },
-      },
-      { $sort: { sortKey: 1, "fixtures.fixture.id": 1 } },
-      // Group by league id
-      {
-        $group: {
-          _id: "$fixtures.league.id",
-          league: { $first: "$fixtures.league" },
-          fixtures: { $push: "$fixtures" },
-          countNSPT: {
-            $sum: {
-              $cond: [
-                { $in: ["$fixtures.fixture.status.short", liveStatus] },
-                1,
-                0,
-              ],
-            },
-          },
-        },
-      },
-      // Sort groups by the count of fixtures with status.short in ["NS", "PT"]
-      { $sort: { countNSPT: -1 } },
-      { $skip: skip },
-      { $limit: 20 },
-      // Project the final structure
-      {
-        $project: {
-          _id: 0,
-          league: 1,
-          fixtures: 1,
-        },
-      },
-    ]);
-    if (fixtures.length !== 0) {
+    const fixtures = await Fixtures.findOne({ date });
+
+    if (fixtures) {
       return res.status(200).json({
         success: true,
         message: "Fixtures fetched",
@@ -86,46 +40,11 @@ const getFixturesForADate = async (req, res) => {
       fixtures: response,
       lastCall,
     });
-    const newFixtures = await Fixtures.aggregate([
-      // Match documents with the specified date
-      { $match: { date: date } },
-      // Unwind the fixtures array
-      { $unwind: "$fixtures" },
-      {
-        $set: {
-          priority: {
-            $cond: {
-              if: { $in: ["$fixtures.fixture.status.short", liveStatus] },
-              then: 0,
-              else: 1,
-            },
-          },
-        },
-      },
-      // Sort by priority
-      { $sort: { priority: 1 } },
-      // Group by league id
-      {
-        $group: {
-          _id: "$fixtures.league.id",
-          league: { $first: "$fixtures.league" },
-          fixtures: { $push: "$fixtures" },
-        },
-      },
-      // Project the final structure
-      {
-        $project: {
-          _id: 0,
-          league: 1,
-          fixtures: 1,
-        },
-      },
-    ]);
 
     return res.status(200).json({
       success: true,
       message: "Fixtures fetched",
-      data: newFixtures,
+      data: response,
     });
   } catch (error) {
     return res
@@ -332,13 +251,11 @@ const getStatistics = async (req, res) => {
     const statistics = await Statistics.findOne({ fixture: Number(fixture) });
 
     if (statistics)
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Statistics fetched",
-          data: statistics.statistics,
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Statistics fetched",
+        data: statistics.statistics,
+      });
 
     const {
       data: { response },
