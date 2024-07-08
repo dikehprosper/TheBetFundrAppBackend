@@ -38,6 +38,15 @@ io.on("connection", (socket) => {
     console.log("fixtures updated");
     io.emit("fixtures", msg);
   });
+  socket.on("live games", (msg) => {
+    io.emit("live games", msg);
+  });
+});
+
+app.post("/emit-live-games", (req, res) => {
+  const { data } = req.body;
+  io.emit("live games", { liveFixtures: data });
+  res.sendStatus(200);
 });
 
 app.post("/emit-fixtures", (req, res) => {
