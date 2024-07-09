@@ -947,12 +947,62 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             status: 504,
           });
       }
-
       const date = new Date();
       const newUuid = generateUniqueShortUuid(15);
       const fullname = user.fullname
 
+      // Check for similar transactions in the last 5 minutes
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const recentTransaction = admin.transactionHistory.find(transaction =>
+        transaction.betId === betId && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+      );
+      console.log(recentTransaction, "snsbsbfasbf")
+      if (recentTransaction !== undefined) {
 
+        const userTransaction = {
+          status: "Failed",
+          registrationDateTime: date,
+          amount: amount,
+          totalAmount: amount,
+          betId: betId,
+          // momoName: momoName,
+          momoNumber: momoNumber,
+          fundingType: "deposits",
+          identifierId: newUuid,
+          service: service,
+          paymentConfirmation: "Failed",
+          customErrorCode: 300
+        };
+        user.transactionHistory.push(userTransaction);
+        admin.transactionHistory.push({
+          userid: user._id,
+          status: "Failed",
+          registrationDateTime: date,
+          amount: amount,
+          totalAmount: amount,
+          betId: betId,
+          // momoName: momoName,
+          momoNumber: momoNumber,
+          fundingType: "deposits",
+          identifierId: newUuid,
+          userEmail: email,
+          subadminEmail: "none",
+          service: service,
+          paymentConfirmation: "Failed",
+          customErrorCode: 300
+        });
+
+        await admin.save();
+        await user.save();
+        console.log("done")
+        // Return a JSON response with the transaction status
+        transactionInProgress = false;
+        return res.status(508).json({
+          success: 508,
+          message: "failed to generate",
+          userTransaction,
+        });
+      }
       const result = await makePaymentRequest(amount, momoNumber, network, fullname, newUuid
       );
       console.log("API Response:", result);
@@ -1203,6 +1253,64 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
               status: 504,
             });
         }
+
+
+        // Check for similar transactions in the last 5 minutes
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const recentTransaction = admin.transactionHistory.find(transaction =>
+          transaction.betId === betId && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+        );
+        if (recentTransaction) {
+          transactionInProgress = false;
+          const userTransaction = {
+            status: "Failed",
+            registrationDateTime: date,
+            amount: 0,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            service: service,
+            bonusBalance: amount,
+            totalAmount: amount,
+            paymentConfirmation: "Failed",
+            customErrorCode: 300
+          };
+          user.transactionHistory.push(userTransaction);
+          admin.transactionHistory.push({
+            userid: user._id,
+            status: "Failed",
+            registrationDateTime: date,
+            amount: 0,
+            totalAmount: amount,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            userEmail: email,
+            subadminEmail: "none",
+            service: service,
+            paymentConfirmation: "Failed",
+            bonusBalance: amount,
+            customErrorCode: 300
+          });
+
+          await admin.save();
+          await user.save();
+          // Return a JSON response with the transaction status
+          transactionInProgress = false;
+          return res
+            .status(510)
+            .json({
+              success: 510,
+              message: "failed to generate",
+              userTransaction,
+            });
+        }
+
+
         const date = new Date();
         const newUuid = generateUniqueShortUuid(15);
 
@@ -1440,6 +1548,69 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
               status: 504,
             });
         }
+
+
+
+        // Check for similar transactions in the last 5 minutes
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const recentTransaction = admin.transactionHistory.find(transaction =>
+          transaction.betId === betId && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+        );
+        if (recentTransaction) {
+          transactionInProgress = false;
+          const userTransaction = {
+            status: "Failed",
+            registrationDateTime: date,
+            amount: updatedAmount,
+            totalAmount: amount,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            service: service,
+            bonusBalance: user.bonusBalance,
+            paymentConfirmation: "Failed",
+            customErrorCode: 302
+          };
+
+          admin.transactionHistory.push({
+            userid: user._id,
+            status: "Failed",
+            registrationDateTime: date,
+            amount: updatedAmount,
+            betId: betId,
+            totalAmount: amount,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            userEmail: email,
+            subadminEmail: "none",
+            service: service,
+            paymentConfirmation: "Failed",
+            bonusBalance: user.bonusBalance,
+            customErrorCode: 302
+
+          });
+          user.transactionHistory.push(userTransaction);
+          user.bonus.push(userTransaction);
+          await admin.save();
+          await user.save();
+          transactionInProgress = false;
+          return res
+            .status(510)
+            .json({
+              success: 510,
+              message: "failed to generate",
+              userTransaction,
+            });
+        }
+
+
+
+
+
         const newUuid = generateUniqueShortUuid(15);
         const date = new Date();
         updatedAmount = amount - user.bonusBalance;
