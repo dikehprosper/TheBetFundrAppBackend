@@ -42,6 +42,7 @@ router.post(
   upload.single("image"),
   async (req, res) => {
     try {
+      console.log("done")
       transactionInProgress = true;
       const { email } = req.body;
       const file = req.file;

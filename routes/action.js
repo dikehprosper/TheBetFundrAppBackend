@@ -954,11 +954,10 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
       // Check for similar transactions in the last 5 minutes
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
       const recentTransaction = admin.transactionHistory.find(transaction =>
-        transaction.betId === betId && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+        transaction.betId === betId && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
       );
       console.log(recentTransaction, "snsbsbfasbf")
       if (recentTransaction !== undefined) {
-
         const userTransaction = {
           status: "Failed",
           registrationDateTime: date,
@@ -1003,6 +1002,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           userTransaction,
         });
       }
+      console.log("API Response:");
       const result = await makePaymentRequest(amount, momoNumber, network, fullname, newUuid
       );
       console.log("API Response:", result);
@@ -1255,12 +1255,18 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         }
 
 
+
+
+        const date = new Date();
+        const newUuid = generateUniqueShortUuid(15);
+        const fullname = user.fullname
+
         // Check for similar transactions in the last 5 minutes
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const recentTransaction = admin.transactionHistory.find(transaction =>
-          transaction.betId === betId && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+          transaction.betId === betId && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
         );
-        if (recentTransaction) {
+        if (recentTransaction !== undefined) {
           transactionInProgress = false;
           const userTransaction = {
             status: "Failed",
@@ -1301,18 +1307,13 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           await user.save();
           // Return a JSON response with the transaction status
           transactionInProgress = false;
-          return res
-            .status(510)
-            .json({
-              success: 510,
-              message: "failed to generate",
-              userTransaction,
-            });
+          return res.status(508).json({
+            success: 508,
+            message: "failed to generate",
+            userTransaction,
+          });
         }
 
-
-        const date = new Date();
-        const newUuid = generateUniqueShortUuid(15);
 
         // INITIATE MOBCASH TRANSACTION
         const response = await rechargeAccount(betId, amount);
@@ -1504,7 +1505,6 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             userTransaction,
           });     
       }
-
       if (bonusBalance < amount) {
         const user = await User.findOne({ email });
         if (!user) {
@@ -1554,9 +1554,9 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         // Check for similar transactions in the last 5 minutes
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const recentTransaction = admin.transactionHistory.find(transaction =>
-          transaction.betId === betId && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+          transaction.betId === betId && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
         );
-        if (recentTransaction) {
+        if (recentTransaction !== undefined) {
           transactionInProgress = false;
           const userTransaction = {
             status: "Failed",
@@ -1606,9 +1606,6 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
               userTransaction,
             });
         }
-
-
-
 
 
         const newUuid = generateUniqueShortUuid(15);
