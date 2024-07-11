@@ -14,7 +14,7 @@ const { FedaPay, Transaction, Customer } = require("fedapay");
 const { makePaymentRequest } = require("../helpers/makePaymentRequest");
 const { validateDepositRequest } = require("../helpers/checkVerificationForInput");
 const { validateDepositRequest2 } = require("../helpers/checkVerificationForInput");
-const { rechargeAccount, checkBalance } = require('./mobcash');
+const { rechargeAccount, checkBalance, withdrawFromAccount } = require('./mobcash');
 
 // add the current transaction to the user
 let transactionInProgress = false;
@@ -952,15 +952,16 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
       const fullname = user.fullname
 
       // Check for similar transactions in the last 5 minutes
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60.5 * 1000);
       const recentTransaction = admin.transactionHistory.find(transaction =>
-        transaction.betId === betId && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+        transaction.betId === betId && transaction.amount === amount && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
       );
-      console.log(recentTransaction, "snsbsbfasbf")
+
       if (recentTransaction !== undefined) {
         const userTransaction = {
           status: "Failed",
           registrationDateTime: date,
+          network: network,
           amount: amount,
           totalAmount: amount,
           betId: betId,
@@ -977,6 +978,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           userid: user._id,
           status: "Failed",
           registrationDateTime: date,
+          network: network,
           amount: amount,
           totalAmount: amount,
           betId: betId,
@@ -1000,6 +1002,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           success: 508,
           message: "failed to generate",
           userTransaction,
+          user
         });
       }
       console.log("API Response:");
@@ -1007,53 +1010,126 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
       );
       console.log("API Response:", result);
 
-      if (result !== "SUCCESSFUL") {
-        const userTransaction = {
-          status: "Failed",
-          registrationDateTime: date,
-          amount: amount,
-          totalAmount: amount,
-          betId: betId,
-          // momoName: momoName,
-          momoNumber: momoNumber,
-          fundingType: "deposits",
-          identifierId: newUuid,
-          service: service,
-          paymentConfirmation: "Failed",
-          customErrorCode: 302
-        };
-        user.transactionHistory.push(userTransaction);
-        admin.transactionHistory.push({
-          userid: user._id,
-          status: "Failed",
-          registrationDateTime: date,
-          amount: amount,
-          totalAmount: amount,
-          betId: betId,
-          // momoName: momoName,
-          momoNumber: momoNumber,
-          fundingType: "deposits",
-          identifierId: newUuid,
-          userEmail: email,
-          subadminEmail: "none",
-          service: service,
-          paymentConfirmation: "Failed",
-          customErrorCode: 302
-        });
-
-        await admin.save();
-        await user.save();
-        // Return a JSON response with the transaction status
-        transactionInProgress = false;
-        return res
-          .status(209)
-          .json({
-            success: 209,
-            message: "failed to generate",
-            userTransaction,
+      if (result.status !== "SUCCESSFUL") {
+        if (result.status === 'PENDING') {
+          const userTransaction = {
+            status: "Pending",
+            registrationDateTime: date,
+            amount: amount,
+            totalAmount: amount,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            network: network,
+            service: service,
+            paymentConfirmation: "Pending",
+            customErrorCode: 302
+          };
+          user.transactionHistory.push(userTransaction);
+          admin.transactionHistory.push({
+            userid: user._id,
+            status: "Pending",
+            registrationDateTime: date,
+            amount: amount,
+            totalAmount: amount,
+            network: network,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            userEmail: email,
+            subadminEmail: "none",
+            service: service,
+            paymentConfirmation: "Pending",
+            customErrorCode: 302
           });
+          admin.pendingTransactions.push({
+            userid: user._id,
+            status: "Pending",
+            registrationDateTime: date,
+            amount: amount,
+            totalAmount: amount,
+            network: network,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            userEmail: email,
+            subadminEmail: "none",
+            service: service,
+            paymentConfirmation: "Pending",
+            customErrorCode: 302
+          });
+
+          await admin.save();
+          await user.save();
+          // Return a JSON response with the transaction status
+          transactionInProgress = false;
+          return res
+            .status(209)
+            .json({
+              success: 209,
+              message: "failed to generate",
+              userTransaction,
+              user
+            });
+        } else {
+          const userTransaction = {
+            status: "Failed",
+            registrationDateTime: date,
+            amount: amount,
+            totalAmount: amount,
+            network: network,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            service: service,
+            paymentConfirmation: "Failed",
+            customErrorCode: 302
+          };
+          user.transactionHistory.push(userTransaction);
+          admin.transactionHistory.push({
+            userid: user._id,
+            status: "Failed",
+            registrationDateTime: date,
+            amount: amount,
+            totalAmount: amount,
+            network: network,
+            betId: betId,
+            // momoName: momoName,
+            momoNumber: momoNumber,
+            fundingType: "deposits",
+            identifierId: newUuid,
+            userEmail: email,
+            subadminEmail: "none",
+            service: service,
+            paymentConfirmation: "Failed",
+            customErrorCode: 302
+          });
+
+          await admin.save();
+          await user.save();
+          // Return a JSON response with the transaction status
+          transactionInProgress = false;
+          return res
+            .status(209)
+            .json({
+              success: 209,
+              message: "failed to generate",
+              userTransaction,
+              user
+            });
+        }
+
       }
       // INITIATE MOBCASH TRANSACTION
+
       const response = await rechargeAccount(betId, amount);
       console.log(response, "response from mobcash");
       if (response.Success === false && response.MessageId === 100337) {
@@ -1062,6 +1138,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           registrationDateTime: date,
           amount: amount,
           totalAmount: amount,
+          network: network,
           betId: betId,
           momoNumber: momoNumber,
           fundingType: "deposits",
@@ -1082,6 +1159,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           fundingType: "deposits",
           identifierId: newUuid,
           userEmail: email,
+          network: network,
           subadminEmail: "none",
           service: service,
           paymentConfirmation: "Successful",
@@ -1093,6 +1171,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             success: true,
           message: "Transaction wasnt fully completed",
             userTransaction,
+          user
           });
       }
       if (response.Success === false && response.MessageId === 100323) {
@@ -1106,6 +1185,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           fundingType: "deposits",
           identifierId: newUuid,
           service: service,
+          network: network,
           paymentConfirmation: "Successful",
           customErrorCode: 301
         };
@@ -1121,6 +1201,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           fundingType: "deposits",
           identifierId: newUuid,
           userEmail: email,
+          network: network,
           subadminEmail: "none",
           service: service,
           paymentConfirmation: "Successful",
@@ -1132,6 +1213,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           success: true,
           message: "Transaction wasnt fully completed",
           userTransaction,
+          user
         });
       }
       if (response.Success === false) {
@@ -1141,6 +1223,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           amount: amount,
           totalAmount: amount,
           betId: betId,
+          network: network,
           momoNumber: momoNumber,
           fundingType: "deposits",
           identifierId: newUuid,
@@ -1154,6 +1237,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           status: "Pending",
           registrationDateTime: date,
           amount: amount,
+          network: network,
           totalAmount: amount,
           betId: betId,
           momoNumber: momoNumber,
@@ -1170,6 +1254,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           success: true,
           message: "Transaction wasnt fully completed",
           userTransaction,
+          user
         });
       }
       const userTransaction = {
@@ -1183,6 +1268,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         identifierId: newUuid,
         service: service,
         paymentConfirmation: "Successful",
+        network: network,
       };
 
       user.transactionHistory.push(userTransaction);
@@ -1192,6 +1278,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         registrationDateTime: date,
         amount: amount,
         totalAmount: amount,
+        network: network,
         betId: betId,
         momoNumber: momoNumber,
         fundingType: "deposits",
@@ -1207,11 +1294,13 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         success: true,
         message: "Transaction generated successfully",
         userTransaction,
+        user
       });
     }
 
     if (bonusBalance !== null) {
       if (bonusBalance >= amount) {
+        console.log("done")
         // Uncomment below code to fetch user and perform additional checks if required
         const user = await User.findOne({ email });
 
@@ -1264,7 +1353,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         // Check for similar transactions in the last 5 minutes
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const recentTransaction = admin.transactionHistory.find(transaction =>
-          transaction.betId === betId && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+          transaction.betId === betId && transaction.amount === amount && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
         );
         if (recentTransaction !== undefined) {
           transactionInProgress = false;
@@ -1278,6 +1367,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             fundingType: "deposits",
             identifierId: newUuid,
             service: service,
+            network: network,
             bonusBalance: amount,
             totalAmount: amount,
             paymentConfirmation: "Failed",
@@ -1291,6 +1381,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             amount: 0,
             totalAmount: amount,
             betId: betId,
+            network: network,
             // momoName: momoName,
             momoNumber: momoNumber,
             fundingType: "deposits",
@@ -1316,15 +1407,17 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
 
 
         // INITIATE MOBCASH TRANSACTION
+
         const response = await rechargeAccount(betId, amount);
         console.log(response, "response")
         if (response.Success === false && response.MessageId === 100337) {
-          console.log("111111")
+
           const userTransaction = {
             status: "Failed",
             registrationDateTime: date,
             amount: 0,
             betId: betId,
+            network: network,
             // momoName: momoName,
             momoNumber: momoNumber,
             fundingType: "deposits",
@@ -1343,6 +1436,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             amount: 0,
             totalAmount: amount,
             betId: betId,
+            network: network,
             // momoName: momoName,
             momoNumber: momoNumber,
             fundingType: "deposits",
@@ -1363,6 +1457,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
               success: 209,
               message: "failed to generate",
               userTransaction,
+              user
             });
         }
         if (response.Success === false && response.MessageId === 100323) {
@@ -1373,6 +1468,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             betId: betId,
             // momoName: momoName,
             momoNumber: momoNumber,
+            network: network,
             fundingType: "deposits",
             identifierId: newUuid,
             service: service,
@@ -1391,6 +1487,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             betId: betId,
             // momoName: momoName,
             momoNumber: momoNumber,
+            network: network,
             fundingType: "deposits",
             identifierId: newUuid,
             userEmail: email,
@@ -1409,6 +1506,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
               success: 209,
               message: "failed to generate",
               userTransaction,
+              user
             });
         }
         if (response.Success === false) {
@@ -1420,6 +1518,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             betId: betId,
             // momoName: momoName,
             momoNumber: momoNumber,
+            network: network,
             fundingType: "deposits",
             identifierId: newUuid,
             service: service,
@@ -1439,6 +1538,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             momoNumber: momoNumber,
             fundingType: "deposits",
             identifierId: newUuid,
+            network: network,
             userEmail: email,
             subadminEmail: "none",
             service: service,
@@ -1454,6 +1554,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
               success: 209,
               message: "failed to generate",
               userTransaction,
+              user
             });
         }
         const updatedBonusBalance = user.bonusBalance - amount;
@@ -1464,6 +1565,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           betId: betId,
           // momoName: momoName,
           momoNumber: momoNumber,
+          network: network,
           fundingType: "deposits",
           identifierId: newUuid,
           service: service,
@@ -1480,6 +1582,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           betId: betId,
           // momoName: momoName,
           momoNumber: momoNumber,
+          network: network,
           fundingType: "deposits",
           identifierId: newUuid,
           userEmail: email,
@@ -1503,9 +1606,11 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             message: "transaction generated successfully",
             newUserBonus,
             userTransaction,
+            user
           });     
       }
       if (bonusBalance < amount) {
+        console.log("done")
         const user = await User.findOne({ email });
         if (!user) {
           transactionInProgress = false;
@@ -1549,12 +1654,13 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             });
         }
 
-
+        const newUuid = generateUniqueShortUuid(15);
+        const date = new Date();
 
         // Check for similar transactions in the last 5 minutes
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const recentTransaction = admin.transactionHistory.find(transaction =>
-          transaction.betId === betId && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+          transaction.betId === betId && transaction.amount === amount && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
         );
         if (recentTransaction !== undefined) {
           transactionInProgress = false;
@@ -1566,6 +1672,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             betId: betId,
             // momoName: momoName,
             momoNumber: momoNumber,
+            network: network,
             fundingType: "deposits",
             identifierId: newUuid,
             service: service,
@@ -1583,6 +1690,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             totalAmount: amount,
             // momoName: momoName,
             momoNumber: momoNumber,
+            network: network,
             fundingType: "deposits",
             identifierId: newUuid,
             userEmail: email,
@@ -1604,67 +1712,145 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
               success: 510,
               message: "failed to generate",
               userTransaction,
+              user
             });
         }
 
-
-        const newUuid = generateUniqueShortUuid(15);
-        const date = new Date();
         updatedAmount = amount - user.bonusBalance;
         const fullname = user.fullname
         const result = await makePaymentRequest(updatedAmount, momoNumber, network, fullname, newUuid
         );
 
         if (result !== "SUCCESSFUL") {
-          const userTransaction = {
-            status: "Failed",
-            registrationDateTime: date,
-            amount: updatedAmount,
-            totalAmount: amount,
-            betId: betId,
-            // momoName: momoName,
-            momoNumber: momoNumber,
-            fundingType: "deposits",
-            identifierId: newUuid,
-            service: service,
-            bonusBalance: user.bonusBalance,
-            paymentConfirmation: "Failed",
-            customErrorCode: 302
-          };
+          if (result.status === 'PENDING') {
+            const userTransaction = {
+              status: "Pending",
+              registrationDateTime: date,
+              amount: updatedAmount,
+              totalAmount: amount,
+              betId: betId,
+              network: network,
+              // momoName: momoName,
+              momoNumber: momoNumber,
+              fundingType: "deposits",
+              identifierId: newUuid,
+              service: service,
+              bonusBalance: user.bonusBalance,
+              paymentConfirmation: "Pending",
+              customErrorCode: 302
+            };
 
-          admin.transactionHistory.push({
-            userid: user._id,
-            status: "Failed",
-            registrationDateTime: date,
-            amount: updatedAmount,
-            betId: betId,
-            totalAmount: amount,
-            // momoName: momoName,
-            momoNumber: momoNumber,
-            fundingType: "deposits",
-            identifierId: newUuid,
-            userEmail: email,
-            subadminEmail: "none",
-            service: service,
-            paymentConfirmation: "Failed",
-            bonusBalance: user.bonusBalance,
-            customErrorCode: 302
+            admin.transactionHistory.push({
+              userid: user._id,
+              status: "Pending",
+              registrationDateTime: date,
+              amount: updatedAmount,
+              betId: betId,
+              totalAmount: amount,
+              network: network,
+              // momoName: momoName,
+              momoNumber: momoNumber,
+              fundingType: "deposits",
+              identifierId: newUuid,
+              userEmail: email,
+              subadminEmail: "none",
+              service: service,
+              paymentConfirmation: "Pending",
+              bonusBalance: user.bonusBalance,
+              customErrorCode: 302
 
-          });
-          user.transactionHistory.push(userTransaction);
-          user.bonus.push(userTransaction);
-          await admin.save();
-          await user.save();
-          transactionInProgress = false;
-          return res
-            .status(209)
-            .json({
-              success: 209,
-              message: "failed to generate",
-              userTransaction,
             });
+            admin.pendingTransactions.push({
+              userid: user._id,
+              status: "Pending",
+              registrationDateTime: date,
+              amount: updatedAmount,
+              betId: betId,
+              totalAmount: amount,
+              network: network,
+              // momoName: momoName,
+              momoNumber: momoNumber,
+              fundingType: "deposits",
+              identifierId: newUuid,
+              userEmail: email,
+              subadminEmail: "none",
+              service: service,
+              paymentConfirmation: "Pending",
+              bonusBalance: user.bonusBalance,
+              customErrorCode: 302
+            });
+            user.bonusBalance = 0;
+            user.transactionHistory.push(userTransaction);
+            user.bonus.push(userTransaction);
+            await admin.save();
+            await user.save();
+            transactionInProgress = false;
+            const newUserBonus = user.bonusBalance;
+            return res
+              .status(209)
+              .json({
+                success: 209,
+                message: "failed to generate",
+                userTransaction,
+                newUserBonus,
+                user
+              });
+          } else {
+            const userTransaction = {
+              status: "Failed",
+              registrationDateTime: date,
+              amount: updatedAmount,
+              totalAmount: amount,
+              betId: betId,
+              network: network,
+              // momoName: momoName,
+              momoNumber: momoNumber,
+              fundingType: "deposits",
+              identifierId: newUuid,
+              service: service,
+              bonusBalance: user.bonusBalance,
+              paymentConfirmation: "Failed",
+              customErrorCode: 302
+            };
+
+            admin.transactionHistory.push({
+              userid: user._id,
+              status: "Failed",
+              registrationDateTime: date,
+              amount: updatedAmount,
+              network: network,
+              betId: betId,
+              totalAmount: amount,
+              // momoName: momoName,
+              momoNumber: momoNumber,
+              fundingType: "deposits",
+              identifierId: newUuid,
+              userEmail: email,
+              subadminEmail: "none",
+              service: service,
+              paymentConfirmation: "Failed",
+              bonusBalance: user.bonusBalance,
+              customErrorCode: 302
+
+            });
+            user.transactionHistory.push(userTransaction);
+            user.bonus.push(userTransaction);
+            await admin.save();
+            await user.save();
+            transactionInProgress = false;
+            return res
+              .status(209)
+              .json({
+                success: 209,
+                message: "failed to generate",
+                userTransaction,
+                user
+              });
+          }
+
         }
-        // INITIATE MOBCASH TRANSACTION
+
+        // // INITIATE MOBCASH TRANSACTION
         const response = await rechargeAccount(betId, amount);
 
         if (response.Success === false && response.MessageId === 100337) {
@@ -1676,6 +1862,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             betId: betId,
             // momoName: momoName,
             momoNumber: momoNumber,
+            network: network,
             fundingType: "deposits",
             identifierId: newUuid,
             service: service,
@@ -1694,6 +1881,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             momoNumber: momoNumber,
             fundingType: "deposits",
             identifierId: newUuid,
+            network: network,
             userEmail: email,
             subadminEmail: "none",
             service: service,
@@ -1707,12 +1895,13 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           await user.save();
           await admin.save();
           const newUserBonus = user.bonusBalance;
-          console.log(newUserBonus, "*****************")
+
           return res.status(200).json({
             success: true,
             message: "Transaction wasnt fully completed",
             userTransaction,
-            newUserBonus
+            newUserBonus,
+            user
           });
         }
         if (response.Success === false && response.MessageId === 100323) {
@@ -1726,6 +1915,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             momoNumber: momoNumber,
             fundingType: "deposits",
             identifierId: newUuid,
+            network: network,
             service: service,
             bonusBalance: user.bonusBalance,
             paymentConfirmation: "Successful",
@@ -1739,6 +1929,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             betId: betId,
             totalAmount: amount,
             // momoName: momoName,
+            network: network,
             momoNumber: momoNumber,
             fundingType: "deposits",
             identifierId: newUuid,
@@ -1759,7 +1950,8 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             success: true,
             message: "Transaction wasnt fully completed",
             userTransaction,
-            newUserBonus
+            newUserBonus,
+            user
           });
         }
         if (response.Success === false) {
@@ -1769,6 +1961,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             amount: updatedAmount,
             totalAmount: amount,
             betId: betId,
+            network: network,
             // momoName: momoName,
             momoNumber: momoNumber,
             fundingType: "deposits",
@@ -1790,6 +1983,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             amount: updatedAmount,
             betId: betId,
             totalAmount: amount,
+            network: network,
             // momoName: momoName,
             momoNumber: momoNumber,
             fundingType: "deposits",
@@ -1808,15 +2002,19 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             success: true,
             message: "Transaction wasnt fully completed",
             userTransaction,
-            newUserBonus
+            newUserBonus,
+            user
           });
         }
+
+
           const userTransaction = {
             status: "Successful",
             registrationDateTime: date,
             amount: updatedAmount,
             totalAmount: amount,
             betId: betId,
+            network: network,
             // momoName: momoName,
             momoNumber: momoNumber,
             fundingType: "deposits",
@@ -1832,6 +2030,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             amount: updatedAmount,
             betId: betId,
             totalAmount: amount,
+            network: network,
             // momoName: momoName,
             momoNumber: momoNumber,
             fundingType: "deposits",
@@ -1855,8 +2054,9 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             .json({
               success: true,
               message: "transaction generated successfully",
-              userTransaction,
-              newUserBonus
+              user,
+              newUserBonus,
+              userTransaction
             });
 
       }
@@ -2199,7 +2399,8 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
     const date = new Date();
     const newUuid = generateUniqueShortUuid(15);
     // INITIATE MOBCASH TRANSACTION
-    console.log(betId, "hfbjdbfjbdf")
+
+    console.log(typeof betId, typeof amount, "hfbjdbfjbdf")
     const response = await rechargeAccount(betId, amount);
     console.log(response, "response")
     if (response.Success === false && response.MessageId === 100337) {
@@ -2247,6 +2448,7 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
           success: 209,
           message: "failed to generate",
           userTransaction,
+          user
         });
     }
     if (response.Success === false && response.MessageId === 100323) {
@@ -2294,6 +2496,7 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
           success: 209,
           message: "failed to generate",
           userTransaction,
+          user
         });
     }
     if (response.Success === false) {
@@ -2339,6 +2542,7 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
           success: 209,
           message: "failed to generate",
           userTransaction,
+          user
         });
     }
     const updatedBonusBalance = user.bonusBalance - amount;
@@ -2408,6 +2612,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
       momoNumber,
       service,
       bonusBalance,
+      email
     } = req.body;
 
     if (bonusBalance) {
@@ -2465,151 +2670,58 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
             status: 506,
           });
       }
-      const newBalance = getBalance - amount;
-      user.bonusBalance = newBalance;
-      await user.save();
 
       const newUuid = uuidv4();
       const date = new Date();
 
-      // Create a new transaction history entry for the user
+
+
       const userTransaction = {
+        status: "Pending",
+        registrationDateTime: date,
+        withdrawalCode: withdrawalCode,
+        amount: 0,
+        totalAmount: amount,
+        betId: betId,
+        momoNumber: momoNumber,
+        fundingType: "withdrawals",
+        identifierId: newUuid,
+        service: service,
+        paymentConfirmation: "Successful",
+        bonusBalance: amount
+      };
+
+      admin.transactionHistory.push({
+        userid: user._id,
         status: "Pending",
         registrationDateTime: date,
         amount: 0,
         totalAmount: amount,
-        withdrawalCode,
-        betId,
-        service,
+        betId: betId,
+        momoNumber: momoNumber,
         fundingType: "withdrawals",
         identifierId: newUuid,
-        bonusBalance: amount,
-        momoNumber,
-      };
+        userEmail: email,
+        subadminEmail: "none",
+        service: service,
+        paymentConfirmation: "Successful",
+        bonusBalance: amount
+      });
 
-      // Add the current pending transaction to the user
-
-      const subadminTransaction = {
-        userid: _id,
-        status: "Pending",
-        registrationDateTime: date,
-        withdrawalCode,
-        amount: amount,
-        betId,
-        fundingType: "withdrawals",
-        identifierId: newUuid,
-        service,
-        momoNumber,
-      };
-
-      const newUserBonus = user.bonusBalance;
-      // Example usage: Get the index of the subadmin with current: true
-      let currentSubadminIndex = -1;
-
-      for (let i = 0; i < adminUser.length; i++) {
-        if (adminUser[i].current === true) {
-          currentSubadminIndex = i;
-          break;
-        }
-      }
-
-      // Find the subadmin that is currently receiving requests
-      const currentSubadmin = adminUser.find(
-        (subadmin) => subadmin.current === true
-      );
-
-      // Check if the request count for the current subadmin is divisible by 10
-      if (currentSubadmin && currentSubadmin.currentCount === 5) {
-        // Mark the current subadmin as not 'current'
-        currentSubadmin.current = false;
-        currentSubadmin.currentCount = 0;
-        let nextCurrentSubadminIndex =
-          (currentSubadminIndex + 1) % adminUser.length;
-
-        let nextSubadmin = adminUser[nextCurrentSubadminIndex]
-          ? adminUser[nextCurrentSubadminIndex]
-          : adminUser[0];
-
-        // Mark the next subadmin as 'current'
-        nextSubadmin.current = true;
-        const updatedCount = nextSubadmin.currentCount + 1;
-        nextSubadmin.currentCount = updatedCount;
-        nextSubadmin.transactionHistory.push(subadminTransaction);
-
-        const adminTransaction = {
-          userid: _id,
-          status: "Pending",
-          registrationDateTime: date,
-          withdrawalCode,
-          amount: 0,
-          totalAmount: amount,
-          bonusBalance: amount,
-          betId,
-          fundingType: "withdrawals",
-          identifierId: newUuid,
-          service,
-          momoNumber,
-          userEmail: user.email,
-          subadminEmail: nextSubadmin.email,
-        };
-        user.transactionHistory.push(userTransaction);
-        user.bonus.push(userTransaction);
-        admin.transactionHistory.push(adminTransaction);
-
-        // Save changes to the database for both the current and next subadmin
-        await Promise.all([
-          currentSubadmin.save(),
-          nextSubadmin.save(),
-          admin.save(),
-          user.save(),
-        ]);
-
-        transactionInProgress = false;
-        return res.status(201).json({
-          message: "History added",
-          success: true,
-          userTransaction,
-          newUserBonus,
-        });
-      } else {
-        currentSubadmin.transactionHistory.push(subadminTransaction);
-        const updatedCount = currentSubadmin.currentCount + 1;
-        currentSubadmin.currentCount = updatedCount;
-
-        const admin = await AdminUser.findOne({
-          isAdmin: true,
-        });
-
-        const adminTransaction = {
-          userid: _id,
-          status: "Pending",
-          registrationDateTime: date,
-          withdrawalCode,
-          amount: 0,
-          bonusBalance: amount,
-          betId,
-          fundingType: "withdrawals",
-          identifierId: newUuid,
-          service,
-          totalAmount: amount,
-          momoNumber,
-          userEmail: user.email,
-          subadminEmail: currentSubadmin.email,
-        };
-        admin.transactionHistory.push(adminTransaction);
-        user.transactionHistory.push(userTransaction);
+      user.transactionHistory.push(userTransaction);
+      const updatedBalance = getBalance - amount
+      user.bonusBalance = updatedBalance
         await user.save();
-        await admin.save();
-        await currentSubadmin.save();
-        // Return the added transaction details in the response
-        transactionInProgress = false;
-        return res.status(201).json({
-          message: "History added",
-          success: true,
-          userTransaction,
-          newUserBonus,
-        });
-      }
+      await admin.save();
+      transactionInProgress = false;
+      return res.status(200).json({
+        success: true,
+        message: "Transaction fully completed",
+        userTransaction,
+        user
+      });
+
+
     } else {
       const admin = await AdminUser.findOne({ isAdmin: true });
 
@@ -2640,26 +2752,6 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
           .status(502)
           .json({ success: 502, message: "User is deactivated", status: 502 });
       }
-
-      const newUuid = uuidv4();
-      const date = new Date();
-
-      // Create a new transaction history entry for the user
-      const userTransaction = {
-        status: "Pending",
-        registrationDateTime: date,
-        amount,
-        totalAmount: amount,
-        withdrawalCode,
-        betId,
-        service,
-        momoNumber,
-        fundingType: "withdrawals",
-        identifierId: newUuid,
-      };
-
-      // Add the current pending transaction to the user
-
       // Find the subadmin user by cashdeskId
       const adminUser = await SubAdminUser.find({
         isSubAdminWithdrawals: true,
@@ -2676,124 +2768,99 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
           });
       }
 
-      const subadminTransaction = {
-        userid: _id,
-        status: "Pending",
-        registrationDateTime: date,
-        withdrawalCode,
-        amount,
-        totalAmount: amount,
-        betId,
-        fundingType: "withdrawals",
-        identifierId: newUuid,
-        service,
-        momoNumber,
-      };
+      const newUuid = generateUniqueShortUuid(15);
+      const date = new Date();
 
-      // Example usage: Get the index of the subadmin with current: true
-      let currentSubadminIndex = -1;
+      // INITIATE MOBCASH TRANSACTION
+      const response = await withdrawFromAccount(betId, withdrawalCode);
 
-      for (let i = 0; i < adminUser.length; i++) {
-        if (adminUser[i].current === true) {
-          currentSubadminIndex = i;
-          break;
-        }
-      }
-
-      // Find the subadmin that is currently receiving requests
-      const currentSubadmin = adminUser.find(
-        (subadmin) => subadmin.current === true
-      );
-
-      console.log(currentSubadmin, "currentSubadmin");
-      // Check if the request count for the current subadmin is divisible by 10
-      if (currentSubadmin && currentSubadmin.currentCount === 5) {
-        // Mark the current subadmin as not 'current'
-        currentSubadmin.current = false;
-        currentSubadmin.currentCount = 0;
-        let nextCurrentSubadminIndex =
-          (currentSubadminIndex + 1) % adminUser.length;
-
-        let nextSubadmin = adminUser[nextCurrentSubadminIndex]
-          ? adminUser[nextCurrentSubadminIndex]
-          : adminUser[0];
-
-        // Mark the next subadmin as 'current'
-        nextSubadmin.current = true;
-        const updatedCount = nextSubadmin.currentCount + 1;
-        nextSubadmin.currentCount = updatedCount;
-        nextSubadmin.transactionHistory.push(subadminTransaction);
-
-        const adminTransaction = {
-          userid: _id,
-          status: "Pending",
+      const updatedResponse = removeMinusFromSumma(response);
+      if (updatedResponse.Success !== true) {
+        const userTransaction = {
+          status: "Failed",
           registrationDateTime: date,
-          withdrawalCode,
-          amount,
-          totalAmount: amount,
-          betId,
+          withdrawalCode: withdrawalCode,
+          betId: betId,
+          amount: 0,
+          totalAmount: 0,
+          momoNumber: momoNumber,
           fundingType: "withdrawals",
           identifierId: newUuid,
-          service,
-          momoNumber,
-          userEmail: user.email,
-          subadminEmail: nextSubadmin.email,
+          service: service,
+          paymentConfirmation: "Failed",
         };
-        user.transactionHistory.push(userTransaction);
-        admin.transactionHistory.push(adminTransaction);
-
-        // Save changes to the database for both the current and next subadmin
-        await Promise.all([
-          currentSubadmin.save(),
-          nextSubadmin.save(),
-          admin.save(),
-          user.save(),
-        ]);
-
-        transactionInProgress = false;
-        return res.status(201).json({
-          message: "History added",
-          success: true,
-          userTransaction,
-        });
-      } else {
-        currentSubadmin.transactionHistory.push(subadminTransaction);
-        const updatedCount = currentSubadmin.currentCount + 1;
-        currentSubadmin.currentCount = updatedCount;
-
-        const admin = await AdminUser.findOne({
-          isAdmin: true,
-        });
-
-        const adminTransaction = {
-          userid: _id,
-          status: "Pending",
+        admin.transactionHistory.push({
+          userid: user._id,
+          status: "Failed",
           registrationDateTime: date,
-          withdrawalCode,
-          amount,
-          betId,
+          betId: betId,
+          amount: 0,
+          totalAmount: 0,
+          momoNumber: momoNumber,
           fundingType: "withdrawals",
           identifierId: newUuid,
-          service,
-          totalAmount: amount,
-          momoNumber,
-          userEmail: user.email,
-          subadminEmail: currentSubadmin.email,
-        };
-        admin.transactionHistory.push(adminTransaction);
+          userEmail: email,
+          subadminEmail: "none",
+          service: service,
+          paymentConfirmation: "Failed",
+
+        });
         user.transactionHistory.push(userTransaction);
         await user.save();
         await admin.save();
-        await currentSubadmin.save();
-        // Return the added transaction details in the response
         transactionInProgress = false;
-        return res.status(201).json({
-          message: "History added",
-          success: true,
+        return res.status(209).json({
+          success: 209,
+          message: "Transaction wasnt fully completed",
           userTransaction,
+          user
         });
       }
-    }
+
+
+      const userTransaction = {
+        status: "Pending",
+        registrationDateTime: date,
+        withdrawalCode: withdrawalCode,
+        amount: updatedResponse.Summa,
+        totalAmount: updatedResponse.Summa,
+        betId: betId,
+        momoNumber: momoNumber,
+        fundingType: "withdrawals",
+        identifierId: newUuid,
+        service: service,
+        paymentConfirmation: "Successful",
+      };
+
+      admin.transactionHistory.push({
+        userid: user._id,
+        status: "Pending",
+        registrationDateTime: date,
+        amount: updatedResponse.Summa,
+        totalAmount: updatedResponse.Summa,
+        betId: betId,
+        momoNumber: momoNumber,
+        fundingType: "withdrawals",
+        identifierId: newUuid,
+        userEmail: email,
+        subadminEmail: "none",
+        service: service,
+        paymentConfirmation: "Successful",
+      });
+
+      user.transactionHistory.push(userTransaction);
+      await user.save();
+      await admin.save();
+      transactionInProgress = false;
+      return res.status(200).json({
+        success: true,
+        message: "Transaction wasnt fully completed",
+        userTransaction,
+        user
+      });
+      }
+
+
   } catch (error) {
     transactionInProgress = false;
     console.error("Error completing the request for deposit:", error);
@@ -3071,4 +3138,11 @@ function generateUniqueShortUuid(length) {
     randomString += chars[randomIndex];
   }
   return timestamp + randomString;
+}
+
+function removeMinusFromSumma(apiResponse) {
+  if (apiResponse && typeof apiResponse.Summa === 'number') {
+    apiResponse.Summa = Math.abs(apiResponse.Summa);
+  }
+  return apiResponse;
 }

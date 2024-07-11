@@ -45,33 +45,36 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
     }
 }
 
+
+// WITH PROMISE
 async function pollTransactionStatus(url, username, password, clientid, transref) {
     return new Promise((resolve, reject) => {
         const startTime = Date.now();
-        const interval = 5000; // Check every 5 seconds
+        const interval = 10000; // Check every 10 seconds
         const timeout = 60000; // Timeout after 1 minute
+        const maxAttempts = 6; // Maximum number of attempts (timeout/interval)
+        let attempts = 0;
 
         const intervalId = setInterval(async () => {
-            if (Date.now() - startTime >= timeout) {
+            attempts += 1;
+
+            if (Date.now() - startTime >= timeout || attempts >= maxAttempts) {
                 clearInterval(intervalId);
-                return resolve('FAILED');
+                return resolve('PENDING');
             }
 
             try {
-                const checkStatus = await fetch(
-                    url,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: "Basic " + Buffer.from(`${username}:${password}`).toString('base64'),
-                        },
-                        body: JSON.stringify({
-                            clientid: clientid,
-                            transref: transref,
-                        }),
-                    }
-                );
+                const checkStatus = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Basic " + Buffer.from(`${username}:${password}`).toString('base64'),
+                    },
+                    body: JSON.stringify({
+                        clientid: clientid,
+                        transref: transref,
+                    }),
+                });
 
                 const statusData = await checkStatus.json();
                 console.log("Status Check Response:", statusData);
@@ -84,15 +87,15 @@ async function pollTransactionStatus(url, username, password, clientid, transref
                     return resolve("FAILED");
                 }
 
-
             } catch (error) {
                 console.error('Error checking transaction status:', error);
                 clearInterval(intervalId);
-                return reject('Failed to check transaction status');
+                return resolve('PENDING');
             }
         }, interval);
     });
 }
+
 
 
 module.exports = { makePaymentRequest };
