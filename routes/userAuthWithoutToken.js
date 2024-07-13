@@ -118,6 +118,7 @@ router.post(
                 image: "",
                 tag: tag,
                 colorScheme: 2,
+                referer: referrerId ? referrerId: ""
             });
 
             // Save the user to the database

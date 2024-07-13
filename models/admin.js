@@ -72,6 +72,13 @@ const adminSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    restrictedBonusBalance: {
+        type: Number,
+        default: 0,
+    }, disbursedBonusBalance: {
+        type: Number,
+        default: 0,
+    },
     pin: {
         type: String,
     },

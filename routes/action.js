@@ -1288,6 +1288,26 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         service: service,
         paymentConfirmation: "Successful",
       });
+
+      if (user.referer !== "") {
+        const user = await User.findOne({ _id: referer });
+        if (user) {
+          const result = calculatePercentage(amount);
+          const eightyPercent = getEightyPercentOfResult(result);
+          const twentyPercent = getTwentyPercentOfResult(result);
+          user.disbursedBonusBalance = user.disbursedBonusBalance + eightyPercent
+          user.restrictedBonusBalance = user.restrictedBonusBalance + twentyPercent
+          admin.disbursedBonusBalance = admin.disbursedBonusBalance + eightyPercent
+          admin.restrictedBonusBalance = admin.restrictedBonusBalance + twentyPercent
+        }
+      }
+      if (user.disbursedBonusBalance >= 2000) {
+        const randomNumber = Math.floor(Math.random() * 11) * 100 + 1000;
+        user.disbursedBonusBalance = user.disbursedBonusBalance - randomNumber
+        admin.disbursedBonusBalance = admin.disbursedBonusBalance - randomNumber
+        user.bonusBalance = user.bonusBalance + randomNumber
+      }
+
       await admin.save();
       await user.save();
       return res.status(200).json({
@@ -2400,7 +2420,6 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
     const newUuid = generateUniqueShortUuid(15);
     // INITIATE MOBCASH TRANSACTION
 
-    console.log(typeof betId, typeof amount, "hfbjdbfjbdf")
     const response = await rechargeAccount(betId, amount);
     console.log(response, "response")
     if (response.Success === false && response.MessageId === 100337) {
@@ -3145,4 +3164,19 @@ function removeMinusFromSumma(apiResponse) {
     apiResponse.Summa = Math.abs(apiResponse.Summa);
   }
   return apiResponse;
+}
+function calculatePercentage(amount) {
+  const threePercent = amount * 0.03;
+  const fifteenPercentOfThreePercent = threePercent * 0.15;
+  return fifteenPercentOfThreePercent;
+}
+function getEightyPercentOfResult(amount) {
+  const result = calculatePercentage(amount);
+  const eightyPercentOfResult = result * 0.80;
+  return eightyPercentOfResult;
+}
+function getTwentyPercentOfResult(amount) {
+  const result = calculatePercentage(amount);
+  const eightyPercentOfResult = result * 0.20;
+  return eightyPercentOfResult;
 }
