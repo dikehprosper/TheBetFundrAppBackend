@@ -3,15 +3,15 @@
 const mongoose = require('mongoose');
 
 const PostSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  user: { type: String, required: true },
   name: { type: String },
-  body: { type: String, required: true },
+  body: { type: String, },
   createdAt: { type: Date, default: Date.now },
   media: [
     {
-      url: { type: String, required: true },
-      type: { type: String, required: true }, // e.g., 'image' or 'video'
-    },
+      url: { type: String },
+      type: { type: String, enum: ['image', 'video'] }
+    }
   ],
   profileImage: { type: String },
   likeCount: { type: Number, default: 0 },
@@ -27,8 +27,8 @@ const PostSchema = new mongoose.Schema({
   ],
   comments: [
     {
-      id: { type: String, required: true },
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      userId: { type: String, required: true },
+      user: { type: String, },
       userEmail: { type: String },
       name: { type: String },
       description: { type: String },
@@ -37,7 +37,7 @@ const PostSchema = new mongoose.Schema({
   ],
   views: [
     {
-      id: { type: String, required: true },
+      userId: { type: String, required: true },
       userEmail: { type: String },
       name: { type: String },
       image: { type: String },
