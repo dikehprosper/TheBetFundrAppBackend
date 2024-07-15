@@ -59,17 +59,7 @@ router.post("/depositWithFedapay", checkOngoingTransaction, async (req, res) => 
           .json({ success: 502, message: "User is deactivated", status: 502 });
       }
 
-      // Find the subadmin user by cashdeskId
-      const adminUser = await SubAdminUser.find({
-        isSubAdminDeposits: true,
-        isOutOfFunds: false,
-      });
-      if (!adminUser || adminUser.length === 0) {
-        transactionInProgress = false;
-        return res
-          .status(503)
-          .json({ success: 503, message: "no subadmin user", status: 503 });
-      }
+    
 
       // Find available admin
       const admin = await AdminUser.findOne({ isAdmin: true });
@@ -302,16 +292,16 @@ router.post("/depositWithFedapay", checkOngoingTransaction, async (req, res) => 
             });
         }
         // Find the subadmin user by cashdeskId
-        const adminUser = await SubAdminUser.find({
-          isSubAdminDeposits: true,
-          isOutOfFunds: false,
-        });
-        if (!adminUser || adminUser.length === 0) {
-          transactionInProgress = false;
-          return res
-            .status(503)
-            .json({ success: 503, message: "no subadmin user", status: 503 });
-        }
+        // const adminUser = await SubAdminUser.find({
+        //   isSubAdminDeposits: true,
+        //   isOutOfFunds: false,
+        // });
+        // if (!adminUser || adminUser.length === 0) {
+        //   transactionInProgress = false;
+        //   return res
+        //     .status(503)
+        //     .json({ success: 503, message: "no subadmin user", status: 503 });
+        // }
 
         // Find available admin
         const admin = await AdminUser.findOne({ isAdmin: true });
@@ -419,17 +409,7 @@ router.post("/depositWithFedapay", checkOngoingTransaction, async (req, res) => 
             });
         }
 
-        // Find the subadmin user by cashdeskId
-        const adminUser = await SubAdminUser.find({
-          isSubAdminDeposits: true,
-          isOutOfFunds: false,
-        });
-        if (!adminUser || adminUser.length === 0) {
-          transactionInProgress = false;
-          return res
-            .status(503)
-            .json({ success: 503, message: "no subadmin user", status: 503 });
-        }
+       
 
         // Find available admin
         const admin = await AdminUser.findOne({ isAdmin: true });
@@ -641,253 +621,253 @@ router.post("/depositWithFedapay", checkOngoingTransaction, async (req, res) => 
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router.post("/walletdepositWithSubadmin", checkOngoingTransaction, async (req, res) => {
-  try {
-    transactionInProgress = true;
-    const { email, betId, amount, momoNumber, network, service, bonusBalance } =
-      req.body;
+// router.post("/walletdepositWithSubadmin", checkOngoingTransaction, async (req, res) => {
+//   try {
+//     transactionInProgress = true;
+//     const { email, betId, amount, momoNumber, network, service, bonusBalance } =
+//       req.body;
 
-    // Uncomment below code to fetch user and perform additional checks if required
-    const user = await User.findOne({ email });
-    if (!user) {
-      transactionInProgress = false;
-      return res
-        .status(401)
-        .json({ success: 401, message: "User not found", status: 401 });
-    }
-    if (!user.isActivated) {
-      transactionInProgress = false;
-      return res
-        .status(502)
-        .json({ success: 502, message: "User is deactivated", status: 502 });
-    }
+//     // Uncomment below code to fetch user and perform additional checks if required
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       transactionInProgress = false;
+//       return res
+//         .status(401)
+//         .json({ success: 401, message: "User not found", status: 401 });
+//     }
+//     if (!user.isActivated) {
+//       transactionInProgress = false;
+//       return res
+//         .status(502)
+//         .json({ success: 502, message: "User is deactivated", status: 502 });
+//     }
 
-    // Find the subadmin user by cashdeskId
-    const adminUserss = await SubAdminUser.find({
-      isSubAdminDeposits: true,
-      isOutOfFunds: false,
-    });
-    if (!adminUserss || adminUserss.length === 0) {
-      transactionInProgress = false;
-      return res
-        .status(503)
-        .json({ success: 503, message: "no subadmin user", status: 503 });
-    }
+//     // Find the subadmin user by cashdeskId
+//     const adminUserss = await SubAdminUser.find({
+//       isSubAdminDeposits: true,
+//       isOutOfFunds: false,
+//     });
+//     if (!adminUserss || adminUserss.length === 0) {
+//       transactionInProgress = false;
+//       return res
+//         .status(503)
+//         .json({ success: 503, message: "no subadmin user", status: 503 });
+//     }
 
-    // Find available admin
-    const admin = await AdminUser.findOne({ isAdmin: true });
-    if (admin.isDepositsOpen === false) {
-      transactionInProgress = false;
-      return res
-        .status(504)
-        .json({
-          success: 504,
-          message: "currently under maintainance",
-          status: 504,
-        });
-    }
+//     // Find available admin
+//     const admin = await AdminUser.findOne({ isAdmin: true });
+//     if (admin.isDepositsOpen === false) {
+//       transactionInProgress = false;
+//       return res
+//         .status(504)
+//         .json({
+//           success: 504,
+//           message: "currently under maintainance",
+//           status: 504,
+//         });
+//     }
 
-    const getBalance = user.bonusBalance;
+//     const getBalance = user.bonusBalance;
 
-    if (getBalance < amount) {
-      transactionInProgress = false;
-      return res
-        .status(506)
-        .json({
-          success: 506,
-          message: "wallet balance not sufficient",
-          status: 506,
-        });
-    }
-    const newBalance = getBalance - amount;
-    user.bonusBalance = newBalance;
-    await user.save();
+//     if (getBalance < amount) {
+//       transactionInProgress = false;
+//       return res
+//         .status(506)
+//         .json({
+//           success: 506,
+//           message: "wallet balance not sufficient",
+//           status: 506,
+//         });
+//     }
+//     const newBalance = getBalance - amount;
+//     user.bonusBalance = newBalance;
+//     await user.save();
 
-    const date = new Date();
-    const newUuid = uuidv4();
-    user.pendingDeposit.push({
-      transactionId: newUuid,
-      createdAt: date,
-      status: "Pending",
-      amount: 0,
-      betId: betId,
-      // momoName: momoName,
-      momoNumber: momoNumber,
-      service: service,
-      bonusBalance: amount,
-      paymentConfirmation: "Pending",
-      totalAmount: amount,
-    });
+//     const date = new Date();
+//     const newUuid = uuidv4();
+//     user.pendingDeposit.push({
+//       transactionId: newUuid,
+//       createdAt: date,
+//       status: "Pending",
+//       amount: 0,
+//       betId: betId,
+//       // momoName: momoName,
+//       momoNumber: momoNumber,
+//       service: service,
+//       bonusBalance: amount,
+//       paymentConfirmation: "Pending",
+//       totalAmount: amount,
+//     });
 
-    const userTransaction = {
-      status: "Pending",
-      registrationDateTime: date,
-      amount: 0,
-      betId: betId,
-      // momoName: momoName,
-      momoNumber: momoNumber,
-      fundingType: "deposits",
-      identifierId: newUuid,
-      service: service,
-      bonusBalance: amount,
-      totalAmount: amount,
-      paymentConfirmation: "Pending",
-    };
-    user.transactionHistory.push(userTransaction);
-    user.bonus.push(userTransaction);
+//     const userTransaction = {
+//       status: "Pending",
+//       registrationDateTime: date,
+//       amount: 0,
+//       betId: betId,
+//       // momoName: momoName,
+//       momoNumber: momoNumber,
+//       fundingType: "deposits",
+//       identifierId: newUuid,
+//       service: service,
+//       bonusBalance: amount,
+//       totalAmount: amount,
+//       paymentConfirmation: "Pending",
+//     };
+//     user.transactionHistory.push(userTransaction);
+//     user.bonus.push(userTransaction);
 
-    if (!user.supplementaryBetId.includes(betId)) {
-      user.supplementaryBetId.push(betId);
-    }
-    await user.save();
+//     if (!user.supplementaryBetId.includes(betId)) {
+//       user.supplementaryBetId.push(betId);
+//     }
+//     await user.save();
 
-    const subadminTransaction = {
-      userid: user._id,
-      status: "Pending",
-      registrationDateTime: date,
-      amount: amount,
-      betId: betId,
-      momoNumber: momoNumber,
-      fundingType: "deposits",
-      identifierId: newUuid,
-      paymentConfirmation: "Successful",
-    };
+//     const subadminTransaction = {
+//       userid: user._id,
+//       status: "Pending",
+//       registrationDateTime: date,
+//       amount: amount,
+//       betId: betId,
+//       momoNumber: momoNumber,
+//       fundingType: "deposits",
+//       identifierId: newUuid,
+//       paymentConfirmation: "Successful",
+//     };
 
-    //  UPDATE TO ONE SUBADMINS
-    const adminUsers = await SubAdminUser.find({
-      isSubAdminDeposits: true,
-    });
-    const adminUser = await SubAdminUser.find({
-      isSubAdminDeposits: true,
-      isOutOfFunds: false,
-    });
-    console.log(adminUser, "kkkkk");
+//     //  UPDATE TO ONE SUBADMINS
+//     const adminUsers = await SubAdminUser.find({
+//       isSubAdminDeposits: true,
+//     });
+//     const adminUser = await SubAdminUser.find({
+//       isSubAdminDeposits: true,
+//       isOutOfFunds: false,
+//     });
+//     console.log(adminUser, "kkkkk");
 
-    if (!adminUser || adminUser.length === 0) {
-      adminUsers[0].transactionHistory.push(subadminTransaction);
-      admin.transactionHistory.push({
-        userid: user._id,
-        status: "Pending",
-        registrationDateTime: date,
-        amount: 0,
-        totalAmount: amount,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        identifierId: newUuid,
-        userEmail: email,
-        subadminEmail: adminUsers[0].email,
-        service: service,
-        paymentConfirmation: "Successful",
-        bonusBalance: amount,
-      });
+//     if (!adminUser || adminUser.length === 0) {
+//       adminUsers[0].transactionHistory.push(subadminTransaction);
+//       admin.transactionHistory.push({
+//         userid: user._id,
+//         status: "Pending",
+//         registrationDateTime: date,
+//         amount: 0,
+//         totalAmount: amount,
+//         betId: betId,
+//         // momoName: momoName,
+//         momoNumber: momoNumber,
+//         fundingType: "deposits",
+//         identifierId: newUuid,
+//         userEmail: email,
+//         subadminEmail: adminUsers[0].email,
+//         service: service,
+//         paymentConfirmation: "Successful",
+//         bonusBalance: amount,
+//       });
 
-      await adminUser.save();
-      await admin.save();
-    } else {
-      // Example usage: Get the index of the subadmin with current: true
-      let currentSubadminIndex = -1;
+//       await adminUser.save();
+//       await admin.save();
+//     } else {
+//       // Example usage: Get the index of the subadmin with current: true
+//       let currentSubadminIndex = -1;
 
-      for (let i = 0; i < adminUser.length; i++) {
-        if (adminUser[i].current === true) {
-          currentSubadminIndex = i;
-          break;
-        }
-      }
+//       for (let i = 0; i < adminUser.length; i++) {
+//         if (adminUser[i].current === true) {
+//           currentSubadminIndex = i;
+//           break;
+//         }
+//       }
 
-      // Find the subadmin that is currently receiving requests
-      const currentSubadmin = adminUser.find(
-        (subadmin) => subadmin.current === true
-      );
-      console.log(currentSubadmin, "kkkkk");
-      // Check if the request count for the current subadmin is divisible by 10
-      if (currentSubadmin && currentSubadmin.currentCount === 5) {
-        // Mark the current subadmin as not 'current'
-        currentSubadmin.current = false;
-        currentSubadmin.currentCount = 0;
-        let nextCurrentSubadminIndex =
-          (currentSubadminIndex + 1) % adminUser.length;
+//       // Find the subadmin that is currently receiving requests
+//       const currentSubadmin = adminUser.find(
+//         (subadmin) => subadmin.current === true
+//       );
+//       console.log(currentSubadmin, "kkkkk");
+//       // Check if the request count for the current subadmin is divisible by 10
+//       if (currentSubadmin && currentSubadmin.currentCount === 5) {
+//         // Mark the current subadmin as not 'current'
+//         currentSubadmin.current = false;
+//         currentSubadmin.currentCount = 0;
+//         let nextCurrentSubadminIndex =
+//           (currentSubadminIndex + 1) % adminUser.length;
 
-        let nextSubadmin = adminUser[nextCurrentSubadminIndex]
-          ? adminUser[nextCurrentSubadminIndex]
-          : adminUser[0];
+//         let nextSubadmin = adminUser[nextCurrentSubadminIndex]
+//           ? adminUser[nextCurrentSubadminIndex]
+//           : adminUser[0];
 
-        // Mark the next subadmin as 'current'
-        nextSubadmin.current = true;
-        const updatedCount = nextSubadmin.currentCount + 1;
-        nextSubadmin.currentCount = updatedCount;
-        nextSubadmin.transactionHistory.push(subadminTransaction);
+//         // Mark the next subadmin as 'current'
+//         nextSubadmin.current = true;
+//         const updatedCount = nextSubadmin.currentCount + 1;
+//         nextSubadmin.currentCount = updatedCount;
+//         nextSubadmin.transactionHistory.push(subadminTransaction);
 
-        admin.transactionHistory.push({
-          userid: user._id,
-          status: "Pending",
-          registrationDateTime: date,
-          amount: 0,
-          totalAmount: amount,
-          betId: betId,
-          // momoName: momoName,
-          momoNumber: momoNumber,
-          fundingType: "deposits",
-          identifierId: newUuid,
-          userEmail: email,
-          subadminEmail: nextSubadmin.email,
-          service: service,
-          paymentConfirmation: "Successful",
-          bonusBalance: amount,
-        });
-        // Save changes to the database for both the current and next subadmin
-        await Promise.all([
-          currentSubadmin.save(),
-          nextSubadmin.save(),
-          admin.save(),
-        ]);
-      } else {
-        admin.transactionHistory.push({
-          userid: user._id,
-          status: "Pending",
-          registrationDateTime: date,
-          amount: 0,
-          totalAmount: amount,
-          betId: betId,
-          // momoName: momoName,
-          momoNumber: momoNumber,
-          fundingType: "deposits",
-          identifierId: newUuid,
-          userEmail: email,
-          subadminEmail: currentSubadmin.email,
-          service: service,
-          paymentConfirmation: "Successful",
-          bonusBalance: amount,
-        });
+//         admin.transactionHistory.push({
+//           userid: user._id,
+//           status: "Pending",
+//           registrationDateTime: date,
+//           amount: 0,
+//           totalAmount: amount,
+//           betId: betId,
+//           // momoName: momoName,
+//           momoNumber: momoNumber,
+//           fundingType: "deposits",
+//           identifierId: newUuid,
+//           userEmail: email,
+//           subadminEmail: nextSubadmin.email,
+//           service: service,
+//           paymentConfirmation: "Successful",
+//           bonusBalance: amount,
+//         });
+//         // Save changes to the database for both the current and next subadmin
+//         await Promise.all([
+//           currentSubadmin.save(),
+//           nextSubadmin.save(),
+//           admin.save(),
+//         ]);
+//       } else {
+//         admin.transactionHistory.push({
+//           userid: user._id,
+//           status: "Pending",
+//           registrationDateTime: date,
+//           amount: 0,
+//           totalAmount: amount,
+//           betId: betId,
+//           // momoName: momoName,
+//           momoNumber: momoNumber,
+//           fundingType: "deposits",
+//           identifierId: newUuid,
+//           userEmail: email,
+//           subadminEmail: currentSubadmin.email,
+//           service: service,
+//           paymentConfirmation: "Successful",
+//           bonusBalance: amount,
+//         });
 
-        currentSubadmin.transactionHistory.push(subadminTransaction);
-        const updatedCount = currentSubadmin.currentCount + 1;
-        currentSubadmin.currentCount = updatedCount;
-        await currentSubadmin.save();
-        await admin.save();
-      }
-    }
+//         currentSubadmin.transactionHistory.push(subadminTransaction);
+//         const updatedCount = currentSubadmin.currentCount + 1;
+//         currentSubadmin.currentCount = updatedCount;
+//         await currentSubadmin.save();
+//         await admin.save();
+//       }
+//     }
 
-    await user.save();
+//     await user.save();
 
-    const newUserBonus = user.bonusBalance;
-    // Return a JSON response with the transaction status
-    transactionInProgress = false;
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "transaction generated successfully",
-        newUserBonus,
-        userTransaction,
-      });
-  } catch (error) {
-    transactionInProgress = false;
-    console.error("Error completing the request for deposit:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+//     const newUserBonus = user.bonusBalance;
+//     // Return a JSON response with the transaction status
+//     transactionInProgress = false;
+//     res
+//       .status(200)
+//       .json({
+//         success: true,
+//         message: "transaction generated successfully",
+//         newUserBonus,
+//         userTransaction,
+//       });
+//   } catch (error) {
+//     transactionInProgress = false;
+//     console.error("Error completing the request for deposit:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 router.post("/deposit", checkOngoingTransaction, async (req, res) => {
 
@@ -923,17 +903,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           .json({ success: 502, message: "User is deactivated", status: 502 });
       }
 
-      // Find the subadmin user by cashdeskId
-      const adminUser = await SubAdminUser.find({
-        isSubAdminDeposits: true,
-        isOutOfFunds: false,
-      });
-      if (!adminUser || adminUser.length === 0) {
-        transactionInProgress = false;
-        return res
-          .status(503)
-          .json({ success: 503, message: "no subadmin user", status: 503 });
-      }
+     
 
       // Find available admin
       const admin = await AdminUser.findOne({ isAdmin: true });
@@ -954,7 +924,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
       // Check for similar transactions in the last 5 minutes
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60.5 * 1000);
       const recentTransaction = admin.transactionHistory.find(transaction =>
-        transaction.betId === betId && transaction.amount === amount && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+        transaction.betId === betId && transaction.amount === amount && transaction.paymentConfirmation === "Successful" && transaction.status === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
       );
 
       if (recentTransaction !== undefined) {
@@ -1373,7 +1343,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         // Check for similar transactions in the last 5 minutes
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const recentTransaction = admin.transactionHistory.find(transaction =>
-          transaction.betId === betId && transaction.amount === amount && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+          transaction.betId === betId && transaction.amount === amount && transaction.paymentConfirmation === "Successful" &&  transaction.status === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
         );
         if (recentTransaction !== undefined) {
           transactionInProgress = false;
@@ -1649,17 +1619,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             });
         }
 
-        // Find the subadmin user by cashdeskId
-        const adminUser = await SubAdminUser.find({
-          isSubAdminDeposits: true,
-          isOutOfFunds: false,
-        });
-        if (!adminUser || adminUser.length === 0) {
-          transactionInProgress = false;
-          return res
-            .status(503)
-            .json({ success: 503, message: "no subadmin user", status: 503 });
-        }
+      
 
         // Find available admin
         const admin = await AdminUser.findOne({ isAdmin: true });
@@ -1680,7 +1640,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         // Check for similar transactions in the last 5 minutes
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const recentTransaction = admin.transactionHistory.find(transaction =>
-          transaction.betId === betId && transaction.amount === amount && transaction.paymentConfirmation === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
+          transaction.betId === betId && transaction.amount === amount && transaction.paymentConfirmation === "Successful" && transaction.status === "Successful" && new Date(transaction.registrationDateTime) >= fiveMinutesAgo
         );
         if (recentTransaction !== undefined) {
           transactionInProgress = false;
@@ -2130,17 +2090,7 @@ router.post("/noLogindeposit", checkOngoingTransaction, async (req, res) => {
           .json({ success: 502, message: "User is deactivated", status: 502 });
       }
 
-      // Find the subadmin user by cashdeskId
-      const adminUser = await SubAdminUser.find({
-        isSubAdminDeposits: true,
-        isOutOfFunds: false,
-      });
-      if (!adminUser || adminUser.length === 0) {
-        transactionInProgress = false;
-        return res
-          .status(503)
-          .json({ success: 503, message: "no subadmin user", status: 503 });
-      }
+
 
       // Find available admin
       const admin = await AdminUser.findOne({ isAdmin: true });
@@ -2383,17 +2333,7 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
           status: 502,
         });
     }
-    // Find the subadmin user by cashdeskId
-    const adminUser = await SubAdminUser.find({
-      isSubAdminDeposits: true,
-      isOutOfFunds: false,
-    });
-    if (!adminUser || adminUser.length === 0) {
-      transactionInProgress = false;
-      return res
-        .status(503)
-        .json({ success: 503, message: "no subadmin user", status: 503 });
-    }
+  
 
     // Find available admin
     const admin = await AdminUser.findOne({ isAdmin: true });
@@ -2662,21 +2602,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
           .status(502)
           .json({ success: 502, message: "User is deactivated", status: 502 });
       }
-      // Find the subadmin user by cashdeskId
-      const adminUser = await SubAdminUser.find({
-        isSubAdminWithdrawals: true,
-        isOutOfFunds: false,
-      });
-      if (!adminUser || adminUser.length === 0) {
-        transactionInProgress = false;
-        return res
-          .status(402)
-          .json({
-            success: 402,
-            message: "No available Subadmin User",
-            status: 402,
-          });
-      }
+   
 
       const getBalance = user.bonusBalance;
       if (getBalance < amount) {
@@ -2771,21 +2697,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
           .status(502)
           .json({ success: 502, message: "User is deactivated", status: 502 });
       }
-      // Find the subadmin user by cashdeskId
-      const adminUser = await SubAdminUser.find({
-        isSubAdminWithdrawals: true,
-        isOutOfFunds: false,
-      });
-      if (!adminUser || adminUser.length === 0) {
-        transactionInProgress = false;
-        return res
-          .status(402)
-          .json({
-            success: 402,
-            message: "No available Subadmin User",
-            status: 402,
-          });
-      }
+    
 
       const newUuid = generateUniqueShortUuid(15);
       const date = new Date();
