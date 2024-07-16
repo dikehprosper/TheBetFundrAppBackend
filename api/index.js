@@ -25,6 +25,7 @@ const editProfileRoutes = require("../routes/editProfile");
 const sendNotificationRoutes = require("../routes/sendNotifications");
 const genarateQRCodeRoutes = require("../routes/QRCode");
 const actionRoutes = require("../routes/action");
+const userActionRoutes = require("../routes/userAction");
 const verifyToken = require("../verifyToken");
 
 // Welcome route
@@ -62,6 +63,7 @@ app.use("/api/users", verifyToken, genarateQRCodeRoutes);
 app.use("/api/users", verifyToken, actionRoutes);
 app.use("/api/usersWithoutToken", authRoutesWithoutToken);
 app.use("/api/fixtures", fixtures);
+app.use("/api/users/actions", verifyToken, userActionRoutes);
 
 // MongoDB connection and server start
 const port = process.env.PORT || 5001;

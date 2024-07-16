@@ -17,7 +17,7 @@ admin.initializeApp(
     credential: admin.credential.cert(require("../service-account-file.json")),
     storageBucket: "gs://groupchat-d6de7.appspot.com",
   },
-  "post"
+  "post",
 );
 
 // getters
@@ -214,6 +214,46 @@ const deletePost = async (req, res) => {
     return successResponse(res, "Post deleted");
   } catch (err) {
     return serverErrorResponse(res, err);
+  }
+};
+
+export const getSavedPost = async (req, res) => {
+  try {
+    const user = req.user;
+    const userWithSavedPosts = await User.findById(user._id)
+      .populate("savedPosts")
+      .exec();
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Saved posts returned",
+        data: { savedPosts: userWithSavedPosts.savedPosts },
+      });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "A server error has occured",
+        error: err,
+      });
+  }
+};
+
+export const savePost = async (req, res) => {
+  const user = req.user;
+  const postId = req.query.postId;
+  try {
+    await User.findByIdAndUpdate(user._id, { $push: { savedPosts: postId } });
+    return res.status(200).json({ success: true, message: "Saved Post" });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "A server error has occured",
+      error: err,
+    });
   }
 };
 
