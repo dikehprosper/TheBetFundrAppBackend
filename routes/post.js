@@ -19,6 +19,8 @@ const {
   getMyLikedPosts,
   createPost,
   getPostDetails,
+  getSavedPost,
+  savePost
 } = require("../controllers/post");
 const express = require("express");
 const multer = require("multer");
@@ -50,13 +52,14 @@ router.get("/like", getLikes);
 router.get("/comment", getComments);
 router.get("/view", getViews);
 router.get("/details", getPostDetails);
-router.get("/saved", saved);
+router.get("/saved", getSavedPost);
 
 // post endpoints
 router.post("/", upload.single("image"), createPost);
 router.post("/like", likePost);
 router.post("/comment", commentOnPost);
 router.post("/view", addToView);
+router.post("/saved", savePost)
 
 // delete endpoints
 router.delete("/", deletePost);
