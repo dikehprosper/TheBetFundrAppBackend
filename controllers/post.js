@@ -123,7 +123,6 @@ const getLikes = async (req, res) => {
 
 const getComments = async (req, res) => {
   const postId = req.query.postId;
-
   try {
     const post = await Post.findById(postId).populate("comments.user").exec();
 
@@ -161,41 +160,42 @@ const createPost = async (req, res) => {
     const existingUser = await User.findById(userId);
 
     // Function to upload a file
-    const uploadFile = async (file, userId) => {
+    const uploadFile = async (file) => {
       const bucket = admin.storage().bucket();
-      const newFileName = `${userId}-${Date.now()}-${file.originalname}`;
+      const newFileName = `${existingUser._id}-${Date.now()}-${file.originalname}`;
       const fileUpload = bucket.file(`postMedia/${newFileName}`);
 
       let buffer;
       let contentType;
-      if (file.mimetype.startsWith('image')) {
+      if (file.mimetype.startsWith("image")) {
+      // If the file is an image, convert it to webp
         buffer = await sharp(file.buffer).webp({ quality: 80 }).toBuffer();
-        contentType = 'image/webp';
-      } else if (file.mimetype.startsWith('video')) {
+        contentType = "image/webp";
+      } else if (file.mimetype.startsWith("video")) {
+        // If the file is a video, use the original buffer and content type
         buffer = file.buffer;
         contentType = file.mimetype;
       }
 
       const blobStream = fileUpload.createWriteStream({
-        metadata: { contentType }
+        metadata: { contentType },
       });
 
       return new Promise((resolve, reject) => {
-        blobStream.on('error', (error) => {
-          console.error('Error uploading file to Firebase:', error);
+        blobStream.on("error", (error) => {
+          console.error("Error uploading file to Firebase:", error);
           reject(error);
         });
 
-        blobStream.on('finish', async () => {
+        blobStream.on("finish", async () => {
           await fileUpload.makePublic();
           const publicUrl = `https://storage.googleapis.com/${bucket.name}/postMedia/${encodeURIComponent(newFileName)}`;
-          resolve({ url: publicUrl, type: file.mimetype.startsWith('image') ? 'image' : 'video' });
+          resolve({ url: publicUrl, type: file.mimetype.startsWith("image") ? "image" : "video" });
         });
 
         blobStream.end(buffer);
       });
     };
-
 
     // Loop through each file and upload it
     if(files){
@@ -209,14 +209,14 @@ const createPost = async (req, res) => {
     // Create a single post with multiple media files
     const createdPost = await Post.create({
       user: existingUser._id,
-      body: postDetails.body,
-      media: publicUrls
+      ...postDetails,
+      media: publicUrls,
     });
 
     return res.status(201).json({
       success: true,
-      message: 'Post created successfully',
-      data: createdPost
+      message: "Post created successfully",
+      data: createdPost,
     });
   } catch (err) {
     console.error("Error creating post:", err);
