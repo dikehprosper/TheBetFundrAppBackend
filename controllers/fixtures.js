@@ -205,7 +205,7 @@ const getStandings = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Season standings retrieved",
-      data: response[0],
+      data: response,
     });
   } catch (error) {
     return res
