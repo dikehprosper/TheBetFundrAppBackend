@@ -8,6 +8,7 @@ const {
 } = require("../helpers/response.js");
 const Post = require("../models/post.js");
 const User = require("../models/user.js");
+const Comment = require("../models/comment.js");
 const { check } = require("express-validator");
 const admin = require("firebase-admin");
 const multer = require("multer");
@@ -26,10 +27,7 @@ const getPostDetails = async (req, res) => {
   const postId = req.query.postId;
 
   try {
-    const post = await Post.findById(postId)
-      .populate("user")
-      .populate("comments.user")
-      .exec();
+    const post = await Post.findById(postId).populate("user").exec();
 
     return successResponse(res, "Post returned successfully", { post });
   } catch (err) {
@@ -43,7 +41,6 @@ const getRandomPosts = async (req, res) => {
       .limit(20)
       .sort({ createdAt: -1 })
       .populate("user")
-      .populate("comments.user")
       .exec();
 
     return successResponse(res, "Posts returned", { posts });
@@ -62,7 +59,6 @@ const getFollowingPosts = async (req, res) => {
       .limit(20)
       .sort({ createdAt: -1 })
       .populate("user")
-      .populate("comments.user")
       .exec();
 
     return successResponse(res, "Following Posts returned", { followingPosts });
@@ -75,10 +71,7 @@ const getMyPosts = async (req, res) => {
   const userId = req.query.userId;
 
   try {
-    const userPosts = await Post.find({ user: userId })
-      .populate("user")
-      .populate("comments.user")
-      .exec();
+    const userPosts = await Post.find({ user: userId }).populate("user").exec();
 
     return successResponse(res, "User posts returned", { posts: userPosts });
   } catch (err) {
@@ -94,7 +87,6 @@ const getMyLikedPosts = async (req, res) => {
       likes: { $elemMatch: { userId: userId } },
     })
       .populate("user")
-      .populate("comments.user")
       .exec();
 
     return successResponse(res, "Liked Posts returned", { posts: likedPosts });
@@ -119,16 +111,29 @@ const getLikes = async (req, res) => {
   }
 };
 
+const getMyComments = async (req, res) => {
+  const user = req.user;
+  try {
+    const myComments = await Comment.find({ user: user._id })
+      .populate("user")
+      .exec();
+
+    return successResponse(res, "My comments returned", {
+      comments: myComments,
+    });
+  } catch (err) {}
+};
+
 const getComments = async (req, res) => {
   const postId = req.query.postId;
 
   try {
-    const post = await Post.findById(postId).populate("comments.user").exec();
-
-    if (!post) return failedResponse(res, "Post not found");
+    const comments = await Comment.find({ post: postId })
+      .populate("user")
+      .exec();
 
     return successResponse(res, "Comments returned", {
-      comments: post.comments,
+      comments,
     });
   } catch (err) {
     return serverErrorResponse(res, err);
@@ -191,7 +196,7 @@ const createPost = async (req, res) => {
     }
 
     const createdPost = await Post.create({
-      user: existingUser.id,
+      user: existingUser._id,
       ...postDetails,
       image: publicUrl,
     });
@@ -217,32 +222,28 @@ const deletePost = async (req, res) => {
   }
 };
 
-export const getSavedPost = async (req, res) => {
+const getSavedPost = async (req, res) => {
   try {
     const user = req.user;
     const userWithSavedPosts = await User.findById(user._id)
       .populate("savedPosts")
       .exec();
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Saved posts returned",
-        data: { savedPosts: userWithSavedPosts.savedPosts },
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Saved posts returned",
+      data: { savedPosts: userWithSavedPosts.savedPosts },
+    });
   } catch (err) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "A server error has occured",
-        error: err,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "A server error has occured",
+      error: err,
+    });
   }
 };
 
-export const savePost = async (req, res) => {
+const savePost = async (req, res) => {
   const user = req.user;
   const postId = req.query.postId;
   try {
@@ -307,29 +308,19 @@ const likePost = async (req, res) => {
 
 // comment functions
 const commentOnPost = async (req, res) => {
-  const { postId, userId, comment } = req.body;
+  const { postId, comment } = req.body;
+  const user = req.user;
 
   try {
-    const user = await User.findById(userId);
-
-    const newId = new mongoose.mongo.ObjectId();
-
-    const commentDetails = {
-      id: newId,
-      user: userId,
-      userEmail: user.email,
-      name: user.fullname,
-      image: user.image,
+    const commentCreated = await Comment.create({
+      user: user._id,
+      post: postId,
       description: comment,
-    };
-
-    const updatedPost = await Post.findByIdAndUpdate(postId, {
-      $push: { comments: commentDetails },
-      $inc: { commentCount: 1 },
     });
 
+    await Post.findByIdAndUpdate(postId, { $inc: { commentCount: 1 } });
     return successResponse(res, "Commented on post successfully", {
-      updatedPost,
+      comment: commentCreated,
     });
   } catch (err) {
     return serverErrorResponse(res, err);
@@ -340,13 +331,9 @@ const deleteComment = async (req, res) => {
   const { commentId, postId } = req.body;
 
   try {
-    const updatedPost = await Post.findByIdAndUpdate(postId, {
-      $pull: { comments: { id: commentId } },
-    });
-
-    return successResponse(res, "Comment deleted successfully", {
-      updatedPost,
-    });
+    await Comment.findByIdAndDelete(commentId);
+    await Post.findByIdAndUpdate(postId, { $inc: { commentCount: -1 } });
+    return successResponse(res, "Comment deleted successfully", {});
   } catch (err) {
     return serverErrorResponse(res, err);
   }
@@ -366,7 +353,7 @@ const addToView = async (req, res) => {
       image: user.image,
     };
 
-    const updatedPost = await Post.findByIdAndUpdate(id, {
+    const updatedPost = await Post.findByIdAndUpdate(postId, {
       $push: { views: viewDetails },
       $inc: { viewCount: 1 },
     });
@@ -393,4 +380,7 @@ module.exports = {
   getMyLikedPosts,
   createPost,
   getPostDetails,
+  getSavedPost,
+  savePost,
+  getMyComments,
 };

@@ -29,7 +29,9 @@ export const followUser = async (req, res) => {
     const userId = req.query.id;
     const user = req.user;
 
-    if (user.following.contains(userId)) {
+    const fetchedUser = await User.findById(user._id);
+
+    if (fetchedUser.following.includes(userId)) {
       await User.findByIdAndUpdate(user._id, {
         $pull: {
           following: userId,
