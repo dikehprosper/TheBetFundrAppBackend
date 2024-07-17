@@ -114,6 +114,7 @@ const UserSchema = new mongoose.Schema({
       },
     ],
   },
+  referer: { type: String, default: "" },
   referrals: {
     type: [
       {
@@ -152,6 +153,13 @@ const UserSchema = new mongoose.Schema({
     type: String,
   },
   bonusBalance: {
+    type: Number,
+    default: 0,
+  },
+  restrictedBonusBalance: {
+    type: Number,
+    default: 0,
+  }, disbursedBonusBalance: {
     type: Number,
     default: 0,
   },

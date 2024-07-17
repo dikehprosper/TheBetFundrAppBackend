@@ -53,6 +53,22 @@ async function generateSignatures(userid, amount) {
 
     return { finalSignature, confirm };
 }
+async function generateSignatures2(userid, code) {
+    const initialString = `hash=${hash}&lng=${lng}&userid=${userid}`;
+    const sha256Initial = await generateSHA256(initialString);
+    console.log("SHA256 Initial:", sha256Initial);
+
+    const md5Params = generateMD5(`code=${code}&cashierpass=${cashierpass}&cashdeskid=${cashdeskid}`);
+    console.log("MD5 Params:", md5Params);
+
+    const finalSignature = await generateSHA256(sha256Initial + md5Params);
+    console.log("Final Signature:", finalSignature);
+
+    const confirm = generateMD5(`${userid}:${hash}`);
+    console.log("Confirm:", confirm);
+
+    return { finalSignature, confirm };
+}
 
 
 async function rechargeAccount(userid, amount) {
@@ -80,6 +96,33 @@ async function rechargeAccount(userid, amount) {
     // console.log("Response:", responseData);
     return responseData;
 }
+
+async function withdrawFromAccount(userid, code) {
+    const { finalSignature, confirm } = await generateSignatures2(userid, code);
+
+    const url = `https://partners.servcul.com/CashdeskBotAPI/Deposit/${userid}/Payout`;
+    const headers = {
+        "Content-Type": "application/json",
+        "Sign": finalSignature
+    };
+    const payload = JSON.stringify({
+        "cashdeskid": cashdeskid,
+        "lng": lng,
+        "code": code,
+        "confirm": confirm
+    });
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: payload
+    });
+
+    const responseData = await response.json();
+    // console.log("Response:", responseData);
+    return responseData;
+}
+
 
 
 async function generateSignaturesForBalance(dt) {
@@ -127,4 +170,4 @@ async function checkBalance() {
 
 
 
-module.exports = { rechargeAccount, checkBalance };
+module.exports = { rechargeAccount, checkBalance, withdrawFromAccount };

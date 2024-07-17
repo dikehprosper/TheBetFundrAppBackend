@@ -55,7 +55,7 @@ router.get("/details", getPostDetails);
 router.get("/saved", getSavedPost);
 
 // post endpoints
-router.post("/", upload.single("image"), createPost);
+router.post("/createPost", createPost);
 router.post("/like", likePost);
 router.post("/comment", commentOnPost);
 router.post("/view", addToView);

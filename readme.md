@@ -12,5 +12,6 @@ Errors = {
 custom Errorcode = {
 300 = A payment of THE AMOUNT has already been made to customer . This payment can be made again in 5 minutes.,
 301 = The POS currency does not match the customer's account currency. Transaction canceled!,
-302 = Your Payment wasn't completed
+302 = Your Payment wasn't completed,
+303 = Customer has confirmed withdrawal requests, deposit cannot be made. DENIED !
 }
