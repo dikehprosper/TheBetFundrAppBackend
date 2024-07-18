@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-undef */
 const mongoose = require("mongoose");
@@ -12,6 +13,7 @@ const Comment = require("../models/comment.js");
 const { check } = require("express-validator");
 const admin = require("firebase-admin");
 const multer = require("multer");
+const sharp = require("sharp");
 require("dotenv").config();
 admin.initializeApp(
   {
@@ -126,7 +128,6 @@ const getMyComments = async (req, res) => {
 
 const getComments = async (req, res) => {
   const postId = req.query.postId;
-
   try {
     const comments = await Comment.find({ post: postId })
       .populate("user")
@@ -156,54 +157,82 @@ const getViews = async (req, res) => {
 
 // post functions
 const createPost = async (req, res) => {
-  const file = req.file;
-  const { userId, postDetails } = req.body;
-  let publicUrl;
+  const files = req.files; // Array of files
+  const { body } = req.body;
+  const user = req.user;
+  let publicUrls = []; // Array to store URLs of uploaded files
 
   try {
-    const existingUser = await User.findById(userId);
+    const existingUser = await User.findById(user._id);
 
-    if (file) {
-      const webpBuffer = await sharp(file.buffer)
-        .webp({ quality: 80 })
-        .toBuffer();
-
+    // Function to upload a file
+    const uploadFile = async (file) => {
       const bucket = admin.storage().bucket();
-      const newFileName = `${existingUser._id}-${Date.now()}.webp`; // Save as .webp
-      const fileUpload = bucket.file(`postImages/${newFileName}`);
+      const newFileName = `${existingUser._id}-${Date.now()}-${file.originalname}`;
+      const fileUpload = bucket.file(`postMedia/${newFileName}`);
+
+      let buffer;
+      let contentType;
+      if (file.mimetype.startsWith("image")) {
+        // If the file is an image, convert it to webp
+        buffer = await sharp(file.buffer).webp({ quality: 80 }).toBuffer();
+        contentType = "image/webp";
+      } else if (file.mimetype.startsWith("video")) {
+        // If the file is a video, use the original buffer and content type
+        buffer = file.buffer;
+        contentType = file.mimetype;
+      }
 
       const blobStream = fileUpload.createWriteStream({
-        metadata: { contentType: "image/webp" },
+        metadata: { contentType },
       });
 
-      blobStream.on("error", (error) => {
-        console.error("Error uploading file to Firebase:", error);
-        transactionInProgress = false;
-
-        return res.send({
-          success: 503,
-          message: "Failed to upload image",
-          status: 503,
+      return new Promise((resolve, reject) => {
+        blobStream.on("error", (error) => {
+          console.error("Error uploading file to Firebase:", error);
+          reject(error);
         });
-      });
 
-      blobStream.on("finish", async () => {
-        await fileUpload.makePublic();
-        publicUrl = `https://storage.googleapis.com/${
-          bucket.name
-        }/postImages/${encodeURIComponent(newFileName)}`;
+        blobStream.on("finish", async () => {
+          await fileUpload.makePublic();
+          const publicUrl = `https://storage.googleapis.com/${bucket.name}/postMedia/${encodeURIComponent(newFileName)}`;
+          resolve({
+            url: publicUrl,
+            type: file.mimetype.startsWith("image") ? "image" : "video",
+          });
+        });
+
+        blobStream.end(buffer);
       });
+    };
+
+    // Loop through each file and upload it
+    if (files) {
+      for (const file of files) {
+        const publicUrl = await uploadFile(file);
+        publicUrls.push(publicUrl);
+      }
     }
 
+    // Create a single post with multiple media files
     const createdPost = await Post.create({
       user: existingUser._id,
-      ...postDetails,
-      image: publicUrl,
+      body,
+      media: publicUrls,
     });
 
-    return successResponse(res, "Post created successfully", { createdPost });
+    return res.status(201).json({
+      success: true,
+      message: "Post created successfully",
+      data: createdPost,
+    });
   } catch (err) {
-    return serverErrorResponse(res, err);
+    console.error("Error creating post:", err);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while creating the post",
+      error: err.message,
+    });
   }
 };
 
@@ -247,8 +276,17 @@ const savePost = async (req, res) => {
   const user = req.user;
   const postId = req.query.postId;
   try {
-    await User.findByIdAndUpdate(user._id, { $push: { savedPosts: postId } });
-    return res.status(200).json({ success: true, message: "Saved Post" });
+    const post = await Post.findById(postId);
+    if (post.saves.includes(user._id)) {
+      await Post.findByIdAndUpdate(postId, { $pull: { saves: user._id } });
+      await User.findByIdAndUpdate(user._id, { $pull: { savedPost: postId } });
+
+      return res.status(200).json({ success: true, message: "Unsaved Post" });
+    } else {
+      await Post.findByIdAndUpdate(postId, { $push: { saves: user._id } });
+      await User.findByIdAndUpdate(user._id, { $push: { savedPosts: postId } });
+      return res.status(200).json({ success: true, message: "Saved Post" });
+    }
   } catch (err) {
     return res.status(500).json({
       success: false,

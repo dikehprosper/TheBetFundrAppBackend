@@ -61,6 +61,7 @@ app.use("/api/users", verifyToken, editProfileRoutes);
 app.use("/api/users", verifyToken, sendNotificationRoutes);
 app.use("/api/users", verifyToken, genarateQRCodeRoutes);
 app.use("/api/users", verifyToken, actionRoutes);
+app.use("/api/users", verifyToken, authRoutes);
 app.use("/api/usersWithoutToken", authRoutesWithoutToken);
 app.use("/api/fixtures", fixtures);
 app.use("/api/users/actions", verifyToken, userActionRoutes);
