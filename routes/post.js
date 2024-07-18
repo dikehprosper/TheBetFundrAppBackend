@@ -19,10 +19,9 @@ const {
   getMyLikedPosts,
   createPost,
   getPostDetails,
-} = require("../controllers/post");
+} = require("../controllers/post.js");
 const express = require("express");
 const multer = require("multer");
-const verifyToken = require("../verifyToken.js");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // const Post = require('../models/post');
@@ -50,7 +49,6 @@ router.get("/like", getLikes);
 router.get("/comment", getComments);
 router.get("/view", getViews);
 router.get("/details", getPostDetails);
-router.get("/saved", saved);
 
 // post endpoints
 router.post("/createPost", createPost);
@@ -64,9 +62,6 @@ router.delete("/comment", deleteComment);
 
 // patch endpoints
 router.patch("/", updatePost);
-
-// put endpoints
-router.put("/saved", savedPost);
 
 // /api/houses
 // router.get("/", checkRequestProcessing, (req, res) => {

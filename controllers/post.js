@@ -247,7 +247,7 @@ const deletePost = async (req, res) => {
   }
 };
 
-export const getSavedPost = async (req, res) => {
+const getSavedPost = async (req, res) => {
   try {
     const user = req.user;
     const userWithSavedPosts = await User.findById(user._id)
@@ -272,7 +272,7 @@ export const getSavedPost = async (req, res) => {
   }
 };
 
-export const savePost = async (req, res) => {
+const savePost = async (req, res) => {
   const user = req.user;
   const postId = req.query.postId;
   try {
@@ -423,4 +423,6 @@ module.exports = {
   getMyLikedPosts,
   createPost,
   getPostDetails,
+  getSavedPost,
+  savePost
 };

@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-undef */
 const User = require("../models/user");
 
-export const getFollowers = async (req, res) => {
+ const getFollowers = async (req, res) => {
   try {
     const user = req.user;
     const userWithFollowers = await User.findById(user._id)
@@ -24,7 +26,7 @@ export const getFollowers = async (req, res) => {
   }
 };
 
-export const followUser = async (req, res) => {
+ const followUser = async (req, res) => {
   try {
     const userId = req.query.id;
     const user = req.user;
@@ -62,3 +64,8 @@ export const followUser = async (req, res) => {
     });
   }
 };
+module.exports = {
+  followUser,
+  getFollowers
+  
+}
