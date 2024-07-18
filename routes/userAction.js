@@ -4,8 +4,8 @@ const { followUser, getFollowers } = require("../controllers/action");
 
 const router = express.Router();
 
-router.get("/follow", verifyToken, getFollowers);
+router.get("/follow", getFollowers);
 
-router.put("/follow", verifyToken, followUser);
+router.put("/follow", followUser);
 
 module.exports = router;

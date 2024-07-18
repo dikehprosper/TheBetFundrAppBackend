@@ -9,9 +9,11 @@ const {
 } = require("../helpers/response.js");
 const Post = require("../models/post.js");
 const User = require("../models/user.js");
+const Comment = require("../models/comment.js");
 const { check } = require("express-validator");
 const admin = require("firebase-admin");
 const multer = require("multer");
+const sharp = require("sharp");
 require("dotenv").config();
 admin.initializeApp(
   {
@@ -21,17 +23,13 @@ admin.initializeApp(
   "post",
 );
 
-
 // getters
 
 const getPostDetails = async (req, res) => {
   const postId = req.query.postId;
 
   try {
-    const post = await Post.findById(postId)
-      .populate("user")
-      .populate("comments.user")
-      .exec();
+    const post = await Post.findById(postId).populate("user").exec();
 
     return successResponse(res, "Post returned successfully", { post });
   } catch (err) {
@@ -45,7 +43,6 @@ const getRandomPosts = async (req, res) => {
       .limit(20)
       .sort({ createdAt: -1 })
       .populate("user")
-      .populate("comments.user")
       .exec();
 
     return successResponse(res, "Posts returned", { posts });
@@ -64,7 +61,6 @@ const getFollowingPosts = async (req, res) => {
       .limit(20)
       .sort({ createdAt: -1 })
       .populate("user")
-      .populate("comments.user")
       .exec();
 
     return successResponse(res, "Following Posts returned", { followingPosts });
@@ -77,10 +73,7 @@ const getMyPosts = async (req, res) => {
   const userId = req.query.userId;
 
   try {
-    const userPosts = await Post.find({ user: userId })
-      .populate("user")
-      .populate("comments.user")
-      .exec();
+    const userPosts = await Post.find({ user: userId }).populate("user").exec();
 
     return successResponse(res, "User posts returned", { posts: userPosts });
   } catch (err) {
@@ -96,7 +89,6 @@ const getMyLikedPosts = async (req, res) => {
       likes: { $elemMatch: { userId: userId } },
     })
       .populate("user")
-      .populate("comments.user")
       .exec();
 
     return successResponse(res, "Liked Posts returned", { posts: likedPosts });
@@ -121,15 +113,28 @@ const getLikes = async (req, res) => {
   }
 };
 
+const getMyComments = async (req, res) => {
+  const user = req.user;
+  try {
+    const myComments = await Comment.find({ user: user._id })
+      .populate("user")
+      .exec();
+
+    return successResponse(res, "My comments returned", {
+      comments: myComments,
+    });
+  } catch (err) {}
+};
+
 const getComments = async (req, res) => {
   const postId = req.query.postId;
   try {
-    const post = await Post.findById(postId).populate("comments.user").exec();
-
-    if (!post) return failedResponse(res, "Post not found");
+    const comments = await Comment.find({ post: postId })
+      .populate("user")
+      .exec();
 
     return successResponse(res, "Comments returned", {
-      comments: post.comments,
+      comments,
     });
   } catch (err) {
     return serverErrorResponse(res, err);
@@ -153,11 +158,12 @@ const getViews = async (req, res) => {
 // post functions
 const createPost = async (req, res) => {
   const files = req.files; // Array of files
-  const { userId, postDetails } = req.body;
+  const { body } = req.body;
+  const user = req.user;
   let publicUrls = []; // Array to store URLs of uploaded files
 
   try {
-    const existingUser = await User.findById(userId);
+    const existingUser = await User.findById(user._id);
 
     // Function to upload a file
     const uploadFile = async (file) => {
@@ -168,7 +174,7 @@ const createPost = async (req, res) => {
       let buffer;
       let contentType;
       if (file.mimetype.startsWith("image")) {
-      // If the file is an image, convert it to webp
+        // If the file is an image, convert it to webp
         buffer = await sharp(file.buffer).webp({ quality: 80 }).toBuffer();
         contentType = "image/webp";
       } else if (file.mimetype.startsWith("video")) {
@@ -190,7 +196,10 @@ const createPost = async (req, res) => {
         blobStream.on("finish", async () => {
           await fileUpload.makePublic();
           const publicUrl = `https://storage.googleapis.com/${bucket.name}/postMedia/${encodeURIComponent(newFileName)}`;
-          resolve({ url: publicUrl, type: file.mimetype.startsWith("image") ? "image" : "video" });
+          resolve({
+            url: publicUrl,
+            type: file.mimetype.startsWith("image") ? "image" : "video",
+          });
         });
 
         blobStream.end(buffer);
@@ -198,18 +207,17 @@ const createPost = async (req, res) => {
     };
 
     // Loop through each file and upload it
-    if(files){
+    if (files) {
       for (const file of files) {
         const publicUrl = await uploadFile(file);
         publicUrls.push(publicUrl);
       }
     }
-   
 
     // Create a single post with multiple media files
     const createdPost = await Post.create({
       user: existingUser._id,
-      ...postDetails,
+      body,
       media: publicUrls,
     });
 
@@ -227,10 +235,6 @@ const createPost = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 const deletePost = async (req, res) => {
   const { postId, userId } = req.body;
@@ -254,21 +258,17 @@ const getSavedPost = async (req, res) => {
       .populate("savedPosts")
       .exec();
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Saved posts returned",
-        data: { savedPosts: userWithSavedPosts.savedPosts },
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Saved posts returned",
+      data: { savedPosts: userWithSavedPosts.savedPosts },
+    });
   } catch (err) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "A server error has occured",
-        error: err,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "A server error has occured",
+      error: err,
+    });
   }
 };
 
@@ -276,8 +276,17 @@ const savePost = async (req, res) => {
   const user = req.user;
   const postId = req.query.postId;
   try {
-    await User.findByIdAndUpdate(user._id, { $push: { savedPosts: postId } });
-    return res.status(200).json({ success: true, message: "Saved Post" });
+    const post = await Post.findById(postId);
+    if (post.saves.includes(user._id)) {
+      await Post.findByIdAndUpdate(postId, { $pull: { saves: user._id } });
+      await User.findByIdAndUpdate(user._id, { $pull: { savedPost: postId } });
+
+      return res.status(200).json({ success: true, message: "Unsaved Post" });
+    } else {
+      await Post.findByIdAndUpdate(postId, { $push: { saves: user._id } });
+      await User.findByIdAndUpdate(user._id, { $push: { savedPosts: postId } });
+      return res.status(200).json({ success: true, message: "Saved Post" });
+    }
   } catch (err) {
     return res.status(500).json({
       success: false,
@@ -337,29 +346,19 @@ const likePost = async (req, res) => {
 
 // comment functions
 const commentOnPost = async (req, res) => {
-  const { postId, userId, comment } = req.body;
+  const { postId, comment } = req.body;
+  const user = req.user;
 
   try {
-    const user = await User.findById(userId);
-
-    const newId = new mongoose.mongo.ObjectId();
-
-    const commentDetails = {
-      id: newId,
-      user: userId,
-      userEmail: user.email,
-      name: user.fullname,
-      image: user.image,
+    const commentCreated = await Comment.create({
+      user: user._id,
+      post: postId,
       description: comment,
-    };
-
-    const updatedPost = await Post.findByIdAndUpdate(postId, {
-      $push: { comments: commentDetails },
-      $inc: { commentCount: 1 },
     });
 
+    await Post.findByIdAndUpdate(postId, { $inc: { commentCount: 1 } });
     return successResponse(res, "Commented on post successfully", {
-      updatedPost,
+      comment: commentCreated,
     });
   } catch (err) {
     return serverErrorResponse(res, err);
@@ -370,13 +369,9 @@ const deleteComment = async (req, res) => {
   const { commentId, postId } = req.body;
 
   try {
-    const updatedPost = await Post.findByIdAndUpdate(postId, {
-      $pull: { comments: { id: commentId } },
-    });
-
-    return successResponse(res, "Comment deleted successfully", {
-      updatedPost,
-    });
+    await Comment.findByIdAndDelete(commentId);
+    await Post.findByIdAndUpdate(postId, { $inc: { commentCount: -1 } });
+    return successResponse(res, "Comment deleted successfully", {});
   } catch (err) {
     return serverErrorResponse(res, err);
   }
@@ -396,7 +391,7 @@ const addToView = async (req, res) => {
       image: user.image,
     };
 
-    const updatedPost = await Post.findByIdAndUpdate(id, {
+    const updatedPost = await Post.findByIdAndUpdate(postId, {
       $push: { views: viewDetails },
       $inc: { viewCount: 1 },
     });
@@ -424,5 +419,6 @@ module.exports = {
   createPost,
   getPostDetails,
   getSavedPost,
-  savePost
+  savePost,
+  getMyComments,
 };

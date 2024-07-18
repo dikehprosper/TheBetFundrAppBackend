@@ -66,7 +66,6 @@ app.use("/api/usersWithoutToken", authRoutesWithoutToken);
 app.use("/api/fixtures", fixtures);
 app.use("/api/users/actions", verifyToken, userActionRoutes);
 
-
 // MongoDB connection and server start
 const port = process.env.PORT || 5001;
 mongoose
@@ -75,5 +74,3 @@ mongoose
     server.listen(port, () => console.log(`Server is running on port ${port}`));
   })
   .catch((err) => console.log(err));
-
-
