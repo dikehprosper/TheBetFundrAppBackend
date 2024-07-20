@@ -878,12 +878,10 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
 
     // Validate the request body
     const errors = validateDepositRequest(req.body);
-
     if (errors.length > 0) {
       transactionInProgress = false;
       return res.status(400).json({ success: 400, message: "invalid Input", status: 400 });
     }
-
     let updatedAmount;
     if (bonusBalance === null) {
       updatedAmount = amount;
@@ -903,7 +901,6 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           .json({ success: 502, message: "User is deactivated", status: 502 });
       }
 
-     
 
       // Find available admin
       const admin = await AdminUser.findOne({ isAdmin: true });
@@ -1286,9 +1283,9 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         service: service,
         paymentConfirmation: "Successful",
       });
-
+      const referer = user.referer
       if (user.referer !== "") {
-        const user = await User.findOne({ _id: referer });
+        const user = await User.findOne({ tag: referer });
         if (user) {
           const result = calculatePercentage(amount);
           const eightyPercent = getEightyPercentOfResult(result);

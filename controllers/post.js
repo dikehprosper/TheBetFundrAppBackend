@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-undef */
