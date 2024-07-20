@@ -13,6 +13,7 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
         const QOS_string_check_transaction = process.env.QOS_STRING_CHECK_TRANSACTION;
         const QOS_clientid = network.toLowerCase() === "mtn" ? process.env.QOS_CLIENTID1 : process.env.QOS_CLIENTID2;
 
+        console.log(momoNumber, amount, firstname, newUuid, QOS_clientid, "these are the detaisl")
         const response = await fetch(
             QOS_string,
             {
@@ -31,7 +32,15 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
                 }),
             }
         );
+        console.log(response)
+        if (!response.ok) {
+            const result = {
+                status: "Failed",
+                transactionId: newUuid
+            }
 
+            return result
+        }
         const data = await pollTransactionStatus(QOS_string_check_transaction, QOS_username, QOS_password, QOS_clientid, newUuid);
         const result = {
             status: data,
@@ -44,6 +53,10 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
         throw new Error('Payment request failed');
     }
 }
+
+
+
+
 
 
 // WITH PROMISE
