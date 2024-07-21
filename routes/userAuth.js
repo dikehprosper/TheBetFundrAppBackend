@@ -8,14 +8,13 @@ const User = require("../models/user");
 const bcryptjs = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
-const { check, } = require("express-validator");
+const { check } = require("express-validator");
 const SendEmail = require("../utils/mailer");
 
 require("dotenv").config();
 // FedaPay.setApiKey(process.env.FEDAPAY_KEY1);
 // FedaPay.setEnvironment(process.env.ENVIRONMENT1);
 const tokenVlaue = process.env.TOKEN_SECRET;
-
 
 const loginValidate = [
   check("email").isEmail().withMessage("Please provide a valid email"),
@@ -36,7 +35,6 @@ const checkOngoingTransaction = (req, res, next) => {
   // If no transaction is in progress, allow the route handler to proceed
   next();
 };
-
 
 router.post("/setPin", checkOngoingTransaction, async (req, res) => {
   try {
@@ -82,7 +80,7 @@ router.post("/setPin", checkOngoingTransaction, async (req, res) => {
     // create token
     const token = await jwt.sign(
       tokenData,
-      tokenVlaue
+      tokenVlaue,
       //     {
       //     expiresIn: "1d", // "1m" stands for 1 minute
       // }
@@ -104,7 +102,7 @@ router.post("/setPin", checkOngoingTransaction, async (req, res) => {
 
 router.post("/getUser", checkOngoingTransaction, async (req, res) => {
   try {
-    console.log("processed")
+    console.log("processed");
     transactionInProgress = true;
     const { token } = req.body;
 
@@ -208,7 +206,7 @@ router.post(
       transactionInProgress = true;
       const { pin, email } = req.body;
 
-      console.log(pin, email, "pin, email")
+      console.log(pin, email, "pin, email");
 
       // Check if the user already exists
       const existingUser = await User.findOne({ email });
@@ -266,7 +264,7 @@ router.post(
       // create token
       const token = await jwt.sign(
         tokenData,
-        tokenVlaue
+        tokenVlaue,
         //     {
         //     expiresIn: "1d", // "1m" stands for 1 minute
         // }
@@ -284,10 +282,8 @@ router.post(
       console.error("Error logining in user:", error);
       res.status(500).json({ error: "Internal server error" });
     }
-  }
+  },
 );
-
-
 
 router.post("/resetPasswordForLoggedInUser", async (req, res) => {
   try {
@@ -311,7 +307,7 @@ router.post("/resetPasswordForLoggedInUser", async (req, res) => {
 
     const validPassword = await bcryptjs.compare(
       password,
-      existingUser.password
+      existingUser.password,
     );
     if (!validPassword) {
       transactionInProgress = false;
@@ -474,29 +470,33 @@ router.post("/changeUserPin", async (req, res) => {
   }
 });
 
-
 router.post("/setTag", async (req, res) => {
   try {
     const { email, tag } = req.body;
 
-
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      return res.status(501).send({ success: 501, message: "User does not exist", status: 501 });
+      return res
+        .status(501)
+        .send({ success: 501, message: "User does not exist", status: 501 });
     }
 
     if (!existingUser.isActivated) {
-      return res.status(502).send({ success: 502, message: "User is deactivated", status: 502 });
+      return res
+        .status(502)
+        .send({ success: 502, message: "User is deactivated", status: 502 });
     }
 
     if (existingUser.tag === tag) {
-      return res.status(503).send({ success: 503, message: "Tag is the same as old", status: 503 });
+      return res
+        .status(503)
+        .send({ success: 503, message: "Tag is the same as old", status: 503 });
     }
 
     // Fetch all existing tags once
     const allUsers = await User.find({}, { tag: 1 });
-    const existingTags = allUsers.map(user => user.tag);
+    const existingTags = allUsers.map((user) => user.tag);
 
     // Check if the incoming tag matches any user's tag
     if (existingTags.includes(tag)) {
@@ -506,22 +506,28 @@ router.post("/setTag", async (req, res) => {
         success: 504,
         message: "Tag already exists",
         suggestions,
-        status: 504
+        status: 504,
       });
     }
 
     // Update the user's tag if no conflicts
     existingUser.tag = tag;
     await existingUser.save();
-    const updatedTag = tag
+    const updatedTag = tag;
 
-    return res.status(201).send({ success: true, message: "Tag successfully updated", status: 201, updatedTag });
+    return res
+      .status(201)
+      .send({
+        success: true,
+        message: "Tag successfully updated",
+        status: 201,
+        updatedTag,
+      });
   } catch (error) {
     console.error("Error updating user tag:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 // Function to generate tag suggestions
 const generateTagSuggestions = async (tag, existingTags) => {
@@ -538,8 +544,6 @@ const generateTagSuggestions = async (tag, existingTags) => {
   return suggestions;
 };
 
-
-
 router.post("/getTotalReferral", async (req, res) => {
   try {
     const { email } = req.body;
@@ -547,49 +551,52 @@ router.post("/getTotalReferral", async (req, res) => {
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      return res.status(501).send({ success: 501, message: "User does not exist", status: 501 });
+      return res
+        .status(501)
+        .send({ success: 501, message: "User does not exist", status: 501 });
     }
 
     if (!existingUser.isActivated) {
-      return res.status(502).send({ success: 502, message: "User is deactivated", status: 502 });
+      return res
+        .status(502)
+        .send({ success: 502, message: "User is deactivated", status: 502 });
     }
-
 
     const referralUsers = await Promise.all(
       existingUser.referrals.map(async (referralEmail) => {
-        const user = await User.findOne(
-          { email: referralEmail }
-        );
+        const user = await User.findOne({ email: referralEmail });
         if (user) {
           return {
             _id: uuidv4(),
             fullname: user.fullname,
-            image: user.image === "" ? "https://firebasestorage.googleapis.com/v0/b/groupchat-d6de7.appspot.com/o/Untitled%20design%20(4)%20(1).png?alt=media&token=7f06a2ba-e4c5-49a2-a029-b6688c9be61d" : user.image,
+            image:
+              user.image === ""
+                ? "https://firebasestorage.googleapis.com/v0/b/groupchat-d6de7.appspot.com/o/Untitled%20design%20(4)%20(1).png?alt=media&token=7f06a2ba-e4c5-49a2-a029-b6688c9be61d"
+                : user.image,
             status: user.pinState === false ? "completed" : "pending",
             time: user.registrationDateTime,
           };
         }
         return null; // Handle the case where user is not found
-      })
+      }),
     );
 
     // Filter out any null values in case some users were not found
-    const filteredReferralUsers = referralUsers.filter(user => user !== null);
+    const filteredReferralUsers = referralUsers.filter((user) => user !== null);
 
-
-    return res.status(201).send({ success: true, message: "Referral fetched", status: 201, filteredReferralUsers });
+    return res
+      .status(201)
+      .send({
+        success: true,
+        message: "Referral fetched",
+        status: 201,
+        filteredReferralUsers,
+      });
   } catch (error) {
     console.error("Error updating user tag:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-
-
-
-
-
-
 
 // Function to invalidate a session (update the database record)
 async function invalidateSession(sessionId) {
@@ -598,7 +605,7 @@ async function invalidateSession(sessionId) {
     const user = await User.findOneAndUpdate(
       { sessionId },
       { $set: { sessionId: null, isLoggedIn: false } },
-      { new: true }
+      { new: true },
     );
 
     if (!user) {

@@ -1,6 +1,7 @@
 const User = require("../models/user");
+const Post = require("../models/post");
 
-export const getFollowers = async (req, res) => {
+const getFollowers = async (req, res) => {
   try {
     const user = req.user;
     const userWithFollowers = await User.findById(user._id)
@@ -24,7 +25,7 @@ export const getFollowers = async (req, res) => {
   }
 };
 
-export const followUser = async (req, res) => {
+const followUser = async (req, res) => {
   try {
     const userId = req.query.id;
     const user = req.user;
@@ -64,3 +65,25 @@ export const followUser = async (req, res) => {
     });
   }
 };
+
+const getUserData = async (req, res) => {
+  const id = req.query.id;
+  try {
+    const user = await User.findById(id);
+    const posts = await Post.find({ user: id });
+
+    return res.status(200).json({
+      success: false,
+      message: "User Data returned",
+      data: { user: { ...user._doc, postCount: posts.length } },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "A server error has occurred",
+      error: err,
+    });
+  }
+};
+
+module.exports = { followUser, getFollowers, getUserData };

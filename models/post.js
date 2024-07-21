@@ -15,25 +15,9 @@ const PostSchema = new mongoose.Schema({
   likeCount: { type: Number, default: 0 },
   viewCount: { type: Number, default: 0 },
   commentCount: { type: Number, default: 0 },
-  saves: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
-  likes: [
-    {
-      userId: { type: String, required: true },
-      userEmail: { type: String },
-      name: { type: String },
-      image: { type: String },
-    },
-  ],
-  views: {
-    type: [
-      {
-        id: { type: String, required: true },
-        userEmail: { type: String },
-        name: { type: String },
-        image: { type: String },
-      },
-    ],
-  },
+  saves: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  views: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 module.exports = mongoose.model("Post", PostSchema);

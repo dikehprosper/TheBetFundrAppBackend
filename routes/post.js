@@ -22,6 +22,7 @@ const {
   getMyComments,
   getSavedPost,
   savePost,
+  editComment,
 } = require("../controllers/post");
 const express = require("express");
 const multer = require("multer");
@@ -68,6 +69,7 @@ router.delete("/comment", deleteComment);
 
 // patch endpoints
 router.patch("/", updatePost);
+router.patch("/comment", editComment);
 
 // put endpoints
 router.put("/saved", savePost);
