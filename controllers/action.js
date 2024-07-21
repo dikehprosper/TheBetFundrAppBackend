@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-undef */
 const User = require("../models/user");
+const Post = require("../models/post");
 
  const getFollowers = async (req, res) => {
   try {
@@ -26,7 +27,7 @@ const User = require("../models/user");
   }
 };
 
- const followUser = async (req, res) => {
+const followUser = async (req, res) => {
   try {
     const userId = req.query.id;
     const user = req.user;
@@ -66,8 +67,25 @@ const User = require("../models/user");
     });
   }
 };
-module.exports = {
-  followUser,
-  getFollowers
-  
-}
+
+const getUserData = async (req, res) => {
+  const id = req.query.id;
+  try {
+    const user = await User.findById(id);
+    const posts = await Post.find({ user: id });
+
+    return res.status(200).json({
+      success: false,
+      message: "User Data returned",
+      data: { user: { ...user._doc, postCount: posts.length } },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "A server error has occurred",
+      error: err,
+    });
+  }
+};
+
+module.exports = { followUser, getFollowers, getUserData };
