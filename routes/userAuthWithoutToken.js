@@ -121,6 +121,8 @@ router.post(
                 referer: referrerId ? referrerId: ""
             });
 
+       
+
             // Save the user to the database
             const savedUser = await newUser.save();
 

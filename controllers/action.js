@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-undef */
 const User = require("../models/user");
 const Post = require("../models/post");
 
-const getFollowers = async (req, res) => {
+ const getFollowers = async (req, res) => {
   try {
     const user = req.user;
     const userWithFollowers = await User.findById(user._id)
