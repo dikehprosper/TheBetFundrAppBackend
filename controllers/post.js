@@ -268,14 +268,12 @@ const deletePost = async (req, res) => {
 const getSavedPost = async (req, res) => {
   try {
     const user = req.user;
-    const userWithSavedPosts = await User.findById(user._id)
-      .populate({ path: "savedPosts", populate: { path: "user" } })
-      .exec();
+    const savedPosts = await Post.find({ saves: user._id }).populate("user");
 
     return res.status(200).json({
       success: true,
       message: "Saved posts returned",
-      data: { savedPosts: userWithSavedPosts.savedPosts },
+      data: { savedPosts },
     });
   } catch (err) {
     return res.status(500).json({
@@ -293,7 +291,7 @@ const savePost = async (req, res) => {
     const post = await Post.findById(postId);
     if (post.saves.includes(user._id)) {
       await Post.findByIdAndUpdate(postId, { $pull: { saves: user._id } });
-      await User.findByIdAndUpdate(user._id, { $pull: { savedPost: postId } });
+      await User.findByIdAndUpdate(user._id, { $pull: { savedPosts: postId } });
 
       return res.status(200).json({ success: true, message: "Unsaved Post" });
     } else {
