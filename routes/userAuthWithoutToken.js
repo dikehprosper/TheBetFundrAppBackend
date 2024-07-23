@@ -81,11 +81,12 @@ router.post(
                     .status(400)
                     .send({ success: 400, message: "User already exists", status: 400 });
             }
-
+            let referrerIdMail
             if (referrerId) {
                 const user2 = await User.findOne({ tag: referrerId });
                 if (user2) {
                     user2.referrals.push(email);
+                    referrerIdMail = user2.email
                     await user2.save();
                 } else if (!user2) {
                     transactionInProgress = false;
@@ -96,6 +97,9 @@ router.post(
                     });
                 }
             }
+
+
+
 
             // Hash the password
             const hashedPassword = await bcryptjs.hash(password, 10);
@@ -123,7 +127,7 @@ router.post(
                 image: "",
                 tag: tag,
                 colorScheme: 2,
-                referer: referrerId ? referrerId: ""
+                referer: referrerIdMail ? referrerIdMail : ""
             });
 
        
@@ -229,7 +233,7 @@ router.post(
                     invalidateSession(existingUser.sessionId);
                 }
             }
-
+            const newSessionId = generateUniqueSessionId();
             // Set the user's session ID and isLoggedIn status
             existingUser.sessionId = newSessionId;
             existingUser.isLoggedIn = true;

@@ -32,8 +32,10 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
                 }),
             }
         );
-        console.log(response)
-        if (!response.ok) {
+        const response2 = await response.json()
+        console.log(response2, "responseresponse")
+
+        if (response2.responsemsg !== "PENDING" && response2.responsemsg !== "SUCCESSFUL") {
             const result = {
                 status: "Failed",
                 transactionId: newUuid
