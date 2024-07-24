@@ -33,7 +33,7 @@ const getPostDetails = async (req, res) => {
     const post = await Post.findById(postId)
       .populate("user")
       .populate("views")
-      .exec();
+      .lean();
 
     return successResponse(res, "Post returned successfully", { post });
   } catch (err) {
@@ -48,7 +48,7 @@ const getRandomPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("user")
       .populate("views")
-      .exec();
+      .lean();
 
     return successResponse(res, "Posts returned", { posts });
   } catch (err) {
@@ -67,7 +67,7 @@ const getFollowingPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("user")
       .populate("views")
-      .exec();
+      .lean();
 
     return successResponse(res, "Following Posts returned", { followingPosts });
   } catch (err) {
@@ -82,7 +82,7 @@ const getMyPosts = async (req, res) => {
     const userPosts = await Post.find({ user: userId })
       .populate("user")
       .populate("views")
-      .exec();
+      .lean();
 
     return successResponse(res, "User posts returned", { posts: userPosts });
   } catch (err) {
@@ -99,7 +99,7 @@ const getMyLikedPosts = async (req, res) => {
     })
       .populate("user")
       .populate("views")
-      .exec();
+      .lean();
 
     return successResponse(res, "Liked Posts returned", { posts: likedPosts });
   } catch (err) {
@@ -131,7 +131,7 @@ const getMyComments = async (req, res) => {
       .populate("post")
       .populate({ path: "post", populate: { path: "user" } })
       .populate({ path: "post", populate: { path: "views" } })
-      .exec();
+      .lean();
 
     return successResponse(res, "My comments returned", {
       comments: myComments,
@@ -144,7 +144,7 @@ const getComments = async (req, res) => {
   try {
     const comments = await Comment.find({ post: postId })
       .populate("user")
-      .exec();
+      .lean();
 
     return successResponse(res, "Comments returned", {
       comments,
