@@ -1252,19 +1252,19 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           user
         });
       }
-      const userTransaction = {
-        status: "Successful",
-        registrationDateTime: date,
-        amount: amount,
-        totalAmount: amount,
-        betId: betId,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        identifierId: newUuid,
-        service: service,
-        paymentConfirmation: "Successful",
-        network: network,
-      };
+      // const userTransaction = {
+      //   status: "Successful",
+      //   registrationDateTime: date,
+      //   amount: amount,
+      //   totalAmount: amount,
+      //   betId: betId,
+      //   momoNumber: momoNumber,
+      //   fundingType: "deposits",
+      //   identifierId: newUuid,
+      //   service: service,
+      //   paymentConfirmation: "Successful",
+      //   network: network,
+      // };
 
       user.transactionHistory.push(userTransaction);
       admin.transactionHistory.push({
