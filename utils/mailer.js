@@ -24,6 +24,8 @@ async function SendEmail({ email, emailType, userId, fullname }) {
 
     const expiryTime = Date.now() + twoHoursInMillis;
 
+
+    
     if (emailType === "RESET") {
       await User.findByIdAndUpdate(userId, {
         forgotPasswordToken: encodedHash,
