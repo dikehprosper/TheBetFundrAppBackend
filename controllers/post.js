@@ -60,9 +60,9 @@ const getFollowingPosts = async (req, res) => {
   const user = req.user;
 
   try {
-    const user = await User.findById(user._id);
+    const userData = await User.findById(user._id);
 
-    const followingPosts = await Post.find({ _id: { $in: user.following } })
+    const followingPosts = await Post.find({ _id: { $in: userData.following } })
       .limit(20)
       .sort({ createdAt: -1 })
       .populate("user")
