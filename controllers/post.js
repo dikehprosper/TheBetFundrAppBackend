@@ -44,7 +44,6 @@ const getPostDetails = async (req, res) => {
 const getRandomPosts = async (req, res) => {
   try {
     const posts = await Post.find()
-      .limit(20)
       .sort({ createdAt: -1 })
       .populate("user")
       .populate("views")
@@ -62,8 +61,9 @@ const getFollowingPosts = async (req, res) => {
   try {
     const userData = await User.findById(user._id);
 
-    const followingPosts = await Post.find({ _id: { $in: userData.following } })
-      .limit(20)
+    const followingPosts = await Post.find({
+      user: { $in: userData.following },
+    })
       .sort({ createdAt: -1 })
       .populate("user")
       .populate("views")
