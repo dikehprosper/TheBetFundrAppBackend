@@ -69,7 +69,9 @@ const getFollowingPosts = async (req, res) => {
       .populate("views")
       .lean();
 
-    return successResponse(res, "Following Posts returned", { followingPosts });
+    return successResponse(res, "Following Posts returned", {
+      posts: followingPosts,
+    });
   } catch (err) {
     return serverErrorResponse(res, err);
   }
