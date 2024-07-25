@@ -20,6 +20,9 @@ function getCurrentUTCTimestamp() {
 }
 
 
+
+
+
 async function generateSHA256(string) {
     const encoder = new TextEncoder();
     const data = encoder.encode(string);
@@ -29,9 +32,15 @@ async function generateSHA256(string) {
     return hashHex;
 }
 
+
+
+
+
+
 function generateMD5(string) {
     return CryptoJS.MD5(string).toString();
 }
+
 const cashierpass = process.env.MOBCASH_CASHIERPASS;
 const hash = process.env.MOBCASH_HASH;
 const lng = 'fr';
@@ -93,9 +102,10 @@ async function rechargeAccount(userid, amount) {
     });
 
     const responseData = await response.json();
-    // console.log("Response:", responseData);
+    console.log("Response:", responseData);
     return responseData;
 }
+
 
 async function withdrawFromAccount(userid, code) {
     const { finalSignature, confirm } = await generateSignatures2(userid, code);
@@ -144,8 +154,7 @@ async function generateSignaturesForBalance(dt) {
 
 
 async function checkBalance() {
-   const dt = getCurrentUTCTimestamp()
-    console.log("dtsss:", dt);
+    const dt = getCurrentUTCTimestamp()
     const { finalSignature, confirm } = await generateSignaturesForBalance(dt);
     // console.log("finalSignature:", finalSignature);
     const url = `https://partners.servcul.com/CashdeskBotAPI/Cashdesk/${cashdeskid}/Balance?confirm=${confirm}&dt=${dt}`;
@@ -153,8 +162,6 @@ async function checkBalance() {
         "Content-Type": "application/json",
         "Sign": finalSignature
     };
-    // console.log("Request URL:", url);
-    // console.log("Request Headers:", headers);
 
     const response = await fetch(url, {
         method: 'GET',
@@ -165,6 +172,8 @@ async function checkBalance() {
     console.log("Response:", responseData);
     return responseData;
 }
+
+
 
 
 

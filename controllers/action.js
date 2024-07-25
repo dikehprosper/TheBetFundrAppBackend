@@ -8,7 +8,7 @@ const Post = require("../models/post");
     const user = req.user;
     const userWithFollowers = await User.findById(user._id)
       .populate(["followers", "following"])
-      .exec();
+      .lean();
 
     return res.status(200).json({
       success: true,

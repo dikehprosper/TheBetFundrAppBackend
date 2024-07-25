@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 
 /* eslint-disable no-inner-declarations */
@@ -9,11 +10,15 @@ const router = express.Router();
 const User = require("../models/user");
 const bcryptjs = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
+const AdminUser = require("../models/admin");
+const { makePaymentRequest } = require("../helpers/makePaymentRequest");
 const jwt = require("jsonwebtoken");
+const QrCodeDeposits = require("../models/generateQrCode");
+const { getDate, getDateInOneHour } = require("../utils/date");
 const date = new Date();
 // const { FedaPay, Customer } = require("fedapay");
 const { check, validationResult } = require("express-validator");
-
+const SendEmail = require("../utils/mailer");
 require("dotenv").config();
 // FedaPay.setApiKey(process.env.FEDAPAY_KEY1);
 // FedaPay.setEnvironment(process.env.ENVIRONMENT1);
@@ -76,11 +81,12 @@ router.post(
                     .status(400)
                     .send({ success: 400, message: "User already exists", status: 400 });
             }
-
+            let referrerIdMail
             if (referrerId) {
                 const user2 = await User.findOne({ tag: referrerId });
                 if (user2) {
                     user2.referrals.push(email);
+                    referrerIdMail = user2.email
                     await user2.save();
                 } else if (!user2) {
                     transactionInProgress = false;
@@ -91,6 +97,9 @@ router.post(
                     });
                 }
             }
+
+
+
 
             // Hash the password
             const hashedPassword = await bcryptjs.hash(password, 10);
@@ -118,7 +127,7 @@ router.post(
                 image: "",
                 tag: tag,
                 colorScheme: 2,
-                referer: referrerId ? referrerId: ""
+                referer: referrerIdMail ? referrerIdMail : ""
             });
 
        
@@ -215,8 +224,7 @@ router.post(
                 });
             }
 
-            // Generate a new session ID using the 'uuid' library
-            const newSessionId = generateUniqueSessionId();
+          
 
             // Check for existing session and invalidate it
             if (existingUser.isAdmin === false) {
@@ -225,7 +233,7 @@ router.post(
                     invalidateSession(existingUser.sessionId);
                 }
             }
-
+            const newSessionId = generateUniqueSessionId();
             // Set the user's session ID and isLoggedIn status
             existingUser.sessionId = newSessionId;
             existingUser.isLoggedIn = true;
@@ -297,8 +305,581 @@ router.post("/resetPassword", async (req, res) => {
     }
 });
 
+router.post(
+    "/checkQRCodeValidity",
+    checkOngoingTransaction,
+    async (req, res) => {
+        try {
+            const qrId = req.body.qrId;
+            console.log(qrId, "pppppppppppppp");
+            // Retrieve QR code data from the database based on qrId
+            const qrCodeData = await QrCodeDeposits.findOne({ _id: qrId });
+            console.log(qrCodeData);
+
+            if (!qrCodeData) {
+                return res
+                    .status(404)
+                    .json({ success: 404, message: "QR code not found", status: 404 });
+            }
+
+            // Get current time
+            const currentTimeMillis = new Date(getDate()).getTime();
+            const qrCodeDataVaidUntilTimeMillis = new Date(
+                qrCodeData.validUntil
+            ).getTime();
+
+            // Compare current time with expiration time
+            if (currentTimeMillis < qrCodeDataVaidUntilTimeMillis) {
+                console.log("first checkkkkkkk");
+                const data = {
+                    fullname: qrCodeData.fullname,
+                    amount: qrCodeData.amount,
+                    betId: qrCodeData.betId,
+                    email: qrCodeData.email,
+                    createdAt: qrCodeData.createdAt,
+                    validUntil: qrCodeData.validUntil,
+                    used: qrCodeData.used,
+                    qrcodeStatus: qrCodeData.qrcodeStatus,
+                    service: qrCodeData.service,
+                    paymentConfirmation: qrCodeData.paymentConfirmation,
+                    id: qrCodeData._id,
+                };
+
+                res.setHeader("Cache-Control", "no-store");
+
+                return res.status(200).json({
+                    success: true,
+                    message: "QR code is still valid",
+                    status: 200,
+                    data,
+                });
+            } else {
+                qrCodeData.qrcodeStatus = "Expired";
+                await qrCodeData.save();
+                return res
+                    .status(400)
+                    .json({ success: 400, message: "QR code has expired", status: 400 });
+            }
+        } catch (error) {
+            console.error("Error checking QR code validity:", error);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    }
+);
+
+router.get("/getQRCode", async (req, res) => {
+    try {
+        console.log("done");
+        const qrCodeDeposits = await QrCodeDeposits.find({});
+
+        if (!qrCodeDeposits || qrCodeDeposits.length === 0) {
+            return res
+                .status(404)
+                .json({ success: false, message: "No QR codes found", status: 404 });
+        }
+
+        // Iterate through the QR code deposits and prepare the data to send in the response
+        const qrCodeDataArray = qrCodeDeposits.map((qrCodeData) => ({
+            id: qrCodeData._id,
+        }));
+
+        res.setHeader("Cache-Control", "no-store");
+        return res.status(200).json({
+            success: true,
+            message: "QR codes retrieved successfully",
+            status: 200,
+            data: qrCodeDataArray,
+        });
+    } catch (error) {
+        console.error("Error checking QR code validity:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
 
 
+router.post("/noLogindeposit", checkOngoingTransaction, async (req, res) => {
+    try {
+        transactionInProgress = true;
+        const { momoNumber, network, id } = req.body;
+        console.log(network, "hbvjbvd");
+        const bonusBalance = null;
+
+        let updatedAmount;
+
+        if (bonusBalance === null) {
+            // Uncomment below code to fetch user and perform additional checks if required
+            const qrCodeData = await QrCodeDeposits.findOne({ _id: id });
+            console.log(qrCodeData);
+            const email = qrCodeData.email;
+            const user = await User.findOne({ email });
+
+            console.log(qrCodeData, email);
+            updatedAmount = qrCodeData.amount;
+            if (qrCodeData.qrcodeStatus === "Expired") {
+                transactionInProgress = false;
+                return res
+                    .status(505)
+                    .json({
+                        success: 505,
+                        message: "transaction is expired",
+                        status: 505,
+                    });
+            }
+
+            if (!user) {
+                transactionInProgress = false;
+                return res
+                    .status(401)
+                    .json({ success: 401, message: "User not found", status: 401 });
+            }
+            if (!user.isActivated) {
+                transactionInProgress = false;
+                return res
+                    .status(502)
+                    .json({ success: 502, message: "User is deactivated", status: 502 });
+            }
+
+
+
+            // Find available admin
+            const admin = await AdminUser.findOne({ isAdmin: true });
+            if (admin.isDepositsOpen === false) {
+                transactionInProgress = false;
+                return res
+                    .status(504)
+                    .json({
+                        success: 504,
+                        message: "currently under maintainance",
+                        status: 504,
+                    });
+            }
+            const date = new Date();
+            const newUuid = generateUniqueShortUuid(15);
+            const fullname = user.fullname
+
+            // Check for similar transactions in the last 5 minutes
+            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000); // Corrected the time calculation
+
+            const recentTransaction = admin.transactionHistory.find(transaction => {
+                console.log('Checking transaction:', transaction);
+
+                const betIdMatch = transaction.betId === qrCodeData.betId;
+                const amountMatch = parseFloat(transaction.amount) === parseFloat(qrCodeData.amount);
+                const paymentConfirmationMatch = transaction.paymentConfirmation === "Successful";
+                const statusMatch = transaction.status === "Successful";
+                const registrationTimeCheck = new Date(transaction.registrationDateTime) >= fiveMinutesAgo;
+                const isRecent = (
+                    betIdMatch &&
+                    amountMatch &&
+                    paymentConfirmationMatch &&
+                    statusMatch &&
+                    registrationTimeCheck
+                );
+
+                console.log('Overall condition:', isRecent);
+                return isRecent;
+            });
+
+            if (recentTransaction !== undefined) {
+                const userTransaction = {
+                    status: "Failed",
+                    registrationDateTime: date,
+                    momoNumber: momoNumber,
+                    service: qrCodeData.service,
+                    paymentConfirmation: "Pending",
+                    authenticatedDeposit: false,
+                    QrCodeDepositsId: qrCodeData._id,
+                    network: network,
+                    amount: qrCodeData.amount,
+                    totalAmount: qrCodeData.amount,
+                    betId: qrCodeData.betId,
+                    fundingType: "deposits",
+                    identifierId: newUuid,
+                    customErrorCode: 300,
+            
+                };
+                user.transactionHistory.push(userTransaction);
+                admin.transactionHistory.push({
+                    userid: user._id,
+                    status: "Failed",
+                    registrationDateTime: date,
+                    network: network,
+                    amount: qrCodeData.amount,
+                    totalAmount: qrCodeData.amount,
+                    betId: qrCodeData.betId,
+                    // momoName: momoName,
+                    momoNumber: momoNumber,
+                    fundingType: "deposits",
+                    identifierId: newUuid,
+                    userEmail: email,
+                    subadminEmail: "none",
+                    service: service,
+                    paymentConfirmation: "Failed",
+                    customErrorCode: 300,
+                    authenticatedDeposit: false,
+                    QrCodeDepositsId: qrCodeData._id,
+                });
+
+                await admin.save();
+                await user.save();
+                console.log("done")
+                // Return a JSON response with the transaction status
+                transactionInProgress = false;
+                return res.status(508).json({
+                    success: 508,
+                    message: "failed to generate",
+                    userTransaction,
+                    user
+                });
+            }
+            // console.log("API Response:");
+            const result = await makePaymentRequest(updatedAmount, "67634291", network, fullname, newUuid
+            );
+            console.log("API Response:", result);
+
+
+
+            if (result.status !== "SUCCESSFUL") {
+                if (result.status === 'PENDING') {
+                    const userTransaction = {
+                        status: "Pending",
+                        registrationDateTime: date,
+                        momoNumber: momoNumber,
+                        fundingType: "deposits",
+                        identifierId: newUuid,
+                        network: network,
+                        paymentConfirmation: "Pending",
+                        customErrorCode: 302,
+                        transactionId: newUuid,
+                        createdAt: date,
+                        amount: qrCodeData.amount,
+                        totalAmount: qrCodeData.amount,
+                        betId: qrCodeData.betId,
+                        service: qrCodeData.service,
+                        authenticatedDeposit: false,
+                        QrCodeDepositsId: qrCodeData._id,
+                    };
+                    user.transactionHistory.push(userTransaction);
+                    admin.transactionHistory.push({
+                        userid: user._id,
+                        status: "Pending",                   
+                          registrationDateTime: date,
+                        momoNumber: momoNumber,
+                        fundingType: "deposits",
+                        identifierId: newUuid,
+                        userEmail: email,
+                        subadminEmail: "none",
+                        paymentConfirmation: "Pending",
+                        customErrorCode: 302,
+                        network: network,
+                        amount: qrCodeData.amount,
+                        totalAmount: qrCodeData.amount,
+                        betId: qrCodeData.betId,
+                        service: qrCodeData.service,
+                        authenticatedDeposit: false,
+                        QrCodeDepositsId: qrCodeData._id,
+                    });
+                    admin.pendingTransactions.push({
+                        userid: user._id,
+                        status: "Pending", 
+                        registrationDateTime: date,
+                        momoNumber: momoNumber,
+                        fundingType: "deposits",
+                        identifierId: newUuid,
+                        userEmail: email,
+                        subadminEmail: "none",
+                        paymentConfirmation: "Pending",
+                        customErrorCode: 302,
+                        network: network,
+                        amount: qrCodeData.amount,
+                        totalAmount: qrCodeData.amount,
+                        betId: qrCodeData.betId,
+                        service: qrCodeData.service,
+                        // authenticatedDeposit: false,
+                        // QrCodeDepositsId: qrCodeData._id,
+                    });
+
+                    await admin.save();
+                    await user.save();
+                    qrCodeData.used = true;
+                    await qrCodeData.save();
+                    // Return a JSON response with the transaction status
+                    transactionInProgress = false;
+                    return res
+                        .status(209)
+                        .json({
+                            success: 209,
+                            message: "failed to generate",
+                            userTransaction,
+                            user
+                        });
+                } else {
+                    const userTransaction = {
+                        fundingType: "deposits",
+                        identifierId: newUuid,
+                        paymentConfirmation: "Failed",
+                        customErrorCode: 302,
+                        status: "Failed",
+                        registrationDateTime: date,
+                        momoNumber: momoNumber,
+                        network: network,
+                        transactionId: newUuid,
+                        createdAt: date,
+                        amount: qrCodeData.amount,
+                        totalAmount: qrCodeData.amount,
+                        betId: qrCodeData.betId,
+                        service: qrCodeData.service,
+                        authenticatedDeposit: false,
+                        QrCodeDepositsId: qrCodeData._id,
+                    };
+                    user.transactionHistory.push(userTransaction);
+                    admin.transactionHistory.push({
+                        network: network,
+                      
+                        fundingType: "deposits",
+                        identifierId: newUuid,
+                        userEmail: email,
+                        subadminEmail: "none",
+                        customErrorCode: 302,
+                        userid: user._id,
+                        status: "Failed",
+                        registrationDateTime: date,
+                        amount: qrCodeData.amount,
+                        totalAmount: qrCodeData.amount,
+                        betId: qrCodeData.betId,
+                        // momoName: momoName,
+                        momoNumber: momoNumber,
+                        service: qrCodeData.service,
+                        paymentConfirmation: "Failed",
+                        authenticatedDeposit: false,
+                        QrCodeDepositsId: qrCodeData._id,
+                    });
+
+                    await admin.save();
+                    await user.save();
+                    // Return a JSON response with the transaction status
+                    transactionInProgress = false;
+                    return res
+                        .status(209)
+                        .json({
+                            success: 209,
+                            message: "failed to generate",
+                            userTransaction,
+                            user
+                        });
+                }
+
+            }
+
+
+
+            const response = await rechargeAccount(betId, amount);
+            if (response.Success === false && response.MessageId === 100337) {
+                const userTransaction = {
+                    status: "Pending",
+                    registrationDateTime: date,
+                    network: network,
+                    paymentConfirmation: "Successful",
+                    customErrorCode: 300,
+                    amount: qrCodeData.amount,
+                    totalAmount: qrCodeData.amount,
+                    betId: qrCodeData.betId,
+                    // momoName: momoName,
+                    momoNumber: momoNumber,
+                    fundingType: "deposits",
+                    identifierId: newUuid,
+                    service: qrCodeData.service,
+                    authenticatedDeposit: false,
+                    QrCodeDepositsId: qrCodeData._id,
+                };
+                user.transactionHistory.push(userTransaction);
+                admin.transactionHistory.push({
+                    userid: user._id,
+                    status: "Pending",
+                    momoNumber: momoNumber,
+                    fundingType: "deposits",
+                    identifierId: newUuid,
+                    userEmail: email,
+                    network: network,
+                    subadminEmail: "none",
+                    paymentConfirmation: "Successful",
+                    customErrorCode: 300,
+                    amount: qrCodeData.amount,
+                    totalAmount: qrCodeData.amount,
+                    betId: qrCodeData.betId,
+                    service: qrCodeData.service,
+                    authenticatedDeposit: false,
+                    QrCodeDepositsId: qrCodeData._id,
+                });
+                qrCodeData.used = true;
+                await qrCodeData.save();
+                await admin.save();
+                await user.save();
+        
+                transactionInProgress = false
+                return res.status(200).json({
+                    success: true,
+                    message: "Transaction wasnt fully completed",
+                    userTransaction,
+                    user
+                });
+            }
+      
+
+            if (response.Success === false && response.MessageId === 100323) {
+                const userTransaction = {
+                    status: "Pending",
+                    registrationDateTime: date,
+                    network: network,
+                    paymentConfirmation: "Successful",
+                    customErrorCode: 301,
+                    amount: qrCodeData.amount,
+                    totalAmount: qrCodeData.amount,
+                    betId: qrCodeData.betId,
+                    // momoName: momoName,
+                    momoNumber: momoNumber,
+                    fundingType: "deposits",
+                    identifierId: newUuid,
+                    service: qrCodeData.service,
+                    authenticatedDeposit: false,
+                    QrCodeDepositsId: qrCodeData._id,
+                };
+                user.transactionHistory.push(userTransaction);
+                admin.transactionHistory.push({
+                    userid: user._id,
+                    status: "Pending",
+                    momoNumber: momoNumber,
+                    fundingType: "deposits",
+                    identifierId: newUuid,
+                    userEmail: email,
+                    network: network,
+                    subadminEmail: "none",
+                    paymentConfirmation: "Successful",
+                    customErrorCode: 301,
+                    amount: qrCodeData.amount,
+                    totalAmount: qrCodeData.amount,
+                    betId: qrCodeData.betId,
+                    service: qrCodeData.service,
+                    authenticatedDeposit: false,
+                    QrCodeDepositsId: qrCodeData._id,
+                });
+                await admin.save();
+                await user.save();
+                qrCodeData.used = true;
+
+                await qrCodeData.save();
+                transactionInProgress = false
+                return res.status(200).json({
+                    success: true,
+                    message: "Transaction wasnt fully completed",
+                    userTransaction,
+                    user
+                });
+            }
+
+            if (response.Success === false) {
+                const userTransaction = {
+                    status: "Pending",
+                    registrationDateTime: date,
+                    network: network,
+                    paymentConfirmation: "Successful",
+                    amount: qrCodeData.amount,
+                    totalAmount: qrCodeData.amount,
+                    betId: qrCodeData.betId,
+                    // momoName: momoName,
+                    momoNumber: momoNumber,
+                    fundingType: "deposits",
+                    identifierId: newUuid,
+                    service: qrCodeData.service,
+                    authenticatedDeposit: false,
+                    QrCodeDepositsId: qrCodeData._id,
+                };
+                user.transactionHistory.push(userTransaction);
+                admin.transactionHistory.push({
+                    userid: user._id,
+                    status: "Pending",
+                    momoNumber: momoNumber,
+                    fundingType: "deposits",
+                    identifierId: newUuid,
+                    userEmail: email,
+                    network: network,
+                    subadminEmail: "none",
+                    paymentConfirmation: "Successful",
+                    amount: qrCodeData.amount,
+                    totalAmount: qrCodeData.amount,
+                    betId: qrCodeData.betId,
+                    service: qrCodeData.service,
+                    authenticatedDeposit: false,
+                    QrCodeDepositsId: qrCodeData._id,
+                });
+                qrCodeData.used = true;
+
+                await qrCodeData.save();
+                await admin.save();
+                await user.save();
+                transactionInProgress = false
+                return res.status(200).json({
+                    success: true,
+                    message: "Transaction wasnt fully completed",
+                    userTransaction,
+                    user
+                });
+            }
+
+
+            const userTransaction = {
+                status: "Successful",
+                registrationDateTime: date,
+                network: network,
+                paymentConfirmation: "Successful",
+                amount: qrCodeData.amount,
+                totalAmount: qrCodeData.amount,
+                betId: qrCodeData.betId,
+                // momoName: momoName,
+                momoNumber: momoNumber,
+                fundingType: "deposits",
+                identifierId: newUuid,
+                service: qrCodeData.service,
+                authenticatedDeposit: false,
+                QrCodeDepositsId: qrCodeData._id,
+            };
+            user.transactionHistory.push(userTransaction);
+            admin.transactionHistory.push({
+                userid: user._id,
+                status: "Successful",
+                momoNumber: momoNumber,
+                fundingType: "deposits",
+                identifierId: newUuid,
+                userEmail: email,
+                network: network,
+                subadminEmail: "none",
+                paymentConfirmation: "Successful",
+                amount: qrCodeData.amount,
+                totalAmount: qrCodeData.amount,
+                betId: qrCodeData.betId,
+                service: qrCodeData.service,
+                authenticatedDeposit: false,
+                QrCodeDepositsId: qrCodeData._id,
+            });
+           
+            qrCodeData.used = true;
+
+            await qrCodeData.save();
+            await admin.save();
+            await user.save();
+
+            // Return a JSON response with the transaction status
+            transactionInProgress = false;
+            res
+                .status(200)
+                .json({ success: true, message: "transaction generated successfully" });
+        }
+    } catch (error) {
+        transactionInProgress = false;
+        console.error("Error completing the request for deposit:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
 
 
 // Function to invalidate a session (update the database record)
@@ -338,3 +919,14 @@ function generateUniqueSessionId() {
 }
 
 module.exports = router;
+
+function generateUniqueShortUuid(length) {
+    const timestamp = Date.now().toString(36); // Convert current timestamp to a base-36 string
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let randomString = '';
+    for (let i = 0; i < length - timestamp.length; i++) {
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        randomString += chars[randomIndex];
+    }
+    return timestamp + randomString;
+}

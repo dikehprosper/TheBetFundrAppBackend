@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-undef */
 const express = require("express");
 const verifyToken = require("../verifyToken");
 const {
