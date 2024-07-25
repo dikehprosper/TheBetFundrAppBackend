@@ -21,7 +21,7 @@ admin.initializeApp(
     credential: admin.credential.cert(require("../service-account-file.json")),
     storageBucket: "gs://groupchat-d6de7.appspot.com",
   },
-  "post",
+  "post"
 );
 
 // getters
@@ -57,10 +57,10 @@ const getRandomPosts = async (req, res) => {
 };
 
 const getFollowingPosts = async (req, res) => {
-  const userId = req.query.userId;
+  const user = req.user;
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(user._id);
 
     const followingPosts = await Post.find({ _id: { $in: user.following } })
       .limit(20)
@@ -181,7 +181,9 @@ const createPost = async (req, res) => {
     // Function to upload a file
     const uploadFile = async (file) => {
       const bucket = admin.storage().bucket();
-      const newFileName = `${existingUser._id}-${Date.now()}-${file.originalname}`;
+      const newFileName = `${existingUser._id}-${Date.now()}-${
+        file.originalname
+      }`;
       const fileUpload = bucket.file(`postMedia/${newFileName}`);
 
       let buffer;
@@ -208,7 +210,9 @@ const createPost = async (req, res) => {
 
         blobStream.on("finish", async () => {
           await fileUpload.makePublic();
-          const publicUrl = `https://storage.googleapis.com/${bucket.name}/postMedia/${encodeURIComponent(newFileName)}`;
+          const publicUrl = `https://storage.googleapis.com/${
+            bucket.name
+          }/postMedia/${encodeURIComponent(newFileName)}`;
           resolve({
             url: publicUrl,
             type: file.mimetype.startsWith("image") ? "image" : "video",
