@@ -30,7 +30,6 @@ async function SendEmail({ email, emailType, userId, fullname }) {
         forgotPasswordTokenExpiry: expiryTime,
       });
     }
-
     const generateRandomPin = () => {
       const pinDigits = Array.from({ length: 5 }, () =>
         Math.floor(Math.random() * 10)
