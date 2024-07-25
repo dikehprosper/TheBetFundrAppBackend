@@ -4,7 +4,7 @@ require("dotenv").config();
 const AWS = require("aws-sdk");
 const bcryptjs = require("bcryptjs");
 const User = require("../models/user");
-const DOMAIN = "https://betfundr.com"
+// const DOMAIN = "https://betfundr.com"
 
 async function SendEmail({ email, emailType, userId, fullname }) {
   console.log("third check");
