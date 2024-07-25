@@ -4,12 +4,16 @@ require("dotenv").config();
 const AWS = require("aws-sdk");
 const bcryptjs = require("bcryptjs");
 const User = require("../models/user");
-// const DOMAIN = "https://betfundr.com"
+const DOMAIN = "https://betfundr.com"
 
 async function SendEmail({ email, emailType, userId, fullname }) {
   console.log("third check");
   try {
     const hashedToken = await bcryptjs.hash(userId.toString(), 10);
+
+    const encodedHash = encodeURIComponent(hashedToken);
+
+    console.log(encodedHash, "encodedHash")
     const randomNumbers = Array.from(
       { length: 4 },
       () => Math.floor(Math.random() * 9) + 1
@@ -22,7 +26,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
 
     if (emailType === "RESET") {
       await User.findByIdAndUpdate(userId, {
-        forgotPasswordToken: hashedToken,
+        forgotPasswordToken: encodedHash,
         forgotPasswordTokenExpiry: expiryTime,
       });
     }
@@ -48,7 +52,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
 
     if (emailType === "VERIFY") {
       await User.findByIdAndUpdate(userId, {
-        verifyToken: hashedToken,
+        verifyToken: encodedHash,
         verifyTokenExpiry: Date.now() + 86400000,
       });
     }
@@ -372,7 +376,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
             <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous</p>
             <div class="reset-link">
 
-                <a href="${DOMAIN}/resetpassword?token=${hashedToken}">
+                <a href="${DOMAIN}/resetpassword?token=${encodedHash}">
                               <div class="reset-link-inner">
                              RÉINITIALISEZ VOTRE MOT DE PASSE
                                           </div>
@@ -549,7 +553,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
             <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous</p>
             <div class="reset-link">
 
-                <a href="${DOMAIN}/resetpassword?token=${hashedToken}">
+                <a href="${DOMAIN}/resetpassword?token=${encodedHash}">
                               <div class="reset-link-inner">
                              RÉINITIALISEZ VOTRE MOT DE PASSE
                                           </div>
@@ -707,7 +711,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
             <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous</p>
             <div class="reset-link">
 
-                <a href="${DOMAIN}/resetpassword?token=${hashedToken}">
+                <a href="${DOMAIN}/resetpassword?token=${encodedHash}">
                               <div class="reset-link-inner">
                              RÉINITIALISEZ VOTRE MOT DE PASSE
                                           </div>
