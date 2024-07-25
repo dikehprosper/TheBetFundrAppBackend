@@ -18,7 +18,7 @@ const { getDate, getDateInOneHour } = require("../utils/date");
 const date = new Date();
 // const { FedaPay, Customer } = require("fedapay");
 const { check, validationResult } = require("express-validator");
-
+const SendEmail = require("../utils/mailer");
 require("dotenv").config();
 // FedaPay.setApiKey(process.env.FEDAPAY_KEY1);
 // FedaPay.setEnvironment(process.env.ENVIRONMENT1);

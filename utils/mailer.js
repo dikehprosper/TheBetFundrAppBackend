@@ -4,6 +4,7 @@ require("dotenv").config();
 const AWS = require("aws-sdk");
 const bcryptjs = require("bcryptjs");
 const User = require("../models/user");
+const DOMAIN = "https://betfundr.com"
 
 async function SendEmail({ email, emailType, userId, fullname }) {
   console.log("third check");
@@ -371,7 +372,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
             <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous</p>
             <div class="reset-link">
 
-                <a href="${process.env.DOMAIN}/resetpassword?token=${hashedToken}">
+                <a href="${DOMAIN}/resetpassword?token=${hashedToken}">
                               <div class="reset-link-inner">
                              RÉINITIALISEZ VOTRE MOT DE PASSE
                                           </div>
@@ -548,7 +549,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
             <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous</p>
             <div class="reset-link">
 
-                <a href="${process.env.DOMAIN}/resetpassword?token=${hashedToken}">
+                <a href="${DOMAIN}/resetpassword?token=${hashedToken}">
                               <div class="reset-link-inner">
                              RÉINITIALISEZ VOTRE MOT DE PASSE
                                           </div>
@@ -706,7 +707,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
             <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous</p>
             <div class="reset-link">
 
-                <a href="${process.env.DOMAIN}/resetpassword?token=${hashedToken}">
+                <a href="${DOMAIN}/resetpassword?token=${hashedToken}">
                               <div class="reset-link-inner">
                              RÉINITIALISEZ VOTRE MOT DE PASSE
                                           </div>
