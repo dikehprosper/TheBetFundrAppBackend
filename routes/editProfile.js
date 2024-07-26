@@ -148,20 +148,8 @@ router.post(
   async (req, res) => {
     try {
       transactionInProgress = true;
-      const { fullname, email, number, fedapayId, betId } = req.body;
-      const numberPrefix = number.substring(0, 2);
-      const network = VerifyMobileNumber({ numberPrefix });
-      console.log(network);
-
-      if (network.length < 1) {
-        transactionInProgress = false;
-        return res.send({
-          success: 400,
-          message: "invalid number",
-          status: 400,
-        });
-      }
-
+      const { fullname, email, number, betId } = req.body;
+     
       // Check if the User  exists
       const user = await User.findOne({ email });
       if (!user.isActivated) {
@@ -174,27 +162,9 @@ router.post(
       }
 
       if (user.isUser === true) {
-        const apiUrl = `${process.env.APIURL1}${fedapayId}`;
-        const apiKey = process.env.FEDAPAY_KEY1;
-        console.log(apiUrl);
-        const response = await fetch(apiUrl, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            firstname: fullname.split(" ")[0],
-            lastname: fullname.split(" ")[1],
-            email: email,
-            phone_number: {
-              number: `+229${number}`,
-              country: "BJ",
-            },
-          }),
-        });
-        console.log(response.status);
-        if (response.status === 200) {
+      
+
+      
           user.fullname = fullname;
           user.email = email;
           user.number = number;
@@ -210,17 +180,6 @@ router.post(
               status: 210,
               user,
             });
-        }
-        if (response.status !== 200) {
-          transactionInProgress = false;
-          return res
-            .status(402)
-            .send({
-              success: 402,
-              message: "failed to update information on fedapay",
-              status: 402,
-            });
-        }
       }
     } catch (error) {
       transactionInProgress = false;
