@@ -2902,7 +2902,7 @@ function removeMinusFromSumma(apiResponse) {
 }
 function calculatePercentage(amount) {
   const threePercent = amount * 0.03;
-  const fifteenPercentOfThreePercent = threePercent * 0.15;
+  const fifteenPercentOfThreePercent = threePercent * 0.25;
   return fifteenPercentOfThreePercent;
 }
 function getEightyPercentOfResult(amount) {

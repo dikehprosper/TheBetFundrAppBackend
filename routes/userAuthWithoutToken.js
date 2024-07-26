@@ -378,10 +378,13 @@ router.get("/getQRCode", async (req, res) => {
                 .json({ success: false, message: "No QR codes found", status: 404 });
         }
 
-        // Iterate through the QR code deposits and prepare the data to send in the response
-        const qrCodeDataArray = qrCodeDeposits.map((qrCodeData) => ({
-            id: qrCodeData._id,
-        }));
+     
+
+        const qrCodeDataArray = qrCodeDeposits.filter(qrCodeData => qrCodeData.used === false && qrCodeData.qrcodeStatus === "Pending" )
+            .map(qrCodeData => ({
+                id: qrCodeData._id
+            }));
+
 
         res.setHeader("Cache-Control", "no-store");
         return res.status(200).json({
