@@ -44,7 +44,6 @@ const getPostDetails = async (req, res) => {
 const getRandomPosts = async (req, res) => {
   try {
     const posts = await Post.find()
-      .limit(20)
       .sort({ createdAt: -1 })
       .populate("user")
       .populate("views")
@@ -60,16 +59,19 @@ const getFollowingPosts = async (req, res) => {
   const user = req.user;
 
   try {
-    const user = await User.findById(user._id);
+    const userData = await User.findById(user._id);
 
-    const followingPosts = await Post.find({ _id: { $in: user.following } })
-      .limit(20)
+    const followingPosts = await Post.find({
+      user: { $in: userData.following },
+    })
       .sort({ createdAt: -1 })
       .populate("user")
       .populate("views")
       .lean();
 
-    return successResponse(res, "Following Posts returned", { followingPosts });
+    return successResponse(res, "Following Posts returned", {
+      posts: followingPosts,
+    });
   } catch (err) {
     return serverErrorResponse(res, err);
   }
