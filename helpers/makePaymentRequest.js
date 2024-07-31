@@ -27,7 +27,7 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
 
             // Set up the event listener
             paymentEvents.once('transactionReceived', (data) => {
-                if (!resolved && data.transRef === newUuid) {
+                if (!resolved && data.transref === newUuid) {
                     console.log('Transaction data received during payment request:', data);
                     clearTimeout(timeoutId);
                     resolved = true;

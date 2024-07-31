@@ -894,16 +894,16 @@ router.post("/noLogindeposit", checkOngoingTransaction, async (req, res) => {
 
 router.post("/deposit", async (req, res) => {
 
-    const { status, transRef, specialfield1, amount, serviceRef, code } = req.body;
+    const { status, transref, specialfield1, amount, serviceref, code } = req.body;
     // Emit an event when data is received
-    paymentEvents.emit('transactionReceived', { status, transRef, specialfield1, amount, serviceRef, code });
+    paymentEvents.emit('transactionReceived', { status, transref, specialfield1, amount, serviceref, code });
 
     console.log('Received transaction dataaaa:');
     console.log(`status: ${status}`);
-    console.log(`transRef: ${transRef}`);
+    console.log(`transref: ${transref}`);
     console.log(`specialfield1: ${specialfield1}`);
     console.log(`amount: ${amount}`);
-    console.log(`serviceRef: ${serviceRef}`);
+    console.log(`serviceref: ${serviceref}`);
     console.log(`code: ${code}`);
     // Here you can add logic to handle the transaction data, such as saving it to a database
 
