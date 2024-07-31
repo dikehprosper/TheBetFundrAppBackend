@@ -65,6 +65,7 @@ app.use("/api/users", verifyToken, authRoutes);
 app.use("/api/usersWithoutToken", authRoutesWithoutToken);
 app.use("/api/fixtures", fixtures);
 app.use("/api/users/actions", verifyToken, userActionRoutes);
+app.use("/api/usersWithoutToken", authRoutesWithoutToken);
 
 // MongoDB connection and server start
 const port = process.env.PORT || 5001;

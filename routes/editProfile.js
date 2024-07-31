@@ -162,9 +162,7 @@ router.post(
       }
 
       if (user.isUser === true) {
-      
-
-      
+    
           user.fullname = fullname;
           user.email = email;
           user.number = number;
