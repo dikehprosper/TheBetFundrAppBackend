@@ -73,12 +73,12 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
         const response2 = await response.json();
         console.log(response2, "Initial response");
 
-        // if (response2.responsemsg !== "PENDING" && response2.responsemsg !== "SUCCESSFUL") {
-        //     return {
-        //         status: "Failed",
-        //         transactionId: newUuid
-        //     };
-        // }
+        if (response2.responsemsg !== "PENDING" && response2.responsemsg !== "SUCCESSFUL") {
+            return {
+                status: "Failed",
+                transactionId: newUuid
+            };
+        }
 
         const transactionData = await waitForTransactionUpdate(newUuid);
 
