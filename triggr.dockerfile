@@ -1,24 +1,23 @@
+# Use the official Node.js 20 image from the Docker Hub
+FROM node:20-slim
 
-
-# Use an intermediate build stage to install dependencies
-FROM node:20 
+# Set the working directory inside the container
 WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
+
+# Install the dependencies
 RUN npm install
 
-# Use a smaller base image for the final stage
-FROM node:20-slim
-WORKDIR /usr/src/app
-COPY --from=builder /usr/src/app/node_modules ./node_modules
+# Copy the rest of the application code to the working directory
 COPY . .
-
 
 # Expose the port the application runs on
 EXPOSE 5001
 
 # Command to run the application
 CMD ["npm", "start"]
-
 
 
 
