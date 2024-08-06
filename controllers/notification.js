@@ -11,3 +11,5 @@ const getNotifications = async (req) => {
     return failureResponse(res, err);
   }
 };
+
+module.exports = { getNotifications };
