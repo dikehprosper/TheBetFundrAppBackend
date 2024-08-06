@@ -355,7 +355,7 @@ const likePost = async (req, res) => {
       const notification = await Notification.create({
         from: user._id,
         to: post.user._id,
-        description: `${user.name} has liked your post`,
+        description: `${user.fullname} has liked your post`,
         type: "like",
       });
 
@@ -364,7 +364,7 @@ const likePost = async (req, res) => {
         notification.from,
         "like",
         notification.description,
-        notification.createdAt
+        ""
       );
 
       return successResponse(res, "Post has been liked", { updatedPost });
