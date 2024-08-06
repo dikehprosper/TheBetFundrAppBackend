@@ -1,4 +1,10 @@
 const Notification = require("../models/notification");
+const {
+  serverErrorResponse,
+  successResponse,
+  failedResponse,
+} = require("../helpers/response.js");
+
 const getNotifications = async (req) => {
   try {
     const user = req.user();
@@ -8,7 +14,7 @@ const getNotifications = async (req) => {
       notifications: notifications,
     });
   } catch (err) {
-    return failureResponse(res, err);
+    return serverErrorResponse(res, err);
   }
 };
 
