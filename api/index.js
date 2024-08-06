@@ -63,15 +63,15 @@ io.on("connection", (socket) => {
 
 function sendNotification(to, from, type, message, time) {
   const socketId = connectedUsers.get(to);
-  if (socketId) {
-    io.emit("notification", {
-      to,
-      from,
-      type,
-      message,
-      createdAt: time,
-    });
-  }
+  // if (socketId) {
+  io.emit("notification", {
+    to,
+    from,
+    type,
+    message,
+    createdAt: time,
+  });
+  // }
 }
 
 app.post("/emit-live-games", (req, res) => {
