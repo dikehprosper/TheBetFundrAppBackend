@@ -5,6 +5,10 @@
 const fetch = require('node-fetch');
 const paymentEvents = require('./events');
 
+
+
+
+
 async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid) {
     function waitForTransactionUpdate(newUuid) {
         return new Promise((resolve) => {
@@ -53,6 +57,10 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
         const QOS_password = process.env.QOS_PASSWORD;
         const QOS_string_check_transaction = process.env.QOS_STRING_CHECK_TRANSACTION;
         const QOS_clientid = networkLowerCase === "mtn" ? process.env.QOS_CLIENTID1 : process.env.QOS_CLIENTID2;
+
+      
+     
+
 
         // Initial payment request
         const response = await fetch(QOS_string, {

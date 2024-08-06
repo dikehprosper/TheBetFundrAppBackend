@@ -28,6 +28,13 @@ const actionRoutes = require("../routes/action");
 const userActionRoutes = require("../routes/userAction");
 const verifyToken = require("../verifyToken");
 
+
+
+
+
+
+
+
 // Welcome route
 app.get("/", (req, res) => {
   res.send("Welcome to express");
