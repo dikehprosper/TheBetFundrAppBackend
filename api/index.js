@@ -27,13 +27,8 @@ const genarateQRCodeRoutes = require("../routes/QRCode");
 const actionRoutes = require("../routes/action");
 const userActionRoutes = require("../routes/userAction");
 const verifyToken = require("../verifyToken");
-
-
-
-
-
-
-
+const { getNotifications } = require("../controllers/notification");
+const connectedUsers = new Map();
 
 // Welcome route
 app.get("/", (req, res) => {
@@ -42,6 +37,7 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
   console.log("user connected");
+
   socket.on("fixtures", (msg) => {
     console.log("fixtures updated");
     io.emit("fixtures", msg);
@@ -49,7 +45,34 @@ io.on("connection", (socket) => {
   socket.on("live games", (msg) => {
     io.emit("live games", msg);
   });
+
+  socket.on("authenticate", (userId) => {
+    connectedUsers.set(userId, socket.id);
+  });
+
+  socket.on("disconnect", () => {
+    // Remove user from connectedUsers when they disconnect
+    for (let [userId, socketId] of connectedUsers.entries()) {
+      if (socketId === socket.id) {
+        connectedUsers.delete(userId);
+        break;
+      }
+    }
+  });
 });
+
+function sendNotification(to, from, type, message, time) {
+  const socketId = connectedUsers.get(to);
+  if (socketId) {
+    io.to(socketId).emit("notification", {
+      to,
+      from,
+      type,
+      message,
+      createdAt: time,
+    });
+  }
+}
 
 app.post("/emit-live-games", (req, res) => {
   const { data } = req.body;
@@ -63,6 +86,8 @@ app.post("/emit-fixtures", (req, res) => {
   res.sendStatus(200);
 });
 
+app.get("/api/notifications", verifyToken, getNotifications);
+
 app.use("/api/posts", verifyToken, post);
 app.use("/api/users", verifyToken, editProfileRoutes);
 app.use("/api/users", verifyToken, sendNotificationRoutes);
@@ -74,6 +99,7 @@ app.use("/api/fixtures", fixtures);
 app.use("/api/users/actions", verifyToken, userActionRoutes);
 app.use("/api/usersWithoutToken", authRoutesWithoutToken);
 
+module.exports = { io, sendNotification };
 // MongoDB connection and server start
 const port = process.env.PORT || 5001;
 mongoose
