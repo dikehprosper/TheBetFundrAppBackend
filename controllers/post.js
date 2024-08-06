@@ -11,6 +11,7 @@ const {
 const Post = require("../models/post.js");
 const User = require("../models/user.js");
 const Comment = require("../models/comment.js");
+const Notification = require("../models/notification.js");
 const { check } = require("express-validator");
 const admin = require("firebase-admin");
 const multer = require("multer");
