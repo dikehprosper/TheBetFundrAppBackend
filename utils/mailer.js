@@ -24,13 +24,14 @@ async function SendEmail({ email, emailType, userId, fullname }) {
 
     const expiryTime = Date.now() + twoHoursInMillis;
 
+
+
     if (emailType === "RESET") {
       await User.findByIdAndUpdate(userId, {
         forgotPasswordToken: encodedHash,
         forgotPasswordTokenExpiry: expiryTime,
       });
     }
-
     const generateRandomPin = () => {
       const pinDigits = Array.from({ length: 5 }, () =>
         Math.floor(Math.random() * 10)
@@ -78,7 +79,7 @@ async function SendEmail({ email, emailType, userId, fullname }) {
       let params = {
         Source: adminEmail,
         Destination: {
-          ToAddresses: ["dikehprosper@gmail.com"],
+          ToAddresses: [email],
         },
         ReplyToAddresses: [],
         Message: {

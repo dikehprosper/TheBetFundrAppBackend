@@ -28,6 +28,13 @@ const actionRoutes = require("../routes/action");
 const userActionRoutes = require("../routes/userAction");
 const verifyToken = require("../verifyToken");
 
+
+
+
+
+
+
+
 // Welcome route
 app.get("/", (req, res) => {
   res.send("Welcome to express");
@@ -65,6 +72,7 @@ app.use("/api/users", verifyToken, authRoutes);
 app.use("/api/usersWithoutToken", authRoutesWithoutToken);
 app.use("/api/fixtures", fixtures);
 app.use("/api/users/actions", verifyToken, userActionRoutes);
+app.use("/api/usersWithoutToken", authRoutesWithoutToken);
 
 // MongoDB connection and server start
 const port = process.env.PORT || 5001;

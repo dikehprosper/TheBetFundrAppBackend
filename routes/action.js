@@ -16,6 +16,9 @@ const { validateDepositRequest } = require("../helpers/checkVerificationForInput
 const { validateDepositRequest2 } = require("../helpers/checkVerificationForInput");
 const { rechargeAccount, checkBalance, withdrawFromAccount } = require('./mobcash');
 
+
+
+
 // add the current transaction to the user
 let transactionInProgress = false;
 // Middleware function to check if a transaction is in progress
@@ -2902,7 +2905,7 @@ function removeMinusFromSumma(apiResponse) {
 }
 function calculatePercentage(amount) {
   const threePercent = amount * 0.03;
-  const fifteenPercentOfThreePercent = threePercent * 0.15;
+  const fifteenPercentOfThreePercent = threePercent * 0.25;
   return fifteenPercentOfThreePercent;
 }
 function getEightyPercentOfResult(amount) {

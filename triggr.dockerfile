@@ -1,5 +1,5 @@
 # Use the official Node.js 20 image from the Docker Hub
-FROM node:20
+FROM node:20-slim
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
@@ -18,3 +18,6 @@ EXPOSE 5001
 
 # Command to run the application
 CMD ["npm", "start"]
+
+
+

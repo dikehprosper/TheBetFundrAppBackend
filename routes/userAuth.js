@@ -285,6 +285,62 @@ router.post(
   },
 );
 
+
+
+
+
+
+
+router.post(
+  "/getUpdatedData",
+  checkOngoingTransaction,
+  loginValidate,
+  async (req, res) => {
+    try {
+      transactionInProgress = true;
+      const { email } = req.body;
+
+      console.log(email, "pin, email");
+
+      // Check if the user already exists
+      const existingUser = await User.findOne({ email });
+      if (!existingUser) {
+        transactionInProgress = false;
+        return res
+          .status(501)
+          .send({ success: 501, message: "User does not exists", status: 501 });
+      }
+
+      if (!existingUser.isActivated) {
+        transactionInProgress = false;
+        return res
+          .status(502)
+          .send({ success: 502, message: "User is deactivated", status: 502 });
+      }
+
+      const savedUser = existingUser;
+
+      transactionInProgress = false;
+      res
+        .status(201)
+        .json({
+          success: true,
+          message: "Succesfully",
+          status: 201,
+          savedUser,
+        });
+    } catch (error) {
+      transactionInProgress = false;
+      console.error("Error logining in user:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
+
+
+
+
 router.post("/resetPasswordForLoggedInUser", async (req, res) => {
   try {
     const { email, password, newPassword } = req.body;
@@ -573,7 +629,7 @@ router.post("/getTotalReferral", async (req, res) => {
               user.image === ""
                 ? "https://firebasestorage.googleapis.com/v0/b/groupchat-d6de7.appspot.com/o/Untitled%20design%20(4)%20(1).png?alt=media&token=7f06a2ba-e4c5-49a2-a029-b6688c9be61d"
                 : user.image,
-            status: user.pinState === false ? "completed" : "pending",
+            status: user.pinState === false ? "Pending" : "Completed",
             time: user.registrationDateTime,
           };
         }
