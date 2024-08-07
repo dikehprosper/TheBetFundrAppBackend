@@ -169,6 +169,9 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 2,
   },
+  expoPushToken: {
+    type: String,
+  },
   bonus: {
     type: [
       {

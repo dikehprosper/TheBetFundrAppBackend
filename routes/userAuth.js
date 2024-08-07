@@ -104,7 +104,8 @@ router.post("/getUser", checkOngoingTransaction, async (req, res) => {
   try {
     console.log("processed");
     transactionInProgress = true;
-    const { token } = req.body;
+    const { token, expoPushToken } = req.body;
+    console.log(token, expoPushToken, "token, expoPushToken")
 
     let decodedToken;
     try {
@@ -126,6 +127,8 @@ router.post("/getUser", checkOngoingTransaction, async (req, res) => {
 
     // Check if the user already exists
     const existingUser = await User.findOne({ email: decodedToken.email });
+
+
     if (!existingUser) {
       transactionInProgress = false;
       return res
@@ -150,6 +153,13 @@ router.post("/getUser", checkOngoingTransaction, async (req, res) => {
         fullname: existingUser.fullname,
       });
     }
+
+    if (expoPushToken) {
+      existingUser.expoPushToken = expoPushToken;
+      await existingUser.save();
+    }
+
+    console.log(existingUser.expoPushToken, "existingUser.expoPushToken")
 
     // Generate a new session ID using the 'uuid' library
     const newSessionId = generateUniqueSessionId();
