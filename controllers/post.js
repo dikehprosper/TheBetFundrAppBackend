@@ -16,7 +16,7 @@ const { check } = require("express-validator");
 const admin = require("firebase-admin");
 const multer = require("multer");
 const sharp = require("sharp");
-const { sendNotification } = require("../api/index.js");
+const { sendNotification } = require("../helpers/notification");
 require("dotenv").config();
 admin.initializeApp(
   {
@@ -357,19 +357,24 @@ const likePost = async (req, res) => {
         to: post.user._id,
         description: `${user.fullname} has liked your post`,
         type: "like",
+        post: post._id,
       });
 
+      const from = await User.findById(user._id);
+      const to = await User.findById(notification.to);
+
       sendNotification(
-        notification.to,
-        notification.from,
+        to,
+        from,
         "like",
         notification.description,
-        ""
+        notification.createdAt
       );
 
       return successResponse(res, "Post has been liked", { updatedPost });
     }
   } catch (err) {
+    console.log(err);
     return serverErrorResponse(res, err);
   }
 };

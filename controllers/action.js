@@ -3,7 +3,7 @@
 const User = require("../models/user");
 const Post = require("../models/post");
 
- const getFollowers = async (req, res) => {
+const getFollowers = async (req, res) => {
   try {
     const user = req.user;
     const userWithFollowers = await User.findById(user._id)
@@ -88,4 +88,23 @@ const getUserData = async (req, res) => {
   }
 };
 
-module.exports = { followUser, getFollowers, getUserData };
+const updatePushToken = async (req, res) => {
+  const { pushToken } = req.body;
+  const user = req.user;
+  try {
+    await User.findByIdAndUpdate(user._id, { $set: { pushToken } });
+    console.log("push token updatd");
+    return res
+      .status(200)
+      .json({ success: true, message: "Push token updated" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      success: false,
+      message: "A server error has occurred",
+      error: err,
+    });
+  }
+};
+
+module.exports = { followUser, getFollowers, getUserData, updatePushToken };

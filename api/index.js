@@ -9,6 +9,8 @@ const { createServer } = require("http");
 const app = express();
 const server = createServer(app);
 const io = new Server(server, { maxHttpBufferSize: 1e8 });
+const connectedUsers = new Map();
+module.exports = { io, connectedUsers };
 
 require("dotenv").config();
 
@@ -28,7 +30,6 @@ const actionRoutes = require("../routes/action");
 const userActionRoutes = require("../routes/userAction");
 const verifyToken = require("../verifyToken");
 const { getNotifications } = require("../controllers/notification");
-const connectedUsers = new Map();
 
 // Welcome route
 app.get("/", (req, res) => {
@@ -47,6 +48,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("authenticate", (userId) => {
+    console.log(userId, socket.id);
     connectedUsers.set(userId, socket.id);
   });
 
@@ -60,19 +62,6 @@ io.on("connection", (socket) => {
     }
   });
 });
-
-function sendNotification(to, from, type, message, time) {
-  const socketId = connectedUsers.get(to);
-  if (socketId) {
-    io.emit("notification", {
-      to,
-      from,
-      type,
-      message,
-      createdAt: time,
-    });
-  }
-}
 
 app.post("/emit-live-games", (req, res) => {
   const { data } = req.body;
@@ -99,7 +88,6 @@ app.use("/api/fixtures", fixtures);
 app.use("/api/users/actions", verifyToken, userActionRoutes);
 app.use("/api/usersWithoutToken", authRoutesWithoutToken);
 
-module.exports = { io, sendNotification };
 // MongoDB connection and server start
 const port = process.env.PORT || 5001;
 mongoose
@@ -108,3 +96,5 @@ mongoose
     server.listen(port, () => console.log(`Server is running on port ${port}`));
   })
   .catch((err) => console.log(err));
+
+console.log("started");
