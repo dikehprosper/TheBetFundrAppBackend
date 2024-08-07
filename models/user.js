@@ -37,6 +37,7 @@ const UserSchema = new mongoose.Schema({
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   image: { type: String, default: "" },
   imageFileName: { type: String, default: "" },
+  pushToken: { type: String, default: "" },
   pinState: {
     type: Boolean,
     default: false,
@@ -159,7 +160,8 @@ const UserSchema = new mongoose.Schema({
   restrictedBonusBalance: {
     type: Number,
     default: 0,
-  }, disbursedBonusBalance: {
+  },
+  disbursedBonusBalance: {
     type: Number,
     default: 0,
   },
