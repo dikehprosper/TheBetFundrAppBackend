@@ -363,7 +363,7 @@ const likePost = async (req, res) => {
       const from = await User.findById(user._id);
       const to = await User.findById(notification.to);
 
-      sendNotification(
+      await sendNotification(
         to,
         from,
         "like",
@@ -391,7 +391,30 @@ const commentOnPost = async (req, res) => {
       description: comment,
     });
 
-    await Post.findByIdAndUpdate(postId, { $inc: { commentCount: 1 } });
+    const post = await Post.findByIdAndUpdate(postId, {
+      $inc: { commentCount: 1 },
+    }).populate("user");
+
+    // send notification to user
+    const notification = await Notification.create({
+      from: user._id,
+      to: post.user._id,
+      description: `${user.fullname} commented on your post`,
+      type: "comment",
+      post: post._id,
+    });
+
+    const from = await User.findById(user._id);
+    const to = await User.findById(notification.to);
+
+    await sendNotification(
+      to,
+      from,
+      "comment",
+      notification.description,
+      notification.createdAt
+    );
+
     return successResponse(res, "Commented on post successfully", {
       comment: commentCreated,
     });
