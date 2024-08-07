@@ -7,9 +7,9 @@ const sendNotification = async (to, from, type, message, time) => {
 
   let messages = [
     {
-      to: to.pushToken, // Example token
-      title: "sdjcjscdsknbcknd", // Notification title
-      body: "jdnjvkndnvjknv", // Notification body
+      to: to.expoPushToken, // Example token
+      title: type === "like" ? "A user liked your post" : "", // Notification title
+      body: message, // Notification body
     },
   ];
   try {
