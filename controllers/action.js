@@ -2,6 +2,8 @@
 /* eslint-disable no-undef */
 const User = require("../models/user");
 const Post = require("../models/post");
+const Notification = require("../models/notification");
+const { sendNotification } = require("../helpers/notification");
 
 const getFollowers = async (req, res) => {
   try {
@@ -56,6 +58,24 @@ const followUser = async (req, res) => {
           followers: user._id,
         },
       });
+
+      const notification = await Notification.create({
+        from: user._id,
+        to: userId,
+        description: `${user.fullname} followed you`,
+        type: "follow",
+      });
+
+      const from = await User.findById(user._id);
+      const to = await User.findById(notification.to);
+
+      await sendNotification(
+        to,
+        from,
+        "follow",
+        notification.description,
+        notification.createdAt
+      );
 
       return res.status(200).json({ success: true, message: "Followed User" });
     }

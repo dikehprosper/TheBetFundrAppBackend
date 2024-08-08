@@ -8,7 +8,11 @@ const {
 const getNotifications = async (req) => {
   try {
     const user = req.user();
-    const notifications = await Notification.find({ to: user._id });
+    const notifications = await Notification.find({ to: user._id }).populate([
+      "to",
+      "from",
+      "post",
+    ]);
 
     return successResponse(res, "Notifications returned", {
       notifications: notifications,

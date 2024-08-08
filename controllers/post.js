@@ -351,25 +351,27 @@ const likePost = async (req, res) => {
         $inc: { likeCount: 1 },
       });
 
-      // send notification to user
-      const notification = await Notification.create({
-        from: user._id,
-        to: post.user._id,
-        description: `${user.fullname} has liked your post`,
-        type: "like",
-        post: post._id,
-      });
+      if (user._id !== post.user._id) {
+        // send notification to user
+        const notification = await Notification.create({
+          from: user._id,
+          to: post.user._id,
+          description: `${user.fullname} has liked your post`,
+          type: "like",
+          post: post._id,
+        });
 
-      const from = await User.findById(user._id);
-      const to = await User.findById(notification.to);
+        const from = await User.findById(user._id);
+        const to = await User.findById(notification.to);
 
-      sendNotification(
-        to,
-        from,
-        "like",
-        notification.description,
-        notification.createdAt
-      );
+        await sendNotification(
+          to,
+          from,
+          "like",
+          notification.description,
+          notification.createdAt
+        );
+      }
 
       return successResponse(res, "Post has been liked", { updatedPost });
     }
@@ -391,7 +393,31 @@ const commentOnPost = async (req, res) => {
       description: comment,
     });
 
-    await Post.findByIdAndUpdate(postId, { $inc: { commentCount: 1 } });
+    const post = await Post.findByIdAndUpdate(postId, {
+      $inc: { commentCount: 1 },
+    }).populate("user");
+
+    if (user._id !== post.user._id) {
+      // send notification to user
+      const notification = await Notification.create({
+        from: user._id,
+        to: post.user._id,
+        description: `${user.fullname} commented on your post`,
+        type: "comment",
+        post: post._id,
+      });
+
+      const from = await User.findById(user._id);
+      const to = await User.findById(notification.to);
+
+      await sendNotification(
+        to,
+        from,
+        "comment",
+        notification.description,
+        notification.createdAt
+      );
+    }
     return successResponse(res, "Commented on post successfully", {
       comment: commentCreated,
     });
