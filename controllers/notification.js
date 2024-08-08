@@ -5,7 +5,7 @@ const {
   failedResponse,
 } = require("../helpers/response.js");
 
-const getNotifications = async (req) => {
+const getNotifications = async (req, res) => {
   try {
     const user = req.user();
     const notifications = await Notification.find({ to: user._id }).populate([
