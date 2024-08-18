@@ -1000,7 +1000,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           user
         });
       }
-      // console.log("API Response:");
+      console.log("API Response:");
       const result = await makePaymentRequest(amount, momoNumber, network, fullname, newUuid
       );
       console.log("API Response:", result);
