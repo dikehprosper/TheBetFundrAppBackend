@@ -8,16 +8,20 @@ const sendNotification = async (to, from, type, message, time) => {
   let messages = [
     {
       to: to.pushToken, // Example token
-      title: "sdjcjscdsknbcknd", // Notification title
-      body: "jdnjvkndnvjknv", // Notification body
+      title:
+        type === "like"
+          ? "A user liked your post"
+          : type === "follow"
+          ? "A user followed you"
+          : type === "comment"
+          ? "A user commented on your post"
+          : "", // Notification title
+      body: message, // Notification body
     },
   ];
   try {
     let ticketChunk = await expo.sendPushNotificationsAsync(messages);
-    console.log("Tickets:", ticketChunk); // Log the tickets to see the response
-  } catch (error) {
-    console.error("Error sending notification:", error);
-  }
+  } catch (error) {}
   if (socketId) {
     io.to(socketId).emit("notification", {
       to: to._id,
