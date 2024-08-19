@@ -50,7 +50,7 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
         const networkLowerCase = network.toLowerCase();
         const QOS_string = networkLowerCase === "mtn" ? process.env.QOS_STRING_FOR_MTN_PAYMENT : process.env.QOS_STRING_FOR_MOOV_PAYMENT;
         const QOS_username = networkLowerCase === "mtn" ? process.env.QOS_USERNAME1 : process.env.QOS_USERNAME2;
-        const QOS_password = process.env.QOS_PASSWORD;
+        const QOS_password = networkLowerCase === "mtn" ? process.env.QOS_PASSWORD1 : process.env.QOS_PASSWORD2;
         const QOS_string_check_transaction = process.env.QOS_STRING_CHECK_TRANSACTION;
         const QOS_clientid = networkLowerCase === "mtn" ? process.env.QOS_CLIENTID1 : process.env.QOS_CLIENTID2;
 
