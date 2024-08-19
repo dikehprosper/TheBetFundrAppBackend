@@ -2,15 +2,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-undef */
 // Assuming you have imported the necessary modules and paymentEvents
-const fetch = require('node-fetch');
 const paymentEvents = require('./events');
 
-
-
-
-
 async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid) {
-    console.log(amount, momoNumber, network, fullname, newUuid, "amount, momoNumber, network, fullname, newUuid")
+    const fetch = (await import('node-fetch')).default;
     function waitForTransactionUpdate(newUuid) {
         return new Promise((resolve) => {
             let resolved = false;  // Flag to prevent resolving the promise multiple times
@@ -60,6 +55,9 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
         const QOS_clientid = networkLowerCase === "mtn" ? process.env.QOS_CLIENTID1 : process.env.QOS_CLIENTID2;
 
 
+
+
+
         // Initial payment request
         const response = await fetch(QOS_string, {
             method: "POST",
@@ -76,16 +74,25 @@ async function makePaymentRequest(amount, momoNumber, network, fullname, newUuid
                 clientid: QOS_clientid,
             }),
         });
-        const response2 = await response.json();
-        console.log(response2, "Initial response");
+        let response2;
+        try {
+            response2 = await response.json(); // Try parsing the response as JSON
+            console.log(response2, "Initial response");
 
-        if (response2.responsemsg !== "PENDING" && response2.responsemsg !== "SUCCESSFUL") {
+            if (response2.responsemsg !== "PENDING" && response2.responsemsg !== "SUCCESSFUL") {
+                return {
+                    status: "Failed",
+                    transactionId: newUuid
+                };
+            }
+        } catch (error) {
+            // Handle the case where response is not JSON or parsing fails
+            console.error("Failed to parse response as JSON:", error);
             return {
                 status: "Failed",
                 transactionId: newUuid
             };
         }
-
         const transactionData = await waitForTransactionUpdate(newUuid);
 
         if (transactionData.status === null) {
