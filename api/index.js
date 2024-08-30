@@ -11,7 +11,7 @@ const server = createServer(app);
 const io = new Server(server, { maxHttpBufferSize: 1e8 });
 const connectedUsers = new Map();
 module.exports = { io, connectedUsers };
-
+app.use('/images', express.static('public/images'));
 require("dotenv").config();
 
 // Apply CORS to allow all origins

@@ -1375,6 +1375,81 @@ router.post("/deposit2", async (req, res) => {
     }
 });
 
+
+router.post("/checkPin2", async (req, res) => {
+    try {
+        const submittedPin = req.body.pin;
+        const userId = req.body.email;
+
+
+        const user = await User.findOne({ email: userId });
+        console.log(user.pinreset, submittedPin, "user")
+        if (user && user.pinreset === submittedPin) {
+            console.log("submittedPin");
+
+            if (user.pinExpiryTime > Date.now()) {
+                return res.status(201).send({
+                    success: true,
+                    message: "PIN verification successful",
+                    status: 201,
+                });
+            } else {
+                res.status(401).send("PIN has expired. Please request a new one.");
+            }
+        } else {
+            res.status(402).send("Invalid PIN or user ID.");
+        }
+    } catch (error) {
+        console.error("Error logining in user:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+
+router.post("/resetPasswordForLoggedInUser2", async (req, res) => {
+    try {
+        const { email, newPassword } = req.body;
+
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (!existingUser) {
+            transactionInProgress = false;
+            return res
+                .status(501)
+                .send({ success: 501, message: "User does not exists", status: 501 });
+        }
+
+        if (!existingUser.isActivated) {
+            transactionInProgress = false;
+            return res
+                .status(502)
+                .send({ success: 502, message: "User is deactivated", status: 502 });
+        }
+
+
+        const hashedPassword = await bcryptjs.hash(newPassword, 10);
+
+        existingUser.password = hashedPassword;
+
+        // console.log("second check")
+        // await SendEmail({
+        //     email,
+        //     userId: existingUser._id,
+        //     emailType: "RESET",
+        //     fullname: existingUser.fullname,
+        // });
+        await existingUser.save();
+        transactionInProgress = false;
+        return res
+            .status(201)
+            .send({ success: true, message: "successful", status: 201 });
+    } catch (error) {
+        transactionInProgress = false;
+        console.error("Error logining in user:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 // Function to invalidate a session (update the database record)
 async function invalidateSession(sessionId) {
     try {

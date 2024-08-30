@@ -16,6 +16,9 @@ const { check } = require("express-validator");
 const admin = require("firebase-admin");
 const multer = require("multer");
 const sharp = require("sharp");
+const vision = require('@google-cloud/vision');
+const client = new vision.ImageAnnotatorClient();
+
 const { sendNotification } = require("../helpers/notification");
 require("dotenv").config();
 admin.initializeApp(
@@ -172,7 +175,8 @@ const getViews = async (req, res) => {
   }
 };
 
-// post functions
+
+
 const createPost = async (req, res) => {
   const files = req.files; // Array of files
   const { body } = req.body;
@@ -182,12 +186,22 @@ const createPost = async (req, res) => {
   try {
     const existingUser = await User.findById(user._id);
 
+    // Function to check for inappropriate content
+    const moderateContent = async (buffer) => {
+      const [result] = await client.safeSearchDetection(buffer);
+      const detections = result.safeSearchAnnotation;
+      if (
+        detections.adult === 'LIKELY' || detections.adult === 'VERY_LIKELY' ||
+        detections.violence === 'LIKELY' || detections.violence === 'VERY_LIKELY'
+      ) {
+        throw new Error('Inappropriate content detected');
+      }
+    };
+
     // Function to upload a file
     const uploadFile = async (file) => {
       const bucket = admin.storage().bucket();
-      const newFileName = `${existingUser._id}-${Date.now()}-${
-        file.originalname
-      }`;
+      const newFileName = `${existingUser._id}-${Date.now()}-${file.originalname}`;
       const fileUpload = bucket.file(`postMedia/${newFileName}`);
 
       let buffer;
@@ -202,6 +216,9 @@ const createPost = async (req, res) => {
         contentType = file.mimetype;
       }
 
+      // Check for inappropriate content before uploading
+      await moderateContent(buffer);
+
       const blobStream = fileUpload.createWriteStream({
         metadata: { contentType },
       });
@@ -214,9 +231,7 @@ const createPost = async (req, res) => {
 
         blobStream.on("finish", async () => {
           await fileUpload.makePublic();
-          const publicUrl = `https://storage.googleapis.com/${
-            bucket.name
-          }/postMedia/${encodeURIComponent(newFileName)}`;
+          const publicUrl = `https://storage.googleapis.com/${bucket.name}/postMedia/${encodeURIComponent(newFileName)}`;
           resolve({
             url: publicUrl,
             type: file.mimetype.startsWith("image") ? "image" : "video",
@@ -256,6 +271,10 @@ const createPost = async (req, res) => {
     });
   }
 };
+
+
+
+
 
 const deletePost = async (req, res) => {
   const { postId } = req.query;

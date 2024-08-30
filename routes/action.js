@@ -2400,6 +2400,9 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
       email
     } = req.body;
 
+
+
+
     if (bonusBalance) {
       const admin = await AdminUser.findOne({ isAdmin: true });
 
@@ -2496,8 +2499,11 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
     } else {
       const admin = await AdminUser.findOne({ isAdmin: true });
 
+      console.log('closed')
+      console.log(admin.isWithdrawalsOpen, 'first')
       if (admin.isWithdrawalsOpen === false) {
         transactionInProgress = false;
+
         return res
           .status(405)
           .json({
