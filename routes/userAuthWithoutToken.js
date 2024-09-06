@@ -70,15 +70,14 @@ router.post(
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-            {
-                return res.status(422).json({ errors: errors.array() });
-            }
+            return res.status(422).json({ errors: errors.array() });
         }
 
         try {
             transactionInProgress = true;
             const { fullname, betId, number, email, password, referrerId } = req.body;
             console.log(fullname, betId, number, email, password, referrerId, "jjjj");
+
             // Check if the user already exists
             const existingUser = await User.findOne({ email });
             if (existingUser) {
@@ -87,12 +86,13 @@ router.post(
                     .status(400)
                     .send({ success: 400, message: "User already exists", status: 400 });
             }
-            let referrerIdMail
+
+            let referrerIdMail;
             if (referrerId) {
                 const user2 = await User.findOne({ tag: referrerId });
                 if (user2) {
                     user2.referrals.push(email);
-                    referrerIdMail = user2.email
+                    referrerIdMail = user2.email;
                     await user2.save();
                 } else if (!user2) {
                     transactionInProgress = false;
@@ -103,9 +103,6 @@ router.post(
                     });
                 }
             }
-
-
-
 
             // Hash the password
             const hashedPassword = await bcryptjs.hash(password, 10);
@@ -128,22 +125,19 @@ router.post(
                 isLoggedIn: true,
                 sessionId: generateUniqueSessionId(),
                 supplementaryBetId: [betId],
-                registrationDateTime: date,
-                // fedapayId: customer.id,
+                registrationDateTime: new Date(),
                 image: "",
                 tag: tag,
                 colorScheme: 2,
                 referer: referrerIdMail ? referrerIdMail : ""
             });
 
-       
-
             // Save the user to the database
             const savedUser = await newUser.save();
 
             console.log(savedUser, "saved user");
 
-            //create token data
+            // Create token data
             const tokenData = {
                 _id: savedUser._id,
                 fullname: savedUser.fullname,
@@ -156,11 +150,25 @@ router.post(
                 pinState: savedUser.pinState,
             };
 
-            // create token
+            // Create token
             const token = await jwt.sign(tokenData, tokenVlaue);
+
+            // Send the welcome email without blocking the user registration process
+            try {
+                await SendEmail({
+                    email: savedUser.email,
+                    userId: savedUser._id,
+                    emailType: "WELCOME",
+                    fullname: savedUser.fullname,
+                });
+            } catch (emailError) {
+                console.error("Failed to send welcome email:", emailError);
+                // Optionally, you can log this failure or send a different notification to admins
+            }
+
             transactionInProgress = false;
             res.header("auth-token", token).send({
-                message: "registered succesfully",
+                message: "Registered successfully",
                 token,
                 success: true,
                 savedUser: savedUser,
@@ -988,7 +996,6 @@ router.post("/deposit2", async (req, res) => {
                 console.log('No recent transaction found');
             }
 
-            console.log(recentTransaction, "hcghcghchghv")
             if (recentTransaction !== undefined) {
                 const userTransaction = {
                     status: "Failed",
@@ -1024,6 +1031,19 @@ router.post("/deposit2", async (req, res) => {
                     paymentConfirmation: "Failed",
                     customErrorCode: 300
                 });
+                try {
+                    await SendEmail({
+                        email: email,
+                        userId: user._id,
+                        emailType: "FAILEDDEPOSIT",
+                        fullname: user.fullname,
+                        amount: amount,
+                        betId: betId,
+                    });
+                } catch (emailError) {
+                    console.error("Failed to send welcome email:", emailError);
+                    // Optionally, you can log this failure or send a different notification to admins
+                }
 
                 await admin.save();
                 await user.save();
@@ -1144,6 +1164,20 @@ router.post("/deposit2", async (req, res) => {
                         paymentConfirmation: "Failed",
                         customErrorCode: 302
                     });
+
+                    try {
+                        await SendEmail({
+                            email: email,
+                            userId: user._id,
+                            emailType: "FAILEDDEPOSIT",
+                            fullname: user.fullname,
+                            amount: amount,
+                            betId: betId,
+                        });
+                    } catch (emailError) {
+                        console.error("Failed to send welcome email:", emailError);
+                        // Optionally, you can log this failure or send a different notification to admins
+                    }
 
                     await admin.save();
                     await user.save();
@@ -1323,6 +1357,23 @@ router.post("/deposit2", async (req, res) => {
                 service: service,
                 paymentConfirmation: "Successful",
             });
+
+            try {
+                await SendEmail({
+                    email: email,
+                    userId: user._id,
+                    emailType: "SUCCESSFULDEPOSIT",
+                    fullname: user.fullname,
+                    amount: amount,
+                    betId: betId,
+                });
+            } catch (emailError) {
+                console.error("Failed to send welcome email:", emailError);
+                // Optionally, you can log this failure or send a different notification to admins
+            }
+
+
+
             const referer = user.referer
             if (user.referer !== "") {
                 const refererUser = await User.findOne({ email: referer });

@@ -15,7 +15,7 @@ const { makePaymentRequest } = require("../helpers/makePaymentRequest");
 const { validateDepositRequest } = require("../helpers/checkVerificationForInput");
 const { validateDepositRequest2 } = require("../helpers/checkVerificationForInput");
 const { rechargeAccount, checkBalance, withdrawFromAccount } = require('./mobcash');
-
+const SendEmail = require("../utils/mailer");
 
 
 
@@ -926,7 +926,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000); // Corrected the time calculation
 
       const recentTransaction = admin.transactionHistory.find(transaction => {
-        console.log('Checking transaction:', transaction);
+
 
         const betIdMatch = transaction.betId === betId;
         const amountMatch = parseFloat(transaction.amount) === parseFloat(amount);
@@ -941,18 +941,22 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           registrationTimeCheck
         );
 
-        console.log('Overall condition:', isRecent);
+        // console.log('Overall condition:', isRecent);
         return isRecent;
       });
 
-      if (recentTransaction) {
-        console.log('Found recent transaction:', recentTransaction);
-      } else {
-        console.log('No recent transaction found');
-      }
+      // if (recentTransaction) {
+      //   console.log('Found recent transaction:', recentTransaction);
+      // } else {
+      //   console.log('No recent transaction found');
+      // }
 
       console.log(recentTransaction, "hcghcghchghv")
+
+
       if (recentTransaction !== undefined) {
+
+        console.log(recentTransaction, "yyyyyyyy")
         const userTransaction = {
           status: "Failed",
           registrationDateTime: date,
@@ -987,6 +991,20 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           paymentConfirmation: "Failed",
           customErrorCode: 300
         });
+
+        try {
+          await SendEmail({
+            email: email,
+            userId: user._id,
+            emailType: "FAILEDDEPOSIT",
+            fullname: user.fullname,
+            amount: amount,
+            betId: betId,
+          });
+        } catch (emailError) {
+          console.error("Failed to send deposit email:", emailError);
+          // Optionally, you can log this failure or send a different notification to admins
+        }
 
         await admin.save();
         await user.save();
@@ -1108,6 +1126,19 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             customErrorCode: 302
           });
 
+          try {
+            await SendEmail({
+              email: email,
+              userId: user._id,
+              emailType: "FAILEDDEPOSIT",
+              fullname: user.fullname,
+              amount: amount,
+              betId: betId,
+            });
+          } catch (emailError) {
+            console.error("Failed to send deposit email:", emailError);
+            // Optionally, you can log this failure or send a different notification to admins
+          }
           await admin.save();
           await user.save();
           // Return a JSON response with the transaction status
@@ -1123,7 +1154,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         }
 
       }
-      // // INITIATE MOBCASH TRANSACTION
+      // INITIATE MOBCASH TRANSACTION
 
       const response = await rechargeAccount(betId, amount);
       console.log(response, "response from mobcash");
@@ -1286,6 +1317,20 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         service: service,
         paymentConfirmation: "Successful",
       });
+
+      try {
+        await SendEmail({
+          email: email,
+          userId: user._id,
+          emailType: "SUCCESSFULDEPOSIT",
+          fullname: user.fullname,
+          amount: amount,
+          betId: betId,
+        });
+      } catch (emailError) {
+        console.error("Failed to send deposit email:", emailError);
+        // Optionally, you can log this failure or send a different notification to admins
+      }
       const referer = user.referer
       if (user.referer !== "") {
         const refererUser = await User.findOne({ email: referer });
@@ -1316,6 +1361,19 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             refererUser.transactionHistory.push(userTransaction);
             await refererUser.save()
             await admin.save();
+            try {
+              await SendEmail({
+                email: refererUser.email,
+                userId: refererUser._id,
+                emailType: "SUCCESSFULBONUS",
+                fullname: refererUser.fullname,
+                amount: randomNumber,
+                betId: refererUser.betId,
+              });
+            } catch (emailError) {
+              console.error("Failed to send deposit email:", emailError);
+              // Optionally, you can log this failure or send a different notification to admins
+            }
           }
         }
       }
@@ -1446,6 +1504,21 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
 
           await admin.save();
           await user.save();
+
+          try {
+            await SendEmail({
+              email: email,
+              userId: user._id,
+              emailType: "FAILEDDEPOSIT",
+              fullname: user.fullname,
+              amount: amount,
+              betId: betId,
+            });
+          } catch (emailError) {
+            console.error("Failed to send deposit email:", emailError);
+            // Optionally, you can log this failure or send a different notification to admins
+          }
+
           // Return a JSON response with the transaction status
           transactionInProgress = false;
           return res.status(508).json({
@@ -1499,6 +1572,22 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           });
           await user.save();
           await admin.save();
+
+          try {
+            await SendEmail({
+              email: email,
+              userId: user._id,
+              emailType: "FAILEDDEPOSIT",
+              fullname: user.fullname,
+              amount: amount,
+              betId: betId,
+            });
+          } catch (emailError) {
+            console.error("Failed to send deposit email:", emailError);
+            // Optionally, you can log this failure or send a different notification to admins
+          }
+
+
           transactionInProgress = false;
           return res
             .status(209)
@@ -1548,6 +1637,20 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           });
           await user.save();
           await admin.save();
+          try {
+            await SendEmail({
+              email: email,
+              userId: user._id,
+              emailType: "FAILEDDEPOSIT",
+              fullname: user.fullname,
+              amount: amount,
+              betId: betId,
+            });
+          } catch (emailError) {
+            console.error("Failed to send deposit email:", emailError);
+            // Optionally, you can log this failure or send a different notification to admins
+          }
+
           transactionInProgress = false;
           return res
             .status(209)
@@ -1596,6 +1699,19 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           });
           await user.save();
           await admin.save();
+          try {
+            await SendEmail({
+              email: email,
+              userId: user._id,
+              emailType: "FAILEDDEPOSIT",
+              fullname: user.fullname,
+              amount: amount,
+              betId: betId,
+            });
+          } catch (emailError) {
+            console.error("Failed to send deposit email:", emailError);
+            // Optionally, you can log this failure or send a different notification to admins
+          }
           transactionInProgress = false;
           return res
             .status(209)
@@ -1645,6 +1761,19 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         user.bonusBalance = updatedBonusBalance;
         await user.save();
         await admin.save();
+        try {
+          await SendEmail({
+            email: email,
+            userId: user._id,
+            emailType: "SUCCESSFULDEPOSIT",
+            fullname: user.fullname,
+            amount: amount,
+            betId: betId,
+          });
+        } catch (emailError) {
+          console.error("Failed to send deposit email:", emailError);
+          // Optionally, you can log this failure or send a different notification to admins
+        }
         const newUserBonus = user.bonusBalance;
         // Return a JSON response with the transaction status
         transactionInProgress = false;
@@ -1677,8 +1806,6 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
               status: 502,
             });
         }
-
-
 
         // Find available admin
         const admin = await AdminUser.findOne({ isAdmin: true });
@@ -1760,6 +1887,21 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
           user.bonus.push(userTransaction);
           await admin.save();
           await user.save();
+
+          try {
+            await SendEmail({
+              email: email,
+              userId: user._id,
+              emailType: "FAILEDDEPOSIT",
+              fullname: user.fullname,
+              amount: amount,
+              betId: betId,
+            });
+          } catch (emailError) {
+            console.error("Failed to send deposit email:", emailError);
+            // Optionally, you can log this failure or send a different notification to admins
+          }
+
           transactionInProgress = false;
           return res
             .status(510)
@@ -1892,6 +2034,20 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
             user.bonus.push(userTransaction);
             await admin.save();
             await user.save();
+
+            try {
+              await SendEmail({
+                email: email,
+                userId: user._id,
+                emailType: "FAILEDDEPOSIT",
+                fullname: user.fullname,
+                amount: amount,
+                betId: betId,
+              });
+            } catch (emailError) {
+              console.error("Failed to send deposit email:", emailError);
+              // Optionally, you can log this failure or send a different notification to admins
+            }
             transactionInProgress = false;
             return res
               .status(209)
@@ -2103,6 +2259,20 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         user.bonusBalance = 0;
         await user.save();
         await admin.save()
+
+        try {
+          await SendEmail({
+            email: email,
+            userId: user._id,
+            emailType: "SUCCESSFULDEPOSIT",
+            fullname: user.fullname,
+            amount: amount,
+            betId: betId,
+          });
+        } catch (emailError) {
+          console.error("Failed to send deposit email:", emailError);
+          // Optionally, you can log this failure or send a different notification to admins
+        }
         const newUserBonus = user.bonusBalance;
         transactionInProgress = false;
         return res
@@ -2226,6 +2396,21 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
       });
       await user.save();
       await admin.save();
+
+      try {
+        await SendEmail({
+          email: email,
+          userId: user._id,
+          emailType: "FAILEDDEPOSIT",
+          fullname: user.fullname,
+          amount: amount,
+          betId: betId,
+        });
+      } catch (emailError) {
+        console.error("Failed to send deposit email:", emailError);
+        // Optionally, you can log this failure or send a different notification to admins
+      }
+
       transactionInProgress = false;
       return res
         .status(209)
@@ -2274,6 +2459,21 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
       });
       await user.save();
       await admin.save();
+
+      try {
+        await SendEmail({
+          email: email,
+          userId: user._id,
+          emailType: "FAILEDDEPOSIT",
+          fullname: user.fullname,
+          amount: amount,
+          betId: betId,
+        });
+      } catch (emailError) {
+        console.error("Failed to send deposit email:", emailError);
+        // Optionally, you can log this failure or send a different notification to admins
+      }
+
       transactionInProgress = false;
       return res
         .status(209)
@@ -2320,6 +2520,22 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
       });
       await user.save();
       await admin.save();
+
+      try {
+        await SendEmail({
+          email: email,
+          userId: user._id,
+          emailType: "FAILEDDEPOSIT",
+          fullname: user.fullname,
+          amount: amount,
+          betId: betId,
+        });
+      } catch (emailError) {
+        console.error("Failed to send deposit email:", emailError);
+        // Optionally, you can log this failure or send a different notification to admins
+      }
+
+
       transactionInProgress = false;
       return res
         .status(209)
@@ -2367,6 +2583,21 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
     user.bonusBalance = updatedBonusBalance;
     await user.save();
     await admin.save();
+
+    try {
+      await SendEmail({
+        email: email,
+        userId: user._id,
+        emailType: "SUCCESSFULDEPOSIT",
+        fullname: user.fullname,
+        amount: amount,
+        betId: betId,
+      });
+    } catch (emailError) {
+      console.error("Failed to send deposit email:", emailError);
+      // Optionally, you can log this failure or send a different notification to admins
+    }
+
     const newUserBonus = user.bonusBalance;
     // Return a JSON response with the transaction status
     transactionInProgress = false;
@@ -2487,6 +2718,20 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
       user.bonusBalance = updatedBalance
         await user.save();
       await admin.save();
+
+      try {
+        await SendEmail({
+          email: email,
+          userId: user._id,
+          emailType: "PENDINGWITHDRAWAL",
+          fullname: user.fullname,
+          amount: amount,
+          betId: betId,
+        });
+      } catch (emailError) {
+        console.error("Failed to send deposit email:", emailError);
+        // Optionally, you can log this failure or send a different notification to admins
+      }
       transactionInProgress = false;
       return res.status(200).json({
         success: true,
@@ -2498,7 +2743,6 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
 
     } else {
       const admin = await AdminUser.findOne({ isAdmin: true });
-
       console.log('closed')
       console.log(admin.isWithdrawalsOpen, 'first')
       if (admin.isWithdrawalsOpen === false) {
@@ -2515,7 +2759,6 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
     
       // Check if the User already exists
       const user = await User.findOne({ _id });
-
       console.log(user, "gggg")
       if (!user) {
         transactionInProgress = false;
@@ -2571,6 +2814,20 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
         user.transactionHistory.push(userTransaction);
         await user.save();
         await admin.save();
+
+        try {
+          await SendEmail({
+            email: email,
+            userId: user._id,
+            emailType: "FAILEDWITHDRAWAL",
+            fullname: user.fullname,
+            amount: amount,
+            betId: betId,
+          });
+        } catch (emailError) {
+          console.error("Failed to send deposit email:", emailError);
+          // Optionally, you can log this failure or send a different notification to admins
+        }
         transactionInProgress = false;
         return res.status(209).json({
           success: 209,
@@ -2614,6 +2871,20 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
       user.transactionHistory.push(userTransaction);
       await user.save();
       await admin.save();
+
+      try {
+        await SendEmail({
+          email: email,
+          userId: user._id,
+          emailType: "PENDINGWITHDRAWAL",
+          fullname: user.fullname,
+          amount: amount,
+          betId: betId,
+        });
+      } catch (emailError) {
+        console.error("Failed to send deposit email:", emailError);
+        // Optionally, you can log this failure or send a different notification to admins
+      }
       transactionInProgress = false;
       return res.status(200).json({
         success: true,
@@ -2865,6 +3136,21 @@ router.post("/walletSend", async (req, res) => {
     await recipient.save();
     await user.save();
     await admin.save();
+
+    try {
+      await SendEmail({
+        email: user.email,
+        userId: user._id,
+        emailType: "SUCCESSFULWALLETSEND",
+        fullname: user.fullname,
+        amount: amount,
+        betId: user.betId,
+        recipient: recipient.fullname,
+      });
+    } catch (emailError) {
+      console.error("Failed to send deposit email:", emailError);
+      // Optionally, you can log this failure or send a different notification to admins
+    }
 
     const updatedBalance = user.bonusBalance;
     transactionInProgress = false;
