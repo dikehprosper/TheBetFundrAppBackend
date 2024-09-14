@@ -1057,6 +1057,8 @@ router.post("/deposit2", async (req, res) => {
                     user
                 });
             }
+
+
             // console.log("API Response:");
             const result = await makePaymentRequest(amount, momoNumber, network, fullname, newUuid
             );
@@ -1326,6 +1328,7 @@ router.post("/deposit2", async (req, res) => {
                     user
                 });
             }
+
             const userTransaction = {
                 status: "Successful",
                 registrationDateTime: date,
@@ -1372,39 +1375,56 @@ router.post("/deposit2", async (req, res) => {
                 // Optionally, you can log this failure or send a different notification to admins
             }
 
-
-
             const referer = user.referer
+            console.log(referer, "fffffff")
             if (user.referer !== "") {
-                const refererUser = await User.findOne({ email: referer });
-                if (refererUser) {
-                    const result = calculatePercentage(amount);
-                    const eightyPercent = getEightyPercentOfResult(result);
-                    const twentyPercent = getTwentyPercentOfResult(result);
-                    refererUser.disbursedBonusBalance = refererUser.disbursedBonusBalance + eightyPercent
-                    refererUser.restrictedBonusBalance = refererUser.restrictedBonusBalance + twentyPercent
-                    admin.disbursedBonusBalance = admin.disbursedBonusBalance + eightyPercent
-                    admin.restrictedBonusBalance = admin.restrictedBonusBalance + twentyPercent
-                    await refererUser.save()
-                    await admin.save();
-                    if (refererUser.disbursedBonusBalance >= 2000) {
-                        const randomNumber = Math.floor(Math.random() * 11) * 100 + 1000;
-                        refererUser.disbursedBonusBalance = refererUser.disbursedBonusBalance - randomNumber
-                        admin.disbursedBonusBalance = admin.disbursedBonusBalance - randomNumber
-                        refererUser.bonusBalance = refererUser.bonusBalance + randomNumber
+                try {
+                    const refererUser = await User.findOne({ email: referer });
+
+                    if (refererUser) {
+                        // Calculate bonus percentages
+                        const result = calculatePercentage(amount);
+                        // Update referer and admin balances
+                        refererUser.bonusBalance += result;
+                        admin.disbursedBonusBalance += result;
+
+
+                        // Create user transaction
                         const userTransaction = {
                             status: "Successful",
                             registrationDateTime: date,
-                            amount: randomNumber,
-                            totalAmount: randomNumber,
+                            amount: result,
+                            totalAmount: result,
                             fundingType: "bonus",
                             identifierId: newUuid,
-                            bonusBalance: randomNumber
+                            bonusBalance: result,
                         };
+
+                        // Add transaction to refererUser history
                         refererUser.transactionHistory.push(userTransaction);
-                        await refererUser.save()
+
+                        // Save both users (referer and admin) after transaction
+                        await refererUser.save();
                         await admin.save();
+
+                        // Send confirmation email
+                        try {
+                            await SendEmail({
+                                email: refererUser.email,
+                                userId: refererUser._id,
+                                emailType: "SUCCESSFULBONUS",
+                                fullname: refererUser.fullname,
+                                amount: randomNumber,
+                                betId: refererUser.betId,
+                            });
+                        } catch (emailError) {
+                            console.error("Failed to send bonus email:", emailError);
+                        // Optionally, log or notify admins of the email failure
+                        }
                     }
+                } catch (error) {
+                    console.error("Error processing bonus:", error);
+                    return NextResponse.json({ error: "An error occurred during bonus processing." }, { status: 500 });
                 }
             }
 
@@ -1548,4 +1568,10 @@ function generateUniqueShortUuid(length) {
         randomString += chars[randomIndex];
     }
     return timestamp + randomString;
+}
+
+function calculatePercentage(amount) {
+    const threePercent = amount * 0.03;
+    const thirtythreePercentOfThreePercent = threePercent * 0.33;
+    return thirtythreePercentOfThreePercent;
 }
