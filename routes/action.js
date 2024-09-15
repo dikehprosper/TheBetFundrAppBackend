@@ -16,8 +16,8 @@ const { validateDepositRequest } = require("../helpers/checkVerificationForInput
 const { validateDepositRequest2 } = require("../helpers/checkVerificationForInput");
 const { rechargeAccount, checkBalance, withdrawFromAccount } = require('./mobcash');
 const SendEmail = require("../utils/mailer");
-
-
+const path = require('path');
+const fs = require('fs');
 
 // add the current transaction to the user
 let transactionInProgress = false;
@@ -1454,6 +1454,8 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         const newUuid = generateUniqueShortUuid(15);
         const fullname = user.fullname
 
+
+
         // Check for similar transactions in the last 5 minutes
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
         const recentTransaction = admin.transactionHistory.find(transaction => {
@@ -2368,196 +2370,196 @@ router.post("/walletdeposit", checkOngoingTransaction, async (req, res) => {
     const newUuid = generateUniqueShortUuid(15);
     // INITIATE MOBCASH TRANSACTION
 
-    const response = await rechargeAccount(betId, amount);
-    console.log(response, "response")
-    if (response.Success === false && response.MessageId === 100337) {
-      console.log("111111")
-      const userTransaction = {
-        status: "Failed",
-        registrationDateTime: date,
-        amount: 0,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        identifierId: newUuid,
-        service: service,
-        bonusBalance: amount,
-        totalAmount: amount,
-        paymentConfirmation: "Failed",
-        customErrorCode: 300
-      };
-      user.transactionHistory.push(userTransaction);
-      admin.transactionHistory.push({
-        userid: user._id,
-        status: "Failed",
-        registrationDateTime: date,
-        amount: 0,
-        totalAmount: amount,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        identifierId: newUuid,
-        userEmail: email,
-        subadminEmail: "none",
-        service: service,
-        paymentConfirmation: "Failed",
-        bonusBalance: amount,
-        customErrorCode: 300
-      });
-      await user.save();
-      await admin.save();
+    // const response = await rechargeAccount(betId, amount);
+    // console.log(response, "response")
+    // if (response.Success === false && response.MessageId === 100337) {
+    //   console.log("111111")
+    //   const userTransaction = {
+    //     status: "Failed",
+    //     registrationDateTime: date,
+    //     amount: 0,
+    //     betId: betId,
+    //     // momoName: momoName,
+    //     momoNumber: momoNumber,
+    //     fundingType: "deposits",
+    //     identifierId: newUuid,
+    //     service: service,
+    //     bonusBalance: amount,
+    //     totalAmount: amount,
+    //     paymentConfirmation: "Failed",
+    //     customErrorCode: 300
+    //   };
+    //   user.transactionHistory.push(userTransaction);
+    //   admin.transactionHistory.push({
+    //     userid: user._id,
+    //     status: "Failed",
+    //     registrationDateTime: date,
+    //     amount: 0,
+    //     totalAmount: amount,
+    //     betId: betId,
+    //     // momoName: momoName,
+    //     momoNumber: momoNumber,
+    //     fundingType: "deposits",
+    //     identifierId: newUuid,
+    //     userEmail: email,
+    //     subadminEmail: "none",
+    //     service: service,
+    //     paymentConfirmation: "Failed",
+    //     bonusBalance: amount,
+    //     customErrorCode: 300
+    //   });
+    //   await user.save();
+    //   await admin.save();
 
-      try {
-        await SendEmail({
-          email: email,
-          userId: user._id,
-          emailType: "FAILEDDEPOSIT",
-          fullname: user.fullname,
-          amount: amount,
-          betId: betId,
-        });
-      } catch (emailError) {
-        console.error("Failed to send deposit email:", emailError);
-        // Optionally, you can log this failure or send a different notification to admins
-      }
+    //   try {
+    //     await SendEmail({
+    //       email: email,
+    //       userId: user._id,
+    //       emailType: "FAILEDDEPOSIT",
+    //       fullname: user.fullname,
+    //       amount: amount,
+    //       betId: betId,
+    //     });
+    //   } catch (emailError) {
+    //     console.error("Failed to send deposit email:", emailError);
+    //     // Optionally, you can log this failure or send a different notification to admins
+    //   }
 
-      transactionInProgress = false;
-      return res
-        .status(209)
-        .json({
-          success: 209,
-          message: "failed to generate",
-          userTransaction,
-          user
-        });
-    }
-    if (response.Success === false && response.MessageId === 100323) {
-      console.log("22222")
-      const userTransaction = {
-        status: "Failed",
-        registrationDateTime: date,
-        amount: 0,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        identifierId: newUuid,
-        service: service,
-        bonusBalance: amount,
-        totalAmount: amount,
-        paymentConfirmation: "Failed",
-        customErrorCode: 301
-      };
-      user.transactionHistory.push(userTransaction);
-      admin.transactionHistory.push({
-        userid: user._id,
-        status: "Failed",
-        registrationDateTime: date,
-        amount: 0,
-        totalAmount: amount,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        identifierId: newUuid,
-        userEmail: email,
-        subadminEmail: "none",
-        service: service,
-        paymentConfirmation: "Failed",
-        bonusBalance: amount,
-        customErrorCode: 301
-      });
-      await user.save();
-      await admin.save();
+    //   transactionInProgress = false;
+    //   return res
+    //     .status(209)
+    //     .json({
+    //       success: 209,
+    //       message: "failed to generate",
+    //       userTransaction,
+    //       user
+    //     });
+    // }
+    // if (response.Success === false && response.MessageId === 100323) {
+    //   console.log("22222")
+    //   const userTransaction = {
+    //     status: "Failed",
+    //     registrationDateTime: date,
+    //     amount: 0,
+    //     betId: betId,
+    //     // momoName: momoName,
+    //     momoNumber: momoNumber,
+    //     fundingType: "deposits",
+    //     identifierId: newUuid,
+    //     service: service,
+    //     bonusBalance: amount,
+    //     totalAmount: amount,
+    //     paymentConfirmation: "Failed",
+    //     customErrorCode: 301
+    //   };
+    //   user.transactionHistory.push(userTransaction);
+    //   admin.transactionHistory.push({
+    //     userid: user._id,
+    //     status: "Failed",
+    //     registrationDateTime: date,
+    //     amount: 0,
+    //     totalAmount: amount,
+    //     betId: betId,
+    //     // momoName: momoName,
+    //     momoNumber: momoNumber,
+    //     fundingType: "deposits",
+    //     identifierId: newUuid,
+    //     userEmail: email,
+    //     subadminEmail: "none",
+    //     service: service,
+    //     paymentConfirmation: "Failed",
+    //     bonusBalance: amount,
+    //     customErrorCode: 301
+    //   });
+    //   await user.save();
+    //   await admin.save();
 
-      try {
-        await SendEmail({
-          email: email,
-          userId: user._id,
-          emailType: "FAILEDDEPOSIT",
-          fullname: user.fullname,
-          amount: amount,
-          betId: betId,
-        });
-      } catch (emailError) {
-        console.error("Failed to send deposit email:", emailError);
-        // Optionally, you can log this failure or send a different notification to admins
-      }
+    //   try {
+    //     await SendEmail({
+    //       email: email,
+    //       userId: user._id,
+    //       emailType: "FAILEDDEPOSIT",
+    //       fullname: user.fullname,
+    //       amount: amount,
+    //       betId: betId,
+    //     });
+    //   } catch (emailError) {
+    //     console.error("Failed to send deposit email:", emailError);
+    //     // Optionally, you can log this failure or send a different notification to admins
+    //   }
 
-      transactionInProgress = false;
-      return res
-        .status(209)
-        .json({
-          success: 209,
-          message: "failed to generate",
-          userTransaction,
-          user
-        });
-    }
-    if (response.Success === false) {
-      console.log("333333")
-      const userTransaction = {
-        status: "Failed",
-        registrationDateTime: date,
-        amount: 0,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        identifierId: newUuid,
-        service: service,
-        bonusBalance: amount,
-        totalAmount: amount,
-        paymentConfirmation: "Failed",
-      };
-      user.transactionHistory.push(userTransaction);
-      admin.transactionHistory.push({
-        userid: user._id,
-        status: "Failed",
-        registrationDateTime: date,
-        amount: 0,
-        totalAmount: amount,
-        betId: betId,
-        // momoName: momoName,
-        momoNumber: momoNumber,
-        fundingType: "deposits",
-        identifierId: newUuid,
-        userEmail: email,
-        subadminEmail: "none",
-        service: service,
-        paymentConfirmation: "Failed",
-        bonusBalance: amount,
-      });
-      await user.save();
-      await admin.save();
+    //   transactionInProgress = false;
+    //   return res
+    //     .status(209)
+    //     .json({
+    //       success: 209,
+    //       message: "failed to generate",
+    //       userTransaction,
+    //       user
+    //     });
+    // }
+    // if (response.Success === false) {
+    //   console.log("333333")
+    //   const userTransaction = {
+    //     status: "Failed",
+    //     registrationDateTime: date,
+    //     amount: 0,
+    //     betId: betId,
+    //     // momoName: momoName,
+    //     momoNumber: momoNumber,
+    //     fundingType: "deposits",
+    //     identifierId: newUuid,
+    //     service: service,
+    //     bonusBalance: amount,
+    //     totalAmount: amount,
+    //     paymentConfirmation: "Failed",
+    //   };
+    //   user.transactionHistory.push(userTransaction);
+    //   admin.transactionHistory.push({
+    //     userid: user._id,
+    //     status: "Failed",
+    //     registrationDateTime: date,
+    //     amount: 0,
+    //     totalAmount: amount,
+    //     betId: betId,
+    //     // momoName: momoName,
+    //     momoNumber: momoNumber,
+    //     fundingType: "deposits",
+    //     identifierId: newUuid,
+    //     userEmail: email,
+    //     subadminEmail: "none",
+    //     service: service,
+    //     paymentConfirmation: "Failed",
+    //     bonusBalance: amount,
+    //   });
+    //   await user.save();
+    //   await admin.save();
 
-      try {
-        await SendEmail({
-          email: email,
-          userId: user._id,
-          emailType: "FAILEDDEPOSIT",
-          fullname: user.fullname,
-          amount: amount,
-          betId: betId,
-        });
-      } catch (emailError) {
-        console.error("Failed to send deposit email:", emailError);
-        // Optionally, you can log this failure or send a different notification to admins
-      }
+    //   try {
+    //     await SendEmail({
+    //       email: email,
+    //       userId: user._id,
+    //       emailType: "FAILEDDEPOSIT",
+    //       fullname: user.fullname,
+    //       amount: amount,
+    //       betId: betId,
+    //     });
+    //   } catch (emailError) {
+    //     console.error("Failed to send deposit email:", emailError);
+    //     // Optionally, you can log this failure or send a different notification to admins
+    //   }
 
 
-      transactionInProgress = false;
-      return res
-        .status(209)
-        .json({
-          success: 209,
-          message: "failed to generate",
-          userTransaction,
-          user
-        });
-    }
+    //   transactionInProgress = false;
+    //   return res
+    //     .status(209)
+    //     .json({
+    //       success: 209,
+    //       message: "failed to generate",
+    //       userTransaction,
+    //       user
+    //     });
+    // }
     const updatedBonusBalance = user.bonusBalance - amount;
     const userTransaction = {
       status: "Successful",
@@ -2674,7 +2676,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
           .status(502)
           .json({ success: 502, message: "User is deactivated", status: 502 });
       }
-   
+
 
       const getBalance = user.bonusBalance;
       if (getBalance < amount) {
@@ -2728,7 +2730,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
       user.transactionHistory.push(userTransaction);
       const updatedBalance = getBalance - amount
       user.bonusBalance = updatedBalance
-        await user.save();
+      await user.save();
       await admin.save();
 
       try {
@@ -2768,7 +2770,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
             status: 405,
           });
       }
-    
+
       // Check if the User already exists
       const user = await User.findOne({ _id });
       console.log(user, "gggg")
@@ -2784,7 +2786,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
           .status(502)
           .json({ success: 502, message: "User is deactivated", status: 502 });
       }
-    
+
 
       const newUuid = generateUniqueShortUuid(15);
       const date = new Date();
@@ -2904,7 +2906,7 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
         userTransaction,
         user
       });
-      }
+    }
 
 
   } catch (error) {
@@ -2913,6 +2915,35 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+
+router.get("/getSocials", async (req, res) => {
+  try {
+    transactionInProgress = true;
+
+    const whatsapp = ""
+    const email = "support@betfundr.com"
+    const twitter = ""
+    const phone = ""
+    const data = {
+      whatsapp: whatsapp,
+      email: email,
+      twitter: twitter,
+      phone: phone
+    }
+    transactionInProgress = false;
+    return res
+      .status(201)
+      .json({ success: 201, data: data, status: 201 });
+
+  } catch (error) {
+    transactionInProgress = false;
+    console.error("Error completing the request for deposit:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 router.post("/searchSendingPage", async (req, res) => {
   let transactionInProgress = false;
@@ -3181,6 +3212,42 @@ router.post("/walletSend", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+router.get('/privacy-policies', (req, res) => {
+  try {
+    // Define file paths
+    const englishPolicyPath = path.join(__dirname, '../utils/saved_policies', 'privacy_policy_en.txt');
+    const frenchPolicyPath = path.join(__dirname, '../utils/saved_policies', 'privacy_policy_fr.txt');
+
+    // Read both files synchronously (or use async with promises if preferred)
+    const englishPolicy = fs.readFileSync(englishPolicyPath, 'utf8');
+    const frenchPolicy = fs.readFileSync(frenchPolicyPath, 'utf8');
+
+
+    console.log(englishPolicy, "englishPolicy")
+    console.log(frenchPolicy, "frenchPolicy")
+
+    const policies = {
+      englishPolicy: englishPolicy,
+      frenchPolicy: frenchPolicy
+    }
+    // Send both policies in a JSON response
+    res.status(200).json({
+      policies,
+    });
+
+  } catch (error) {
+    console.error('Error reading privacy policies:', error);
+    res.status(500).json({ message: 'Error retrieving privacy policies' });
+  }
+});
+
+
+
+
+
+
 
 // checkBalance()
 //     .then(response => console.log(response))
