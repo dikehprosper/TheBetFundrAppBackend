@@ -2922,10 +2922,10 @@ router.get("/getSocials", async (req, res) => {
   try {
     transactionInProgress = true;
 
-    const whatsapp = ""
+    const whatsapp = "https://wa.me/22957577103"
     const email = "support@betfundr.com"
     const twitter = ""
-    const phone = ""
+    const phone = "+22957577103"
     const data = {
       whatsapp: whatsapp,
       email: email,
