@@ -2926,6 +2926,7 @@ router.get("/getSocials", async (req, res) => {
     const email = "support@betfundr.com"
     const twitter = ""
     const phone = "+22957577103"
+    // const phone = "+22957577103"
     const data = {
       whatsapp: whatsapp,
       email: email,
