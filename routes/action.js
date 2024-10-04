@@ -18,7 +18,7 @@ const { rechargeAccount, checkBalance, withdrawFromAccount } = require('./mobcas
 const SendEmail = require("../utils/mailer");
 const path = require('path');
 const fs = require('fs');
-
+const bcryptjs = require("bcryptjs");
 // add the current transaction to the user
 let transactionInProgress = false;
 // Middleware function to check if a transaction is in progress
@@ -3243,6 +3243,95 @@ router.get('/privacy-policies', (req, res) => {
     res.status(500).json({ message: 'Error retrieving privacy policies' });
   }
 });
+
+
+
+
+
+router.post("/submitDeleteAccountForm", checkOngoingTransaction, async (req, res) => {
+  try {
+    transactionInProgress = true;
+
+
+
+    const { email, password } =
+      req.body;
+
+    // Uncomment below code to fetch user and perform additional checks if required
+    const user = await User.findOne({ email });
+    if (!user) {
+      transactionInProgress = false;
+      return res
+        .status(401)
+        .json({ success: 401, message: "User not found", status: 401 });
+    }
+    if (!user.isActivated) {
+      transactionInProgress = false;
+      return res
+        .status(502)
+        .json({
+          success: 502,
+          message: "User is deactivated",
+          status: 502,
+        });
+    }
+
+
+    // Find available admin
+    const admin = await AdminUser.findOne({ isAdmin: true });
+    if (admin.isDepositsOpen === false) {
+      transactionInProgress = false;
+      return res
+        .status(504)
+        .json({
+          success: 504,
+          message: "currently under maintainance",
+          status: 504,
+        });
+    }
+
+    // Check if password is correct
+    const validPassword = await bcryptjs.compare(
+      password,
+      user.password
+    );
+    if (!validPassword) {
+      transactionInProgress = false;
+      return res
+        .status(503)
+        .send({ success: 503, message: "Invalid password", status: 503 });
+    }
+
+    const date = new Date();
+    user.deleteRequestState = true;
+
+    admin.deleteRequest.push({
+      userid: user._id,
+      email: user.email,
+      registrationDateTime: date,
+      deleteRequestState: true,
+    });
+
+
+
+    user.isActivated = false;
+
+    await user.save();
+    await admin.save();
+    transactionInProgress = false;
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "successful",
+      });
+  } catch (error) {
+    transactionInProgress = false;
+    console.error("Error completing the request", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 
 

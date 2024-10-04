@@ -109,6 +109,16 @@ const adminSchema = new mongoose.Schema({
             },
         ],
     },
+    deleteRequest: {
+        type: [
+            {
+                userid: String,
+                time: Date,
+                email: String,
+                deleteRequestState: Boolean,
+            },
+        ],
+    },
     colorScheme: {
         type: Number,
         default: 2,

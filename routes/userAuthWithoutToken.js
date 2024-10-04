@@ -1435,8 +1435,8 @@ router.post("/deposit2", async (req, res) => {
             return res.status(200).json({
                 success: true,
                 message: "Transaction generated successfully",
-                // userTransaction,
-                // user
+                userTransaction,
+
             });
         }
     } catch (error) {

@@ -76,6 +76,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  deleteRequestState: {
+    type: Boolean,
+    default: false,
+  },
   current: {
     type: Boolean,
     default: false,
