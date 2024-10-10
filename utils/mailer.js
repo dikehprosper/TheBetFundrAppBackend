@@ -5,7 +5,7 @@ require("dotenv").config();
 const nodemailer = require("nodemailer");
 const bcryptjs = require("bcryptjs");
 const User = require("../models/user");
-const DOMAIN = "https://betfundr.com"
+const DOMAIN = "https://LamedCash.com"
 
 async function SendEmail({ email, emailType, userId, fullname, amount, betId, recipient }) {
   console.log("third check");
@@ -77,8 +77,8 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
     const transporter = nodemailer.createTransport({
       service: 'gmail', // or another email service
       auth: {
-        user: "betfundrinc@gmail.com", // your email
-        pass: "ckjyirprqaeoyeza", // your email password or app password
+          user: "lamedcash@gmail.com", // your email
+          pass: "nthmcjillzyoooah", // your email password or app password
       },
     });
 
@@ -232,11 +232,11 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
                     Ce lien expirera dans 2 heures.
                   </p
 
-                   <p class="footer1">© Betfundr | Benin</p>
+                   <p class="footer1">© LamedCash | Benin</p>
 
           <p class="footer">
             Si vous avez des questions, veuillez nous contacter au
-              <a href="" style="color: black;">betfundrinc@gmail.com</a>
+              <a href="" style="color: black;">lamedcash@gmail.com</a>
           </p>
               </div>
 
@@ -246,7 +246,7 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
       </body>
       </html>`;
     } else if (emailType === "WELCOME") {
-      mailOptions.subject = `Bonjour, ${fullname}, Bienvenue sur Betfundr`;
+      mailOptions.subject = `Bonjour, ${fullname}, Bienvenue sur LamedCash`;
       mailOptions.html = `
       <html>
       <head>
@@ -361,11 +361,11 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
 
               <div class="content">
                   <p>Commencez à effectuer des transactions sur l'application ou le site Web pour gagner des bonus et parrainez également vos amis pour gagner plus.</p>
-                   <p class="footer1">© Betfundr | Benin</p>
+                   <p class="footer1">© LamedCash | Benin</p>
 
           <p class="footer">
             Si vous avez des questions, veuillez nous contacter au
-              <a href="" style="color: black;">betfundrinc@gmail.com</a>
+              <a href="" style="color: black;">lamedcash@gmail.com</a>
           </p>
               </div>
              
@@ -492,11 +492,11 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
 
               <div class="content">
                   <p> Votre dépôt de ${amount} sur ${betId} a été effectué avec succès.</p>
-                   <p class="footer1">© Betfundr | Benin</p>
+                   <p class="footer1">© LamedCash | Benin</p>
 
           <p class="footer">
             Si vous avez des questions, veuillez nous contacter au
-              <a href="" style="color: black;">betfundrinc@gmail.com</a>
+              <a href="" style="color: black;">lamedcash@gmail.com</a>
           </p>
           </div> 
           </div>
@@ -620,11 +620,11 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
 
               <div class="content">
                   <p> Votre dépôt de ${amount} sur ${betId} n'a pas réussi.</p>
-                   <p class="footer1">© Betfundr | Benin</p>
+                   <p class="footer1">© LamedCash | Benin</p>
 
           <p class="footer">
             Si vous avez des questions, veuillez nous contacter au
-              <a href="" style="color: black;">betfundrinc@gmail.com</a>
+              <a href="" style="color: black;">lamedcash@gmail.com</a>
           </p>
           </div> 
           </div>
@@ -753,11 +753,11 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
 
               <div class="content">
                   <p> Votre retrait de ${amount} sur ${betId} est actuellement en cours d'examen.</p>
-                   <p class="footer1">© Betfundr | Benin</p>
+                   <p class="footer1">© LamedCash | Benin</p>
 
           <p class="footer">
             Si vous avez des questions, veuillez nous contacter au
-              <a href="" style="color: black;">betfundrinc@gmail.com</a>
+              <a href="" style="color: black;">lamedcash@gmail.com</a>
           </p>
           </div> 
           </div>
@@ -881,11 +881,11 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
 
               <div class="content">
                   <p> Votre retrait de ${amount} sur ${betId} n'a pas réussi.</p>
-                   <p class="footer1">© Betfundr | Benin</p>
+                   <p class="footer1">© LamedCash | Benin</p>
 
           <p class="footer">
             Si vous avez des questions, veuillez nous contacter au
-              <a href="" style="color: black;">betfundrinc@gmail.com</a>
+              <a href="" style="color: black;">lamedcash@gmail.com</a>
           </p>
           </div> 
           </div>
@@ -1010,11 +1010,11 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
 
               <div class="content">
                   <p> Votre demande d'envoi d'un montant ${amount} à ${recipient} a réussi.</p>
-                   <p class="footer1">© Betfundr | Benin</p>
+                   <p class="footer1">© LamedCash | Benin</p>
 
           <p class="footer">
             Si vous avez des questions, veuillez nous contacter au
-              <a href="" style="color: black;">betfundrinc@gmail.com</a>
+              <a href="" style="color: black;">lamedcash@gmail.com</a>
           </p>
           </div> 
           </div>
@@ -1141,11 +1141,11 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
 
               <div class="content">
                   <p> Vous venez de recevoir un bonus de ${amount}, vous pouvez le visualiser et le voir sur l'application.</p>
-                   <p class="footer1">© Betfundr | Benin</p>
+                   <p class="footer1">© LamedCash | Benin</p>
 
           <p class="footer">
             Si vous avez des questions, veuillez nous contacter au
-              <a href="" style="color: black;">betfundrinc@gmail.com</a>
+              <a href="" style="color: black;">lamedcash@gmail.com</a>
           </p>
           </div> 
           </div>
@@ -1300,11 +1300,11 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
                   </p
               </div>
           </div>
-          <p class="footer1">© Betfundr | Benin</p>
+          <p class="footer1">© LamedCash | Benin</p>
 
           <p class="footer">
             Si vous avez des questions, veuillez nous contacter au
-              <a href="" style="color: black;">betfundrinc@gmail.com</a>
+              <a href="" style="color: black;">lamedcash@gmail.com</a>
           </p>
 
       </body>

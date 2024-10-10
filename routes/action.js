@@ -2918,12 +2918,14 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
 
 
 
+
+
 router.get("/getSocials", async (req, res) => {
   try {
     transactionInProgress = true;
 
     const whatsapp = "https://wa.me/22957577103"
-    const email = "support@betfundr.com"
+    const email = "support@lamedcash.com"
     const twitter = ""
     const phone = "+22957577103"
     // const phone = "+22957577103"
@@ -3243,6 +3245,10 @@ router.get('/privacy-policies', (req, res) => {
     res.status(500).json({ message: 'Error retrieving privacy policies' });
   }
 });
+
+
+
+
 
 
 

@@ -112,7 +112,7 @@ router.post(
             let firstName = parts[0];
             const name = firstName.replace(/\d/g, "");
 
-            const tag = `betfundr-${name}${count + 1}`;
+            const tag = `lamedcash-${name}${count + 1}`;
 
             // Create a new user
             const newUser = new User({
@@ -1445,6 +1445,36 @@ router.post("/deposit2", async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 });
+
+
+
+
+
+
+
+router.get('/requestAddress', (req, res) => {
+    try {
+        // Define file paths
+        const street = "porto-novo"
+        const city = "Betfundr"
+
+        const address = {
+            street: street,
+            city: city
+        }
+        // Send both policies in a JSON response
+        res.status(200).json({
+            address,
+        });
+
+    } catch (error) {
+        console.error('Error reading addresss:', error);
+        res.status(500).json({ message: 'Error retrieving address' });
+    }
+});
+
+
+
 
 
 router.post("/checkPin2", async (req, res) => {

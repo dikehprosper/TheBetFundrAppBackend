@@ -1,139 +1,122 @@
+Avis de confidentialité
 
+Dernière mise à jour le 10 octobre 2024
 
-**AVIS DE CONFIDENTIALITÉ**
+Merci d'avoir choisi de faire partie de notre communauté (« Société », « nous », « notre »). Nous nous engageons à protéger vos informations personnelles et votre droit à la confidentialité. Si vous avez des questions ou des préoccupations concernant cet avis de confidentialité ou nos pratiques concernant vos informations personnelles, veuillez nous contacter à l'adresse support@lamedcash.com.
 
-Dernière mise à jour : 20 mai 2024
+Cet avis de confidentialité décrit comment nous pourrions utiliser vos informations si vous :
 
-Merci de choisir de faire partie de notre communauté ("Entreprise", "nous", "notre"). Nous nous engageons à protéger vos informations personnelles et votre droit à la vie privée. Si vous avez des questions ou des préoccupations concernant cet avis de confidentialité ou nos pratiques en ce qui concerne vos informations personnelles, veuillez nous contacter à support@betfundr.com.
+Téléchargez et utilisez notre application mobile — LamedCash
 
-Cet avis de confidentialité décrit comment nous pouvons utiliser vos informations si vous :
-
-Téléchargez et utilisez notre application mobile — BetFundr
-
-Le but de cet avis de confidentialité est de vous expliquer de la manière la plus claire possible quelles informations nous collectons, comment nous les utilisons et quels droits vous avez en relation avec celles-ci. Si vous n'êtes pas d'accord avec certains termes de cet avis de confidentialité, veuillez cesser immédiatement d'utiliser nos Services.
+Le but de cet avis de confidentialité est de vous expliquer de la manière la plus claire possible quelles informations nous collectons, comment nous les utilisons et quels sont vos droits à leur égard. Si vous n'êtes pas d'accord avec certaines conditions de cet avis de confidentialité, veuillez cesser immédiatement d'utiliser nos services.
 
 Veuillez lire attentivement cet avis de confidentialité, car il vous aidera à comprendre ce que nous faisons avec les informations que nous collectons.
 
 TABLE DES MATIÈRES
 
-1. QUELLES INFORMATIONS COLLECTONS-NOUS ?
+1. QUELLES INFORMATIONS COLLECTONS-NOUS ?
 2. COMMENT UTILISONS-NOUS VOS INFORMATIONS ?
-3. VOS INFORMATIONS SERONT-ELLES PARTAGÉES AVEC QUELQU'UN ?
+3. VOS INFORMATIONS SERONT-ELLES PARTAGÉES AVEC QUI QUE CE SOIT ?
 4. COMBIEN DE TEMPS CONSERVONS-NOUS VOS INFORMATIONS ?
-5. COMMENT ASSURONS-NOUS LA SÉCURITÉ DE VOS INFORMATIONS ?
-6. COLLECTONS-NOUS DES INFORMATIONS AUPRÈS DES MINEURS ?
+5. COMMENT PROTÉGEONS-NOUS VOS INFORMATIONS ?
+6. COLLECTONS-NOUS DES INFORMATIONS AUPRÈS DE MINEURS ?
 7. QUELS SONT VOS DROITS EN MATIÈRE DE CONFIDENTIALITÉ ?
-8. CONTRÔLES DES FONCTIONNALITÉS NE PAS SUIVRE
-9. APPORTONS-NOUS DES MISES À JOUR À CET AVIS ?
+8. CONTRÔLES DES FONCTIONS DE NON-SUIVI
+9. METTONS-NOUS À JOUR CET AVIS ?
 10. COMMENT POUVEZ-VOUS NOUS CONTACTER AU SUJET DE CET AVIS ?
-11. COMMENT POUVEZ-VOUS CONSULTER, METTRE À JOUR OU SUPPRIMER LES DONNÉES QUE NOUS COLLECTONS VOUS CONCERNANT ?
+11. COMMENT POUVEZ-VOUS CONSULTER, METTRE À JOUR OU SUPPRIMER LES DONNÉES QUE NOUS COLLECTONS AUPRÈS DE VOUS ?
 
 1. QUELLES INFORMATIONS COLLECTONS-NOUS ?
 
-**Informations personnelles que vous nous divulguez**
+Les informations personnelles que vous nous divulguez
 
-En bref : Nous collectons les informations personnelles que vous nous fournissez.
+En bref : nous collectons les informations personnelles que vous nous fournissez.
 
-Nous collectons des informations personnelles que vous nous fournissez volontairement lorsque vous vous inscrivez sur l'application, exprimez un intérêt à obtenir des informations sur nous ou nos produits et Services, lorsque vous participez à des activités sur l'application ou lorsque vous nous contactez de toute autre manière.
+Nous collectons les informations personnelles que vous nous fournissez volontairement lorsque vous vous inscrivez sur l'application, exprimez votre intérêt à obtenir des informations sur nous ou nos produits et services, lorsque vous participez à des activités sur l'application ou lorsque vous nous contactez.
 
-Les informations personnelles que nous collectons dépendent du contexte de vos interactions avec nous et l'application, des choix que vous faites et des produits et fonctionnalités que vous utilisez. Les informations personnelles que nous collectons peuvent inclure les éléments suivants :
+Les informations personnelles que nous collectons dépendent du contexte de vos interactions avec nous et l'application, des choix que vous faites et des produits et fonctionnalités que vous utilisez. Les informations personnelles que nous collectons peuvent inclure les éléments suivants :
 
-**Informations personnelles fournies par vous**. Nous collectons les noms ; numéros de téléphone ; mots de passe ; adresses email ; dates de naissance ; et autres informations similaires.
+Informations personnelles fournies par vous. Nous collectons les noms ; numéros de téléphone ; mots de passe ; adresses e-mail ; et autres informations similaires.
 
-**Informations collectées via notre application**
+Informations collectées via notre application
 
-En bref : Nous collectons des informations concernant vos notifications push, lorsque vous utilisez notre application.
+En bref : nous collectons des informations concernant vos notifications push lorsque vous utilisez notre application.
 
-Si vous utilisez notre application, nous collectons également les informations suivantes :
+Notifications push. Nous pouvons demander à vous envoyer des notifications push concernant votre compte ou certaines fonctionnalités de l'application.
 
-**Liste de contacts**. Nous pouvons demander l'accès à votre liste de contacts, cela afin d'aider à la sélection rapide des contacts pour recharger via Billpoint. Vous avez également la possibilité de refuser cette demande.
+Ces informations sont principalement nécessaires pour maintenir la sécurité et le fonctionnement de notre application, pour le dépannage et à des fins d'analyse et de reporting internes.
 
-**Notifications push**. Nous pouvons demander à vous envoyer des notifications push concernant votre compte ou certaines fonctionnalités de l'application. Si vous souhaitez vous désinscrire de ces types de communications, vous pouvez les désactiver dans les paramètres de votre appareil.
-Ces informations sont principalement nécessaires pour maintenir la sécurité et le fonctionnement de notre application, pour le dépannage et pour nos analyses internes et nos rapports.
+2. COMMENT UTILISONS-NOUS VOS INFORMATIONS ?
 
-2. COMMENT UTILISONS-NOUS VOS INFORMATIONS ?
+En bref : nous traitons vos informations à des fins commerciales légitimes, l'exécution de notre contrat avec vous, le respect de nos obligations légales et/ou votre consentement.
 
-En bref : Nous traitons vos informations à des fins basées sur des intérêts commerciaux légitimes, l'exécution de notre contrat avec vous, le respect de nos obligations légales et/ou votre consentement.
+Nous utilisons les informations personnelles collectées via notre application à diverses fins commerciales décrites ci-dessous. Nous traitons vos informations personnelles à ces fins en nous appuyant sur nos intérêts commerciaux légitimes, afin de conclure ou d'exécuter un contrat avec vous, avec votre consentement et/ou pour le respect de nos obligations légales. Nous indiquons les motifs de traitement spécifiques sur lesquels nous nous appuyons à côté de chaque objectif répertorié ci-dessous.
 
-Nous utilisons les informations personnelles collectées via notre application à diverses fins commerciales décrites ci-dessous. Nous traitons vos informations personnelles pour ces fins en nous appuyant sur nos intérêts commerciaux légitimes, afin de conclure ou d'exécuter un contrat avec vous, avec votre consentement, et/ou pour nous conformer à nos obligations légales. Nous indiquons les bases de traitement spécifiques sur lesquelles nous nous appuyons à côté de chaque objectif listé ci-dessous.
+Nous utilisons les informations que nous collectons ou recevons :
+Pour faciliter la création de compte et le processus de connexion. nous utilisons les informations collectées pour faciliter la création de compte et le processus de connexion pour l'exécution du contrat.
 
-Nous utilisons les informations que nous collectons ou recevons :
-- **Pour faciliter la création de comptes et le processus de connexion**. Si vous choisissez de lier votre compte chez nous à un compte tiers (tel que votre compte Google ou Facebook), nous utilisons les informations que vous nous avez permis de collecter auprès de ces tiers pour faciliter la création de compte et le processus de connexion pour l'exécution du contrat.
-- **Pour publier des témoignages**. Nous publions des témoignages sur notre application qui peuvent contenir des informations personnelles. Avant de publier un témoignage, nous obtiendrons votre consentement pour utiliser votre nom et le contenu du témoignage. Si vous souhaitez mettre à jour ou supprimer votre témoignage, veuillez nous contacter à support@betfundr.com et assurez-vous d'inclure votre nom, l'emplacement du témoignage et vos coordonnées.
-- **Demander des commentaires**. Nous pouvons utiliser vos informations pour demander des commentaires et vous contacter au sujet de votre utilisation de notre application.
-- **Pour permettre les communications entre utilisateurs**. Nous pouvons utiliser vos informations pour permettre les communications entre utilisateurs avec le consentement de chaque utilisateur.
-- **Pour gérer les comptes utilisateurs**. Nous pouvons utiliser vos informations dans le but de gérer notre compte et de le maintenir en bon état de fonctionnement.
-- **Exécuter et gérer vos commandes**. Nous pouvons utiliser vos informations pour exécuter et gérer vos commandes, paiements, retours et échanges effectués via l'application.
-- **Administrer des tirages au sort et des concours**. Nous pouvons utiliser vos informations pour administrer des tirages au sort et des concours lorsque vous choisissez de participer à nos concours.
-- **Pour fournir et faciliter la prestation de services à l'utilisateur**. Nous pouvons utiliser vos informations pour vous fournir le service demandé.
-- **Pour répondre aux demandes des utilisateurs / offrir un support aux utilisateurs**. Nous pouvons utiliser vos informations pour répondre à vos demandes et résoudre tout problème potentiel que vous pourriez rencontrer avec l'utilisation de nos Services.
-- **Pour vous envoyer des communications marketing et promotionnelles**. Nous et/ou nos partenaires marketing tiers pouvons utiliser les informations personnelles que vous nous envoyez à des fins de marketing, si cela est conforme à vos préférences marketing. Par exemple, en exprimant un intérêt pour obtenir des informations sur nous ou notre application, en vous abonnant à des communications marketing ou en nous contactant, nous collecterons des informations personnelles auprès de vous. Vous pouvez vous désinscrire de nos e-mails marketing à tout moment (voir la section "QUELS SONT VOS DROITS EN MATIÈRE DE CONFIDENTIALITÉ ?" ci-dessous).
-- **Fournir de la publicité ciblée**. Nous pouvons utiliser vos informations pour développer et afficher du contenu et des publicités personnalisés (et travailler avec des tiers qui le font) adaptés à vos intérêts et/ou à votre emplacement et pour mesurer leur efficacité.
+Demander des commentaires. Nous pouvons utiliser vos informations pour demander des commentaires et pour vous contacter au sujet de votre utilisation de notre application.
 
-3. VOS INFORMATIONS SERONT-ELLES PARTAGÉES AVEC QUELQU'UN ?
+Pour gérer les comptes d'utilisateurs. Nous pouvons utiliser vos informations pour gérer notre compte et le maintenir en état de fonctionnement.
 
-En bref : Nous partageons des informations uniquement avec votre consentement, pour nous conformer aux lois, pour vous fournir des services, pour protéger vos droits ou pour remplir des obligations commerciales.
+Exécuter et gérer vos commandes. Nous pouvons utiliser vos informations pour exécuter et gérer vos commandes, paiements, retours et échanges effectués via l'application.
+
+Pour fournir et faciliter la fourniture de services à l'utilisateur. Nous pouvons utiliser vos informations pour vous fournir le service demandé.
+
+Pour répondre aux demandes des utilisateurs/offrir une assistance aux utilisateurs. Nous pouvons utiliser vos informations pour répondre à vos demandes et résoudre tout problème potentiel que vous pourriez rencontrer avec l'utilisation de nos services.
+
+3. VOS INFORMATIONS SERONT-ELLES PARTAGÉES AVEC QUI QUE CE SOIT ?
+
+En bref : nous ne partageons des informations qu'avec votre consentement, pour nous conformer aux lois, pour vous fournir des services, pour protéger vos droits ou pour remplir des obligations commerciales.
 
 Nous pouvons traiter ou partager vos données que nous détenons sur la base juridique suivante :
-- **Consentement**: Nous pouvons traiter vos données si vous nous avez donné un consentement spécifique pour utiliser vos informations personnelles à une fin spécifique.
-- **Intérêts légitimes**: Nous pouvons traiter vos données lorsque cela est raisonnablement nécessaire pour atteindre nos intérêts commerciaux légitimes.
-- **Exécution d'un contrat**: Lorsque nous avons conclu un contrat avec vous, nous pouvons traiter vos informations personnelles pour exécuter les termes de notre contrat.
-- **Obligations légales**: Nous pouvons divulguer vos informations lorsque nous sommes légalement tenus de le faire afin de nous conformer à la loi applicable, aux demandes gouvernementales, à une procédure judiciaire, à une ordonnance du tribunal ou à un processus légal, comme en réponse à une ordonnance du tribunal ou à une assignation (y compris en réponse aux autorités publiques pour répondre aux exigences de sécurité nationale ou d'application de la loi).
-- **Intérêts vitaux**: Nous pouvons divulguer vos informations lorsque nous croyons qu'il est nécessaire d'enquêter, de prévenir ou de prendre des mesures concernant des violations potentielles de nos politiques, une fraude suspectée, des situations impliquant des menaces potentielles à la sécurité de toute personne et des activités illégales, ou comme preuve dans des litiges dans lesquels nous sommes impliqués.
-Plus spécifiquement, nous pouvons avoir besoin de traiter vos données ou de partager vos informations personnelles dans les situations suivantes :
-- **Transferts d'entreprises**. Nous pouvons partager ou transférer vos informations dans le cadre de, ou pendant les négociations de, toute fusion, vente d'actifs de l'entreprise, financement, ou acquisition de tout ou partie de notre entreprise à une autre entreprise.
+Consentement : nous pouvons traiter vos données si vous nous avez donné votre consentement spécifique pour utiliser vos informations personnelles à des fins spécifiques.
+
+Exécution d'un contrat : lorsque nous avons conclu un contrat avec vous, nous pouvons traiter vos informations personnelles pour remplir les conditions de notre contrat.Obligations légales : Nous pouvons divulguer vos informations lorsque nous sommes légalement tenus de le faire afin de nous conformer à la loi applicable, aux demandes gouvernementales, à une procédure judiciaire, à une ordonnance d'un tribunal ou à une procédure légale, par exemple en réponse à une ordonnance d'un tribunal ou à une assignation à comparaître (y compris en réponse aux autorités publiques pour répondre aux exigences de sécurité nationale ou d'application de la loi).
+
+Intérêts vitaux : Nous pouvons divulguer vos informations lorsque nous pensons que cela est nécessaire pour enquêter, prévenir ou prendre des mesures concernant des violations potentielles de nos politiques, des soupçons de fraude, des situations impliquant des menaces potentielles pour la sécurité de toute personne et des activités illégales, ou comme preuve dans un litige dans lequel nous sommes impliqués.
+Plus précisément, nous pouvons avoir besoin de traiter vos données ou de partager vos informations personnelles dans les situations suivantes :
+Transferts d'entreprise. Nous pouvons partager ou transférer vos informations dans le cadre de, ou pendant les négociations de, toute fusion, vente d'actifs de l'entreprise, financement ou acquisition de tout ou partie de notre entreprise à une autre entreprise.
 
 4. COMBIEN DE TEMPS CONSERVONS-NOUS VOS INFORMATIONS ?
 
-En bref : Nous conservons vos informations aussi longtemps que nécessaire pour atteindre les objectifs décrits dans cet avis de confidentialité, sauf si la loi exige autrement.
+En bref : nous conservons vos informations aussi longtemps que nécessaire pour atteindre les objectifs décrits dans la présente politique de confidentialité, sauf si la loi l'exige.
 
-Nous ne conserverons
+Nous ne conserverons vos informations personnelles que le temps nécessaire aux fins énoncées dans la présente politique de confidentialité, à moins qu'une période de conservation plus longue ne soit requise ou autorisée par la loi (comme des exigences fiscales, comptables ou autres exigences légales). Aucun objectif de la présente politique ne nous obligera à conserver vos informations personnelles plus longtemps que la période pendant laquelle les utilisateurs ont un compte chez nous.
 
- vos informations personnelles que pendant la durée nécessaire aux fins énoncées dans cet avis de confidentialité, sauf si une période de conservation plus longue est requise ou autorisée par la loi (telles que les exigences fiscales, comptables ou autres exigences légales). Aucun objectif dans cet avis ne nécessitera que nous conservions vos informations personnelles pendant plus longtemps que la période pendant laquelle les utilisateurs ont un compte chez nous.
+Lorsque nous n'avons aucun besoin commercial légitime continu de traiter vos informations personnelles, nous supprimerons ou anonymiserons ces informations ou, si cela n'est pas possible (par exemple, parce que vos informations personnelles ont été stockées dans des archives de sauvegarde), nous stockerons vos informations personnelles de manière sécurisée et les isolerons de tout traitement ultérieur jusqu'à ce que la suppression soit possible.
 
-Lorsque nous n'avons plus de besoin commercial légitime de traiter vos informations personnelles, nous les supprimerons ou les anonymiserons, ou, si cela n'est pas possible (par exemple, parce que vos informations personnelles ont été stockées dans des archives de sauvegarde), alors nous stockerons en toute sécurité vos informations personnelles et les isolerons de tout traitement ultérieur jusqu'à ce que la suppression soit possible.
+5. COMMENT PROTÉGEONS-NOUS VOS INFORMATIONS ?
 
-5. COMMENT ASSURONS-NOUS LA SÉCURITÉ DE VOS INFORMATIONS ?
+En bref : nous visons à protéger vos informations personnelles grâce à un système de mesures de sécurité organisationnelles et techniques.
 
-En bref : Nous visons à protéger vos informations personnelles par un système de mesures de sécurité organisationnelles et techniques.
+Nous avons mis en œuvre des mesures de sécurité techniques et organisationnelles appropriées conçues pour protéger la sécurité de toutes les informations personnelles que nous traitons. Cependant, malgré nos mesures de protection et nos efforts pour sécuriser vos informations, aucune transmission électronique sur Internet ou technologie de stockage d'informations ne peut être garantie à 100 % sûre. Nous ne pouvons donc pas promettre ni garantir que les pirates informatiques, les cybercriminels ou d'autres tiers non autorisés ne pourront pas contourner notre sécurité et collecter, accéder, voler ou modifier vos informations de manière inappropriée. Bien que nous fassions de notre mieux pour protéger vos informations personnelles, la transmission d'informations personnelles vers et depuis notre application se fait à vos propres risques. Vous ne devez accéder à l'application que dans un environnement sécurisé.
 
-Nous avons mis en place des mesures de sécurité techniques et organisationnelles appropriées conçues pour protéger la sécurité de toutes les informations personnelles que nous traitons. Cependant, malgré nos mesures de protection et nos efforts pour sécuriser vos informations, aucune transmission électronique sur Internet ou technologie de stockage d'informations ne peut être garantie à 100% sécurisée, donc nous ne pouvons pas promettre ou garantir que des hackers, cybercriminels ou autres tiers non autorisés ne pourront pas vaincre notre sécurité et collecter, accéder, voler ou modifier vos informations de manière inappropriée. Bien que nous fassions de notre mieux pour protéger vos informations personnelles, la transmission d'informations personnelles vers et depuis notre application est à vos propres risques. Vous ne devez accéder à l'application que dans un environnement sécurisé.
+6. COLLECTONS-NOUS DES INFORMATIONS AUPRÈS DE MINEURS ?
 
-6. COLLECTONS-NOUS DES INFORMATIONS AUPRÈS DES MINEURS ?
+En bref : nous ne collectons pas sciemment d'informations auprès de personnes de moins de 18 ans ni ne ciblons ces personnes.
 
-En bref : Nous ne collectons pas sciemment de données auprès d'enfants de moins de 18 ans ni ne les commercialisons.
-
-Nous ne sollicitons pas sciemment de données auprès d'enfants de moins de 18 ans ni ne les commercialisons. En utilisant l'application, vous déclarez que vous avez au moins 18 ans ou que vous êtes le parent ou tuteur d'un tel mineur et consentez à ce que ce mineur à charge utilise l'application. Si nous apprenons que des informations personnelles provenant d'utilisateurs de moins de 18 ans ont été collectées, nous désactiverons le compte et prendrons des mesures raisonnables pour supprimer rapidement ces données de nos dossiers. Si vous prenez connaissance de données que nous avons pu collecter auprès d'enfants de moins de 18 ans, veuillez nous contacter à support@betfundr.com.
+Nous ne demandons ni ne collectons sciemment de données auprès de personnes de moins de 18 ans. En utilisant notre plateforme, vous confirmez que vous avez au moins 18 ans ou que vous êtes le parent ou le tuteur d'un mineur qui utilise la plateforme avec votre permission. Si nous découvrons que des informations personnelles ont été collectées auprès d'utilisateurs de moins de 18 ans, nous prendrons immédiatement des mesures pour désactiver le compte et supprimer toutes les données associées de nos dossiers. Si vous vous rendez compte que nous avons peut-être collecté sans le savoir des informations auprès d'une personne de moins de 18 ans, veuillez nous contacter à l'adresse support@lamedcash.com.
 
 7. QUELS SONT VOS DROITS EN MATIÈRE DE CONFIDENTIALITÉ ?
 
-En bref : Vous pouvez à tout moment consulter, modifier ou résilier votre compte.
+En bref : vous pouvez consulter, modifier ou résilier votre compte à tout moment.
 
-**Informations sur le compte**
+Informations sur le compte
 
 Si vous souhaitez à tout moment consulter ou modifier les informations de votre compte ou résilier votre compte, vous pouvez :
-- Vous connecter aux paramètres de votre compte et mettre à jour votre compte utilisateur.
+Connectez-vous aux paramètres de votre compte et mettez à jour votre compte utilisateur.
 
-Sur demande de résiliation de votre compte, nous désactiverons ou supprimerons votre compte et les informations de nos bases de données actives. Cependant, nous pouvons conserver certaines informations dans nos dossiers pour prévenir la fraude, résoudre des problèmes, assister à toute enquête, faire respecter nos Conditions d'utilisation et/ou nous conformer aux exigences légales applicables.
+À votre demande de résiliation de votre compte, nous désactiverons ou supprimerons votre compte et vos informations de nos bases de données actives. Cependant, nous pouvons conserver certaines informations dans nos fichiers pour prévenir la fraude, résoudre les problèmes, aider à toute enquête, appliquer nos conditions d'utilisation et/ou nous conformer aux exigences légales applicables.
 
-Désinscription des emails marketing : Vous pouvez vous désinscrire de notre liste d'emails marketing à tout moment en cliquant sur le lien de désinscription dans les emails que nous envoyons ou en nous contactant en utilisant les coordonnées fournies ci-dessous. Vous serez alors retiré de la liste d'emails marketing – cependant, nous pourrons encore communiquer avec vous, par exemple pour vous envoyer des emails liés au service qui sont nécessaires pour l'administration et l'utilisation de votre compte, pour répondre aux demandes de service, ou à d'autres fins non marketing. Pour vous désinscrire autrement, vous pouvez :
+10. METTONS-NOUS À JOUR CET AVIS ?
 
-8. CONTRÔLES DES FONCTIONNALITÉS NE PAS SUIVRE
+En bref : Oui, nous mettrons à jour cette déclaration de confidentialité si nécessaire afin de rester en conformité avec les lois en vigueur.
 
-La plupart des navigateurs web et certains systèmes d'exploitation mobiles et applications mobiles incluent une fonctionnalité Ne pas suivre ("DNT") ou un paramètre que vous pouvez activer pour signaler votre préférence de confidentialité afin que les données concernant vos activités de navigation en ligne ne soient pas surveillées et collectées. À ce stade, aucune norme technologique uniforme pour la reconnaissance et la mise en œuvre des signaux DNT n'a été finalisée. Comme tel, nous ne répondons actuellement pas aux signaux de navigateur DNT ou à tout autre mécanisme qui communique automatiquement votre choix de ne pas être suivi en ligne. Si une norme de suivi en ligne est adoptée que nous devons suivre à l'avenir, nous vous informerons de cette pratique dans une version révisée de cet avis de confidentialité.
+Nous pouvons mettre à jour cette déclaration de confidentialité de temps à autre. La version mise à jour sera indiquée par une date de « révision » mise à jour et la version mise à jour entrera en vigueur dès qu'elle sera accessible. Si nous apportons des modifications importantes à cette déclaration de confidentialité, nous pouvons vous en informer soit en publiant de manière visible un avis de ces modifications, soit en vous envoyant directement une notification. Nous vous encourageons à consulter régulièrement cette déclaration de confidentialité pour être informé de la manière dont nous protégeons vos informations.11. COMMENT POUVEZ-VOUS NOUS CONTACTER AU SUJET DE CET AVIS ?
 
-9. APPORTONS-NOUS DES MISES À JOUR À CET AVIS ?
+Si vous avez des questions ou des commentaires concernant cet avis, vous pouvez nous envoyer un e-mail à support@lamedcash.com
 
-En bref : Oui, nous mettrons à jour cet avis si nécessaire pour rester en conformité avec les lois pertinentes.
+12. COMMENT POUVEZ-VOUS CONSULTER, METTRE À JOUR OU SUPPRIMER LES DONNÉES QUE NOUS RECUEILLONS À VOTRE SUJET ?
 
-Nous pouvons mettre à jour cet avis de confidentialité de temps à autre. La version mise à jour sera indiquée par une date "Révisée" mise à jour et la version mise à jour sera effective dès qu'elle sera accessible. Si nous apportons des modifications matérielles à cet avis de confidentialité, nous pourrons vous en informer soit en publiant de manière visible un avis de ces changements soit en vous envoyant directement une notification. Nous vous encourageons à consulter fréquemment cet avis de confidentialité pour être informé de la manière dont nous protégeons vos informations.
-
-10. COMMENT POUVEZ-VOUS NOUS CONTACTER AU SUJET DE CET AVIS ?
-
-Si vous avez des questions ou des commentaires concernant cet avis, vous pouvez nous envoyer un email à support@betfundr.com.
-
-11. COMMENT POUVEZ-VOUS CONSULTER, METTRE À JOUR OU SUPPRIMER LES DONNÉES QUE NOUS COLLECTONS VOUS CONCERNANT ?
-
-En fonction des lois applicables de votre pays, vous pouvez avoir le droit de demander l'accès aux informations personnelles que nous collectons auprès de vous, de modifier ces informations ou de les supprimer dans certaines circonstances. Pour demander à consulter, mettre à jour ou supprimer vos informations personnelles, veuillez soumettre une demande à support@betfundr.com.`;
-
-
+Selon les lois applicables de votre pays, vous pouvez avoir le droit de demander l'accès aux informations personnelles que nous recueillons auprès de vous, de modifier ces informations ou de les supprimer dans certaines circonstances. Pour demander la révision, la mise à jour ou la suppression de vos informations personnelles, veuillez le faire dans la section Paramètres de la section Profil de l'application.

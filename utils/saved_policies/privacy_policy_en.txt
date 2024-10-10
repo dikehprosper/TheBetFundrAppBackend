@@ -1,14 +1,14 @@
 PRIVACY NOTICE
 
-Last updated May 20, 2024
+Last updated October 10, 2024
 
 
 
-Thank you for choosing to be part of our community ("Company," "we," "us," or "our"). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us at support@betfundr.com.
+Thank you for choosing to be part of our community ("Company," "we," "us," or "our"). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us at support@lamedcash.com.
 
 This privacy notice describes how we might use your information if you:
 
-Download and use our mobile application — BetFundr
+Download and use our mobile application — LamedCash
 
 
 The purpose of this privacy notice is to explain to you in the clearest way possible what information we collect, how we use it, and what rights you have in relation to it. If there are any terms in this privacy notice that you do not agree with, please discontinue use of our Services immediately.
@@ -39,18 +39,15 @@ We collect personal information that you voluntarily provide to us when you regi
 
 The personal information that we collect depends on the context of your interactions with us and the App, the choices you make and the products and features you use. The personal information we collect may include the following:
 
-Personal Information Provided by You. We collect names; phone numbers; passwords;  email addresses; birth dates; and other similar information.
+Personal Information Provided by You. We collect names; phone numbers; passwords;  email addresses;  and other similar information.
 
 
 Information collected through our App
 
 In Short:  We collect information regarding your  push notifications, when you use our App.
 
-If you use our App, we also collect the following information:
 
-Contact List. we may request to access your contact list, this is to help quick selection of contact to recharge via Billpoint. and you equally have the permission to decline such request.
-
-Push Notifications. We may request to send you push notifications regarding your account or certain features of the App. If you wish to opt-out from receiving these types of communications, you may turn them off in your device's settings.
+Push Notifications. We may request to send you push notifications regarding your account or certain features of the App. 
 This information is primarily needed to maintain the security and operation of our App, for troubleshooting and for our internal analytics and reporting purposes.
 
 2. HOW DO WE USE YOUR INFORMATION?
@@ -60,13 +57,9 @@ In Short:  We process your information for purposes based on legitimate business
 We use personal information collected via our App for a variety of business purposes described below. We process your personal information for these purposes in reliance on our legitimate business interests, in order to enter into or perform a contract with you, with your consent, and/or for compliance with our legal obligations. We indicate the specific processing grounds we rely on next to each purpose listed below.
 
 We use the information we collect or receive:
-To facilitate account creation and login process. If you choose to link your account with us to a third-party account (such as your Google or Facebook account), we use the information you allowed us to collect from those third parties to facilitate account creation and login process for the performance of the contract.
-
-To post testimonials. We post testimonials on our App that may contain personal information. Prior to posting a testimonial, we will obtain your consent to use your name and the content of the testimonial. If you wish to update, or delete your testimonial, please contact us at support@betfundr.com and be sure to include your name, testimonial location, and contact information.
+To facilitate account creation and login process. we use the information collected to facilitate account creation and login process for the performance of the contract.
 
 Request feedback. We may use your information to request feedback and to contact you about your use of our App.
-
-To enable user-to-user communications. We may use your information in order to enable user-to-user communications with each user's consent.
 
 To manage user accounts. We may use your information for the purposes of managing our account and keeping it in working order.
 
@@ -74,17 +67,10 @@ To manage user accounts. We may use your information for the purposes of managin
 Fulfill and manage your orders. We may use your information to fulfill and manage your orders, payments, returns, and exchanges made through the App.
 
 
-Administer prize draws and competitions. We may use your information to administer prize draws and competitions when you elect to participate in our competitions.
-
-
 To deliver and facilitate delivery of services to the user. We may use your information to provide you with the requested service.
 
 
 To respond to user inquiries/offer support to users. We may use your information to respond to your inquiries and solve any potential issues you might have with the use of our Services.
-
-To send you marketing and promotional communications. We and/or our third-party marketing partners may use the personal information you send to us for our marketing purposes, if this is in accordance with your marketing preferences. For example, when expressing an interest in obtaining information about us or our App, subscribing to marketing or otherwise contacting us, we will collect personal information from you. You can opt-out of our marketing emails at any time (see the "WHAT ARE YOUR PRIVACY RIGHTS?" below).
-
-Deliver targeted advertising to you. We may use your information to develop and display personalized content and advertising (and work with third parties who do so) tailored to your interests and/or location and to measure its effectiveness.
 
 
 3. WILL YOUR INFORMATION BE SHARED WITH ANYONE?
@@ -93,8 +79,6 @@ In Short:  We only share information with your consent, to comply with laws, to 
 
 We may process or share your data that we hold based on the following legal basis:
 Consent: We may process your data if you have given us specific consent to use your personal information for a specific purpose.
-
-Legitimate Interests: We may process your data when it is reasonably necessary to achieve our legitimate business interests.
 
 Performance of a Contract: Where we have entered into a contract with you, we may process your personal information to fulfill the terms of our contract.
 
@@ -122,9 +106,9 @@ We have implemented appropriate technical and organizational security measures d
 
 6. DO WE COLLECT INFORMATION FROM MINORS?
 
-In Short:  We do not knowingly collect data from or market to children under 18 years of age.
+In Short: We do not knowingly collect information from or target individuals under the age of 18.
 
-We do not knowingly solicit data from or market to children under 18 years of age. By using the App, you represent that you are at least 18 or that you are the parent or guardian of such a minor and consent to such minor dependent’s use of the App. If we learn that personal information from users less than 18 years of age has been collected, we will deactivate the account and take reasonable measures to promptly delete such data from our records. If you become aware of any data we may have collected from children under age 18, please contact us at support@betfundr.com.
+We do not knowingly request or collect data from individuals under the age of 18. By using our platform, you confirm that you are at least 18 years old, or you are the parent or guardian of a minor who is using the platform with your permission. If we discover that personal information has been collected from users under the age of 18, we will take immediate steps to deactivate the account and delete any related data from our records. If you become aware that we may have unknowingly collected information from someone under 18, please reach out to us at support@lamedcash.com.
 
 7. WHAT ARE YOUR PRIVACY RIGHTS?
 
@@ -138,11 +122,6 @@ Log in to your account settings and update your user account.
 
 Upon your request to terminate your account, we will deactivate or delete your account and information from our active databases. However, we may retain some information in our files to prevent fraud, troubleshoot problems, assist with any investigations, enforce our Terms of Use and/or comply with applicable legal requirements.
 
-Opting out of email marketing: You can unsubscribe from our marketing email list at any time by clicking on the unsubscribe link in the emails that we send or by contacting us using the details provided below. You will then be removed from the marketing email list — however, we may still communicate with you, for example to send you service-related emails that are necessary for the administration and use of your account, to respond to service requests, or for other non-marketing purposes. To otherwise opt-out, you may:
-
-8. CONTROLS FOR DO-NOT-TRACK FEATURES
-
-Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track ("DNT") feature or setting you can activate to signal your privacy preference not to have data about your online browsing activities monitored and collected. At this stage no uniform technology standard for recognizing and implementing DNT signals has been finalized. As such, we do not currently respond to DNT browser signals or any other mechanism that automatically communicates your choice not to be tracked online. If a standard for online tracking is adopted that we must follow in the future, we will inform you about that practice in a revised version of this privacy notice. 
 
 
 10. DO WE MAKE UPDATES TO THIS NOTICE?     
@@ -153,13 +132,13 @@ We may update this privacy notice from time to time. The updated version will be
 
 11. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?     
 
-If you have questions or comments about this notice, you may email us support@betfundr.com
+If you have questions or comments about this notice, you may email us support@lamedcash.com
 
 
 
 12. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?     
 
-Based on the applicable laws of your country, you may have the right to request access to the personal information we collect from you, change that information, or delete it in some circumstances. To request to review, update, or delete your personal information, please submit a request to support@betfundr.com.
+Based on the applicable laws of your country, you may have the right to request access to the personal information we collect from you, change that information, or delete it in some circumstances. To request to review, update, or delete your personal information, please do that settings section in the profile section of the App.
 
 
 
