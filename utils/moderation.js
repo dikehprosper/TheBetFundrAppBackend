@@ -1,48 +1,60 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
+require('dotenv').config(); // Load environment variables from .env file
+const { RekognitionClient, DetectModerationLabelsCommand } = require('@aws-sdk/client-rekognition');
 const sharp = require('sharp');
-const nsfwjs = require('nsfwjs');
-const tf = require('@tensorflow/tfjs-node'); // Ensure you have this installed
 
-let model;
-
-// Load the NSFW model
-const loadModel = async () => {
-    if (!model) {
-        model = await nsfwjs.load();
-        console.log('NSFW model loaded');
+// Create a Rekognition client using custom environment variables
+const rekognition = new RekognitionClient({
+    region: process.env.AWS_SES_REGION, // Use your custom region variable
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY, // Use your custom access key variable
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY // Use your custom secret key variable
     }
-};
+});
 
 // Function to moderate content
 const moderateContent = async (imageBuffer) => {
-    await loadModel(); // Ensure the model is loaded
+    const params = {
+        Image: {
+            Bytes: imageBuffer,
+        },
+        MinConfidence: 75, // Set minimum confidence level for moderation
+    };
 
-    // Resize the image using sharp and convert it to raw RGB format
-    const { data, info } = await sharp(imageBuffer)
-        .resize(224, 224) // NSFW.js expects 224x224 input
-        .raw() // Get the raw pixel data
-        .toBuffer({ resolveWithObject: true });
+    const command = new DetectModerationLabelsCommand(params);
 
-    const numChannels = 3; // RGB
-    const tensor = tf.tensor3d(data, [info.height, info.width, numChannels], 'int32'); // Convert to Tensor
+    try {
+        const result = await rekognition.send(command);
+        const labels = result.ModerationLabels;
 
-    // Classify the image using the NSFW model
-    const predictions = await model.classify(tensor);
-
-    // Check for NSFW content
-    const nsfwThreshold = 0.7; // Set a threshold for classification
-    const nsfwCategories = ['Porn', 'Hentai', 'Suggestive'];
-
-    for (const prediction of predictions) {
-        if (nsfwCategories.includes(prediction.className) && prediction.probability > nsfwThreshold) {
+        // Check for inappropriate content
+        if (labels.length > 0) {
             throw new Error('Inappropriate content detected');
         }
-    }
 
-    return predictions; // Return predictions if needed
+        return labels; // Return labels if needed
+    } catch (error) {
+        console.error("Error in moderation:", error);
+        throw new Error('Moderation error occurred');
+    }
+};
+
+// Function to handle image processing and moderation
+// Function to handle image processing and moderation
+const processImage = async (imageBuffer) => {
+    // Resize the image using sharp
+    const resizedImageBuffer = await sharp(imageBuffer)
+        .resize(224, 224) // Resize image for standardization
+        .toBuffer();
+
+    // Moderate the content using AWS Rekognition
+    const labels = await moderateContent(resizedImageBuffer);
+    console.log('Moderation Labels:', labels);
+    return resizedImageBuffer; // Return the resized image buffer for uploading
 };
 
 module.exports = {
     moderateContent,
+    processImage, // Export the processImage function for handling image processing
 };

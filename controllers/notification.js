@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-undef */
 const Notification = require("../models/notification");
 const {
   serverErrorResponse,

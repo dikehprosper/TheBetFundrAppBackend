@@ -31,7 +31,7 @@ const { admin, bucket } = require("../routes/firebase.js")
 
 
 
-const { moderateContent } = require('../utils/moderation.js');
+const { processImage } = require('../utils/moderation.js');
 
 const getPostDetails = async (req, res) => {
   const postId = req.query.postId;
@@ -205,17 +205,15 @@ const createPost = async (req, res) => {
 
       // Handle different file types
       if (file.mimetype.startsWith("image")) {
-        buffer = await sharp(file.buffer).webp({ quality: 80 }).toBuffer();
-        contentType = "image/webp";
+        // Process the image (resize and moderate)
+        buffer = await processImage(file.buffer);
+        contentType = "image/webp"; // Set content type after processing
       } else if (file.mimetype.startsWith("video")) {
-        buffer = file.buffer;
+        buffer = file.buffer; // Keep the original buffer for videos
         contentType = file.mimetype;
       } else {
         throw new Error("Unsupported file type");
       }
-
-      // Check for inappropriate content before uploading
-      await moderateContent(buffer);
 
       const blobStream = fileUpload.createWriteStream({
         metadata: { contentType },
@@ -246,7 +244,8 @@ const createPost = async (req, res) => {
         const publicUrl = await uploadFile(file);
         publicUrls.push(publicUrl);
       }
-    } 
+    }
+
     // Create a single post with multiple media files
     const createdPost = await Post.create({
       user: existingUser._id,
@@ -268,7 +267,6 @@ const createPost = async (req, res) => {
     });
   }
 };
-
 
 
 const deletePost = async (req, res) => {

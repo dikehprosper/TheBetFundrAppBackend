@@ -11,7 +11,12 @@ COPY package*.json ./
 # RUN npm install nsfwjs @tensorflow/tfjs-node sharp
 
 # Install the dependencies
+RUN npm install @aws-sdk/client-rekognition
+
+# Install the dependencies
 RUN npm install
+
+
 
 # Copy the rest of the application code to the working directory
 COPY . .
