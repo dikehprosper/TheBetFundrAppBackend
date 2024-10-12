@@ -245,13 +245,7 @@ const createPost = async (req, res) => {
         const publicUrl = await uploadFile(file);
         publicUrls.push(publicUrl);
       }
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: "No files provided",
-      });
-    }
-
+    } 
     // Create a single post with multiple media files
     const createdPost = await Post.create({
       user: existingUser._id,
