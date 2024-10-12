@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -5,16 +6,15 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
 const sharp = require("sharp");
-const admin = require("firebase-admin");
 const { check } = require("express-validator");
 const multer = require("multer");
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const VerifyMobileNumber = require("../utils/verifyPhone");
 require("dotenv").config();
 const upload = multer({ storage: multer.memoryStorage() });
-admin.initializeApp({
-  credential: admin.credential.cert(require("../service-account-file.json")),
-  storageBucket: "gs://groupchat-d6de7.appspot.com",
-});
+
+const { admin, bucket } = require("./firebase");
+
 
 const signInValidate = [
   check("fullname")
@@ -39,18 +39,18 @@ const checkOngoingTransaction = (req, res, next) => {
 router.post(
   "/editProfileImage",
   checkOngoingTransaction,
-  upload.single("image"),
+  upload.single("image"), // Upload image middleware
   async (req, res) => {
     try {
-      console.log("done")
+     
       transactionInProgress = true;
       const { email } = req.body;
       const file = req.file;
 
       if (!file) {
         transactionInProgress = false;
-        return res.send({
-          success: 400,
+        return res.status(400).send({
+          success: false,
           message: "No image uploaded",
           status: 400,
         });
@@ -59,8 +59,8 @@ router.post(
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
         transactionInProgress = false;
-        return res.send({
-          success: 401,
+        return res.status(401).send({
+          success: false,
           message: "User not found",
           status: 401,
         });
@@ -68,8 +68,8 @@ router.post(
 
       if (!existingUser.isActivated) {
         transactionInProgress = false;
-        return res.send({
-          success: 502,
+        return res.status(502).send({
+          success: false,
           message: "User is deactivated",
           status: 502,
         });
@@ -82,23 +82,27 @@ router.post(
 
       const bucket = admin.storage().bucket();
       const newFileName = `${existingUser._id}-${Date.now()}.webp`; // Save as .webp
-      const fileUpload = bucket.file(`profileImages/${newFileName}`); // Organize files in a subfolder
+      const fileUpload = bucket.file(`profileImages/${newFileName}`);
+      
+      // Organize files in a subfolder
+     
+
 
       // Delete old image if it exists
-      if (existingUser.imageFileName) {
-        try {
-          await bucket
-            .file(`profileImages/${existingUser.imageFileName}`)
-            .delete();
-        } catch (err) {
-          transactionInProgress = false;
-          return res.send({
-            success: 501,
-            message: "unable to delete previous file",
-            status: 501,
+      if (existingUser.imageFileName !== "") {
+        bucket
+          .file(`profileImages/${existingUser.imageFileName}`)
+          .delete()
+          .then(() => {
+            console.log("Previous image deleted successfully");
+          })
+          .catch((err) => {
+            console.error("Error deleting previous image:", err);
+            // Log the error but do not stop the process
           });
-        }
       }
+
+      console.log("done")
 
       const blobStream = fileUpload.createWriteStream({
         metadata: { contentType: "image/webp" },
@@ -108,8 +112,8 @@ router.post(
         console.error("Error uploading file to Firebase:", error);
         transactionInProgress = false;
 
-        return res.send({
-          success: 503,
+        return res.status(503).send({
+          success: false,
           message: "Failed to upload image",
           status: 503,
         });
@@ -117,9 +121,8 @@ router.post(
 
       blobStream.on("finish", async () => {
         await fileUpload.makePublic();
-        const publicUrl = `https://storage.googleapis.com/${
-          bucket.name
-        }/profileImages/${encodeURIComponent(newFileName)}`;
+        const publicUrl = `https://storage.googleapis.com/${bucket.name
+          }/profileImages/${encodeURIComponent(newFileName)}`;
 
         existingUser.image = publicUrl;
         existingUser.imageFileName = newFileName;
@@ -131,8 +134,8 @@ router.post(
           image: publicUrl,
         });
       });
-      transactionInProgress = false;
-      blobStream.end(webpBuffer);
+
+      blobStream.end(webpBuffer); // End stream here after blob is done
     } catch (error) {
       transactionInProgress = false;
       console.error("Error updating user profile:", error);
@@ -140,6 +143,11 @@ router.post(
     }
   }
 );
+
+
+
+
+
 
 router.post(
   "/changeUserDetails",

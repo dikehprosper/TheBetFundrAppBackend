@@ -1455,12 +1455,19 @@ router.post("/deposit2", async (req, res) => {
 router.get('/requestAddress', (req, res) => {
     try {
         // Define file paths
-        const street = "porto-novo"
-        const city = "Betfundr"
+        const street = "Porto-novo"
+        const city = "Lamedcash"
+        // const marqueTextEng = `USE THIS PROMO CODE "229LERICHE" ON 1XBET AND GET 200% BONUS ON YOUR FIRST DEPOSIT`
+        // const marqueTextFRC = `UTILISEZ LE CODE PROMO 1XBET "229LERICHE" ET OBTENEZ  200%  DE BONUS SUR VOTRE 1ER DÉPÔT`
+
+        const marqueTextEng = `WELCOME AND THANKS FOR USING OUR SERVICE`
+        const marqueTextFRC = `BIENVENUE ET MERCI D'UTILISER NOTRE SERVICE`
 
         const address = {
             street: street,
-            city: city
+            city: city,
+            marqueTextEng: marqueTextEng,
+            marqueTextFRC: marqueTextFRC
         }
         // Send both policies in a JSON response
         res.status(200).json({

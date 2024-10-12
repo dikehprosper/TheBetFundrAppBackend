@@ -13,23 +13,24 @@ const User = require("../models/user.js");
 const Comment = require("../models/comment.js");
 const Notification = require("../models/notification.js");
 const { check } = require("express-validator");
-const admin = require("firebase-admin");
 const multer = require("multer");
 const sharp = require("sharp");
 const vision = require('@google-cloud/vision');
 const client = new vision.ImageAnnotatorClient();
-
 const { sendNotification } = require("../helpers/notification");
-require("dotenv").config();
-admin.initializeApp(
-  {
-    credential: admin.credential.cert(require("../service-account-file.json")),
-    storageBucket: "gs://groupchat-d6de7.appspot.com",
-  },
-  "post"
-);
+const { admin, bucket } = require("../routes/firebase.js");
 
-// getters
+// // middleware.js
+// const multer = require("multer");
+
+// const storage = multer.memoryStorage(); // Store files in memory
+// const upload = multer({ storage: storage });
+
+// module.exports = upload;
+
+
+
+const { moderateContent } = require('../utils/moderation.js');
 
 const getPostDetails = async (req, res) => {
   const postId = req.query.postId;
@@ -185,18 +186,12 @@ const createPost = async (req, res) => {
 
   try {
     const existingUser = await User.findById(user._id);
-
-    // Function to check for inappropriate content
-    const moderateContent = async (buffer) => {
-      const [result] = await client.safeSearchDetection(buffer);
-      const detections = result.safeSearchAnnotation;
-      if (
-        detections.adult === 'LIKELY' || detections.adult === 'VERY_LIKELY' ||
-        detections.violence === 'LIKELY' || detections.violence === 'VERY_LIKELY'
-      ) {
-        throw new Error('Inappropriate content detected');
-      }
-    };
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     // Function to upload a file
     const uploadFile = async (file) => {
@@ -206,14 +201,16 @@ const createPost = async (req, res) => {
 
       let buffer;
       let contentType;
+
+      // Handle different file types
       if (file.mimetype.startsWith("image")) {
-        // If the file is an image, convert it to webp
         buffer = await sharp(file.buffer).webp({ quality: 80 }).toBuffer();
         contentType = "image/webp";
       } else if (file.mimetype.startsWith("video")) {
-        // If the file is a video, use the original buffer and content type
         buffer = file.buffer;
         contentType = file.mimetype;
+      } else {
+        throw new Error("Unsupported file type");
       }
 
       // Check for inappropriate content before uploading
@@ -226,7 +223,7 @@ const createPost = async (req, res) => {
       return new Promise((resolve, reject) => {
         blobStream.on("error", (error) => {
           console.error("Error uploading file to Firebase:", error);
-          reject(error);
+          reject(new Error("Failed to upload file"));
         });
 
         blobStream.on("finish", async () => {
@@ -243,11 +240,16 @@ const createPost = async (req, res) => {
     };
 
     // Loop through each file and upload it
-    if (files) {
+    if (files && files.length > 0) {
       for (const file of files) {
         const publicUrl = await uploadFile(file);
         publicUrls.push(publicUrl);
       }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "No files provided",
+      });
     }
 
     // Create a single post with multiple media files
@@ -271,8 +273,6 @@ const createPost = async (req, res) => {
     });
   }
 };
-
-
 
 
 
