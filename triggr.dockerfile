@@ -7,16 +7,8 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# # Install the dependencies along with the required packages
-# RUN npm install nsfwjs @tensorflow/tfjs-node sharp
-
-# Install the dependencies
-RUN npm install @aws-sdk/client-rekognition
-
 # Install the dependencies
 RUN npm install
-
-
 
 # Copy the rest of the application code to the working directory
 COPY . .
@@ -25,7 +17,4 @@ COPY . .
 EXPOSE 5001
 
 # Command to run the application
-CMD ["npm", "start"]
-
-
-
+CMD ["npm", "run", "dev"]  # Use "dev" or "start" based on your script
