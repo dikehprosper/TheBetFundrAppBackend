@@ -7,6 +7,9 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
+# Install the dependencies along with the required packages
+RUN npm install nsfwjs @tensorflow/tfjs-node sharp
+
 # Install the dependencies
 RUN npm install
 
