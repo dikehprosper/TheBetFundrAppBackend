@@ -1309,6 +1309,7 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
 
       </body>
       </html>`;
+      
     }
 
     // Send the email
