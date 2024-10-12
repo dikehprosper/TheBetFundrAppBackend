@@ -18,7 +18,7 @@ const sharp = require("sharp");
 const vision = require('@google-cloud/vision');
 const client = new vision.ImageAnnotatorClient();
 const { sendNotification } = require("../helpers/notification");
-const { admin, bucket } = require("../routes/firebase.js");
+const { admin, bucket } = require("../routes/firebase.js")
 
 
 // // middleware.js
