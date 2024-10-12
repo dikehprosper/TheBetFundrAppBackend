@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 5001
 
 # Command to run the application
-CMD ["npm", "run", "dev"]  # Use "dev" or "start" based on your script
+CMD ["npm", "start"]  # Use "dev" or "start" based on your script
