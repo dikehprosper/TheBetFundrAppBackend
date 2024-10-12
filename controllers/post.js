@@ -215,7 +215,7 @@ const createPost = async (req, res) => {
       }
 
       // Check for inappropriate content before uploading
-      await moderateContent(buffer);
+      // await moderateContent(buffer);
 
       const blobStream = fileUpload.createWriteStream({
         metadata: { contentType },
