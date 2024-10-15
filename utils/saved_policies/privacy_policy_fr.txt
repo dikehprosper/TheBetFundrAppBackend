@@ -21,10 +21,9 @@ TABLE DES MATIÈRES
 5. COMMENT PROTÉGEONS-NOUS VOS INFORMATIONS ?
 6. COLLECTONS-NOUS DES INFORMATIONS AUPRÈS DE MINEURS ?
 7. QUELS SONT VOS DROITS EN MATIÈRE DE CONFIDENTIALITÉ ?
-8. CONTRÔLES DES FONCTIONS DE NON-SUIVI
-9. METTONS-NOUS À JOUR CET AVIS ?
-10. COMMENT POUVEZ-VOUS NOUS CONTACTER AU SUJET DE CET AVIS ?
-11. COMMENT POUVEZ-VOUS CONSULTER, METTRE À JOUR OU SUPPRIMER LES DONNÉES QUE NOUS COLLECTONS AUPRÈS DE VOUS ?
+8. METTONS-NOUS À JOUR CET AVIS ?
+9. COMMENT POUVEZ-VOUS NOUS CONTACTER AU SUJET DE CET AVIS ?
+10. COMMENT POUVEZ-VOUS CONSULTER, METTRE À JOUR OU SUPPRIMER LES DONNÉES QUE NOUS COLLECTONS AUPRÈS DE VOUS ?
 
 1. QUELLES INFORMATIONS COLLECTONS-NOUS ?
 
@@ -48,7 +47,7 @@ Ces informations sont principalement nécessaires pour maintenir la sécurité e
 
 2. COMMENT UTILISONS-NOUS VOS INFORMATIONS ?
 
-En bref : nous traitons vos informations à des fins commerciales légitimes, l'exécution de notre contrat avec vous, le respect de nos obligations légales et/ou votre consentement.
+En bref : nous traitons vos informations à des fins fondées sur des intérêts commerciaux légitimes, l'exécution de notre contrat avec vous, le respect de nos obligations légales et/ou votre consentement.
 
 Nous utilisons les informations personnelles collectées via notre application à diverses fins commerciales décrites ci-dessous. Nous traitons vos informations personnelles à ces fins en nous appuyant sur nos intérêts commerciaux légitimes, afin de conclure ou d'exécuter un contrat avec vous, avec votre consentement et/ou pour le respect de nos obligations légales. Nous indiquons les motifs de traitement spécifiques sur lesquels nous nous appuyons à côté de chaque objectif répertorié ci-dessous.
 
@@ -59,20 +58,22 @@ Demander des commentaires. Nous pouvons utiliser vos informations pour demander 
 
 Pour gérer les comptes d'utilisateurs. Nous pouvons utiliser vos informations pour gérer notre compte et le maintenir en état de fonctionnement.
 
-Exécuter et gérer vos commandes. Nous pouvons utiliser vos informations pour exécuter et gérer vos commandes, paiements, retours et échanges effectués via l'application.
+Exécuter et gérer vos commandes. Nous pouvons utiliser vos informations pour exécuter et gérer vos commandes et demandes effectuées via l'application.
 
 Pour fournir et faciliter la fourniture de services à l'utilisateur. Nous pouvons utiliser vos informations pour vous fournir le service demandé.
 
 Pour répondre aux demandes des utilisateurs/offrir une assistance aux utilisateurs. Nous pouvons utiliser vos informations pour répondre à vos demandes et résoudre tout problème potentiel que vous pourriez rencontrer avec l'utilisation de nos services.
 
-3. VOS INFORMATIONS SERONT-ELLES PARTAGÉES AVEC QUI QUE CE SOIT ?
+3. VOS INFORMATIONS SERONT-ELLES PARTAGÉES AVEC QUI QUE CE SOIT ?
 
-En bref : nous ne partageons des informations qu'avec votre consentement, pour nous conformer aux lois, pour vous fournir des services, pour protéger vos droits ou pour remplir des obligations commerciales.
+En bref : nous ne partageons des informations qu'avec votre consentement, pour nous conformer aux lois, pour vous fournir des services, pour protéger vos droits ou pour remplir des obligations commerciales.
 
-Nous pouvons traiter ou partager vos données que nous détenons sur la base juridique suivante :
-Consentement : nous pouvons traiter vos données si vous nous avez donné votre consentement spécifique pour utiliser vos informations personnelles à des fins spécifiques.
+Nous pouvons traiter ou partager vos données que nous détenons sur la base juridique suivante :
+Consentement : nous pouvons traiter vos données si vous nous avez donné votre consentement spécifique pour utiliser vos informations personnelles à des fins spécifiques.
 
-Exécution d'un contrat : lorsque nous avons conclu un contrat avec vous, nous pouvons traiter vos informations personnelles pour remplir les conditions de notre contrat.Obligations légales : Nous pouvons divulguer vos informations lorsque nous sommes légalement tenus de le faire afin de nous conformer à la loi applicable, aux demandes gouvernementales, à une procédure judiciaire, à une ordonnance d'un tribunal ou à une procédure légale, par exemple en réponse à une ordonnance d'un tribunal ou à une assignation à comparaître (y compris en réponse aux autorités publiques pour répondre aux exigences de sécurité nationale ou d'application de la loi).
+Exécution d'un contrat : lorsque nous avons conclu un contrat avec vous, nous pouvons traiter vos informations personnelles pour respecter les termes de notre contrat.
+
+Obligations légales : Nous pouvons divulguer vos informations lorsque nous sommes légalement tenus de le faire afin de nous conformer à la loi applicable, aux demandes gouvernementales, à une procédure judiciaire, à une ordonnance d'un tribunal ou à un processus légal, par exemple en réponse à une ordonnance d'un tribunal ou à une assignation à comparaître (y compris dans réponse aux autorités publiques pour répondre aux exigences de sécurité nationale ou d'application de la loi).
 
 Intérêts vitaux : Nous pouvons divulguer vos informations lorsque nous pensons que cela est nécessaire pour enquêter, prévenir ou prendre des mesures concernant des violations potentielles de nos politiques, des soupçons de fraude, des situations impliquant des menaces potentielles pour la sécurité de toute personne et des activités illégales, ou comme preuve dans un litige dans lequel nous sommes impliqués.
 Plus précisément, nous pouvons avoir besoin de traiter vos données ou de partager vos informations personnelles dans les situations suivantes :
@@ -80,17 +81,17 @@ Transferts d'entreprise. Nous pouvons partager ou transférer vos informations d
 
 4. COMBIEN DE TEMPS CONSERVONS-NOUS VOS INFORMATIONS ?
 
-En bref : nous conservons vos informations aussi longtemps que nécessaire pour atteindre les objectifs décrits dans la présente politique de confidentialité, sauf si la loi l'exige.
+En bref : Nous conservons vos informations aussi longtemps que nécessaire pour atteindre les objectifs décrits dans la présente déclaration de confidentialité, sauf si la loi l'exige autrement.
 
-Nous ne conserverons vos informations personnelles que le temps nécessaire aux fins énoncées dans la présente politique de confidentialité, à moins qu'une période de conservation plus longue ne soit requise ou autorisée par la loi (comme des exigences fiscales, comptables ou autres exigences légales). Aucun objectif de la présente politique ne nous obligera à conserver vos informations personnelles plus longtemps que la période pendant laquelle les utilisateurs ont un compte chez nous.
+Nous ne conserverons vos informations personnelles que le temps nécessaire aux fins énoncées dans la présente déclaration de confidentialité, à moins qu'une période de conservation plus longue ne soit requise ou autorisée par la loi (comme des exigences fiscales, comptables ou autres exigences légales). Aucun objectif de cet avis ne nous obligera à conserver vos informations personnelles plus longtemps que la période pendant laquelle les utilisateurs ont un compte chez nous.
 
-Lorsque nous n'avons aucun besoin commercial légitime continu de traiter vos informations personnelles, nous supprimerons ou anonymiserons ces informations ou, si cela n'est pas possible (par exemple, parce que vos informations personnelles ont été stockées dans des archives de sauvegarde), nous stockerons vos informations personnelles de manière sécurisée et les isolerons de tout traitement ultérieur jusqu'à ce que la suppression soit possible.
+Lorsque nous n'avons aucun besoin commercial légitime continu de traiter vos informations personnelles, nous supprimerons ou anonymiserons ces informations ou, si cela n'est pas possible (par exemple, parce que vos informations personnelles ont été stockées dans des archives de sauvegarde), nous stockerons alors en toute sécurité vos informations personnelles et les isolerons de tout traitement ultérieur jusqu'à ce que la suppression soit possible.
 
-5. COMMENT PROTÉGEONS-NOUS VOS INFORMATIONS ?
+5. COMMENT PROTÉGEONS-NOUS VOS INFORMATIONS ?
 
-En bref : nous visons à protéger vos informations personnelles grâce à un système de mesures de sécurité organisationnelles et techniques.
+En bref : nous visons à protéger vos informations personnelles grâce à un système de mesures de sécurité organisationnelles et techniques.
 
-Nous avons mis en œuvre des mesures de sécurité techniques et organisationnelles appropriées conçues pour protéger la sécurité de toutes les informations personnelles que nous traitons. Cependant, malgré nos mesures de protection et nos efforts pour sécuriser vos informations, aucune transmission électronique sur Internet ou technologie de stockage d'informations ne peut être garantie à 100 % sûre. Nous ne pouvons donc pas promettre ni garantir que les pirates informatiques, les cybercriminels ou d'autres tiers non autorisés ne pourront pas contourner notre sécurité et collecter, accéder, voler ou modifier vos informations de manière inappropriée. Bien que nous fassions de notre mieux pour protéger vos informations personnelles, la transmission d'informations personnelles vers et depuis notre application se fait à vos propres risques. Vous ne devez accéder à l'application que dans un environnement sécurisé.
+Nous avons mis en œuvre des mesures de sécurité techniques et organisationnelles appropriées conçues pour protéger la sécurité de toutes les informations personnelles que nous traitons. Cependant, malgré nos mesures de protection et nos efforts pour sécuriser vos informations, aucune transmission électronique sur Internet ou technologie de stockage d'informations ne peut être garantie comme étant sûre à 100 %, nous ne pouvons donc pas promettre ou garantir que les pirates informatiques, les cybercriminels ou d'autres tiers non autorisés ne pourront pas vaincre notre sécurité et collecter, accéder, voler ou modifier de manière inappropriée vos informations. Bien que nous fassions de notre mieux pour protéger vos informations personnelles, la transmission d'informations personnelles vers et depuis notre application se fait à vos propres risques. Vous ne devez accéder à l'application que dans un environnement sécurisé.
 
 6. COLLECTONS-NOUS DES INFORMATIONS AUPRÈS DE MINEURS ?
 
@@ -100,23 +101,25 @@ Nous ne demandons ni ne collectons sciemment de données auprès de personnes de
 
 7. QUELS SONT VOS DROITS EN MATIÈRE DE CONFIDENTIALITÉ ?
 
-En bref : vous pouvez consulter, modifier ou résilier votre compte à tout moment.
+En bref : vous pouvez consulter, modifier ou résilier votre compte à tout moment.
 
 Informations sur le compte
 
-Si vous souhaitez à tout moment consulter ou modifier les informations de votre compte ou résilier votre compte, vous pouvez :
+Si vous souhaitez à tout moment consulter ou modifier les informations de votre compte ou résilier votre compte, vous pouvez :
 Connectez-vous aux paramètres de votre compte et mettez à jour votre compte utilisateur.
 
-À votre demande de résiliation de votre compte, nous désactiverons ou supprimerons votre compte et vos informations de nos bases de données actives. Cependant, nous pouvons conserver certaines informations dans nos fichiers pour prévenir la fraude, résoudre les problèmes, aider à toute enquête, appliquer nos conditions d'utilisation et/ou nous conformer aux exigences légales applicables.
+À votre demande de résiliation de votre compte, nous désactiverons ou supprimerons votre compte et vos informations de nos bases de données actives. Cependant, nous pouvons conserver certaines informations dans nos fichiers pour prévenir la fraude, résoudre les problèmes, aider à toute enquête, faire respecter nos conditions d'utilisation et/ou nous conformer aux exigences légales applicables.
 
-10. METTONS-NOUS À JOUR CET AVIS ?
+8. METTONS-NOUS À JOUR CET AVIS ?
 
-En bref : Oui, nous mettrons à jour cette déclaration de confidentialité si nécessaire afin de rester en conformité avec les lois en vigueur.
+En bref : oui, nous mettrons à jour cet avis si nécessaire pour rester conformes aux lois en vigueur.
 
-Nous pouvons mettre à jour cette déclaration de confidentialité de temps à autre. La version mise à jour sera indiquée par une date de « révision » mise à jour et la version mise à jour entrera en vigueur dès qu'elle sera accessible. Si nous apportons des modifications importantes à cette déclaration de confidentialité, nous pouvons vous en informer soit en publiant de manière visible un avis de ces modifications, soit en vous envoyant directement une notification. Nous vous encourageons à consulter régulièrement cette déclaration de confidentialité pour être informé de la manière dont nous protégeons vos informations.11. COMMENT POUVEZ-VOUS NOUS CONTACTER AU SUJET DE CET AVIS ?
+Nous pouvons mettre à jour cet avis de confidentialité de temps à autre. La version mise à jour sera indiquée par une date « Révisée » mise à jour et la version mise à jour entrera en vigueur dès qu'elle sera accessible. Si nous apportons des modifications importantes à cet avis de confidentialité, nous pouvons vous en informer soit en publiant de manière visible un avis de ces modifications, soit en vous envoyant directement une notification. Nous vous encourageons à consulter fréquemment cette déclaration de confidentialité pour être informé de la manière dont nous protégeons vos informations.
 
-Si vous avez des questions ou des commentaires concernant cet avis, vous pouvez nous envoyer un e-mail à support@lamedcash.com
+9. COMMENT POUVEZ-VOUS NOUS CONTACTER AU SUJET DE CETTE DÉNONCIATION ?
 
-12. COMMENT POUVEZ-VOUS CONSULTER, METTRE À JOUR OU SUPPRIMER LES DONNÉES QUE NOUS RECUEILLONS À VOTRE SUJET ?
+Si vous avez des questions ou des commentaires sur cette déclaration, vous pouvez nous envoyer un e-mail à support@lamedcash.com
 
-Selon les lois applicables de votre pays, vous pouvez avoir le droit de demander l'accès aux informations personnelles que nous recueillons auprès de vous, de modifier ces informations ou de les supprimer dans certaines circonstances. Pour demander la révision, la mise à jour ou la suppression de vos informations personnelles, veuillez le faire dans la section Paramètres de la section Profil de l'application.
+10. COMMENT POUVEZ-VOUS CONSULTER, METTRE À JOUR OU SUPPRIMER LES DONNÉES QUE NOUS RECUEILLONS AUPRÈS DE VOUS ?
+
+Selon les lois applicables de votre pays, vous pouvez avoir le droit de demander l'accès aux informations personnelles que nous collectons Vous pouvez modifier ces informations ou les supprimer dans certaines circonstances. Pour demander la révision, la mise à jour ou la suppression de vos informations personnelles, veuillez le faire dans la section Paramètres de la section Profil de l'application.
