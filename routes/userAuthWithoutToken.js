@@ -1535,7 +1535,11 @@ router.post("/resetPasswordForLoggedInUser2", async (req, res) => {
         }
 
 
+
         const hashedPassword = await bcryptjs.hash(newPassword, 10);
+        if (!hashedPassword) {
+            return res.status(500).send({ success: false, message: "Password hashing failed" });
+        }
 
         existingUser.password = hashedPassword;
 
@@ -1546,7 +1550,11 @@ router.post("/resetPasswordForLoggedInUser2", async (req, res) => {
         //     emailType: "RESET",
         //     fullname: existingUser.fullname,
         // });
-        await existingUser.save();
+    
+        const updatedUser = await existingUser.save();
+        if (!updatedUser) {
+            return res.status(500).send({ success: false, message: "Failed to update user password" });
+        }
         transactionInProgress = false;
         return res
             .status(201)
