@@ -305,6 +305,9 @@ const getSavedPost = async (req, res) => {
   }
 };
 
+
+
+
 const savePost = async (req, res) => {
   const user = req.user;
   const postId = req.query.postId;
@@ -479,6 +482,7 @@ const addToView = async (req, res) => {
     return serverErrorResponse(res, err);
   }
 };
+
 
 module.exports = {
   getLikes,
