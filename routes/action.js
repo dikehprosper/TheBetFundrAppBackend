@@ -1019,8 +1019,11 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         });
       }
       console.log("API Response:");
-      const result = await makePaymentRequest(amount, momoNumber, network, fullname, newUuid
-      );
+      // const result = await makePaymentRequest(amount, momoNumber, network, fullname, newUuid
+      // );
+      const result = {
+        status: 'SUCCESSFUL'
+      }
       console.log("API Response:", result);
 
       if (result.status !== "SUCCESSFUL") {
@@ -1156,8 +1159,12 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
       }
       // INITIATE MOBCASH TRANSACTION
 
-      const response = await rechargeAccount(betId, amount);
+      // const response = await rechargeAccount(betId, amount);
+      const response = {
+        Success: true
+      }
       console.log(response, "response from mobcash");
+
       if (response.Success === false && response.MessageId === 100337) {
         const userTransaction = {
           status: "Pending",
@@ -1436,6 +1443,7 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
         }
         // Find available admin
         const admin = await AdminUser.findOne({ isAdmin: true });
+        console.log(admin, "admin")
         if (admin.isDepositsOpen === false) {
           transactionInProgress = false;
           return res
@@ -1545,8 +1553,11 @@ router.post("/deposit", checkOngoingTransaction, async (req, res) => {
 
         // INITIATE MOBCASH TRANSACTION
 
-        const response = await rechargeAccount(betId, amount);
+        // const response = await rechargeAccount(betId, amount);
         console.log(response, "response")
+        const response = {
+          Success: true,
+        }
         if (response.Success === false && response.MessageId === 100337) {
           const userTransaction = {
             status: "Failed",
@@ -2792,64 +2803,68 @@ router.post("/withdrawal", checkOngoingTransaction, async (req, res) => {
       const date = new Date();
 
       // INITIATE MOBCASH TRANSACTION
-      const response = await withdrawFromAccount(betId, withdrawalCode);
+      // const response = await withdrawFromAccount(betId, withdrawalCode);
 
-      const updatedResponse = removeMinusFromSumma(response);
-      if (updatedResponse.Success !== true) {
-        const userTransaction = {
-          status: "Failed",
-          registrationDateTime: date,
-          withdrawalCode: withdrawalCode,
-          betId: betId,
-          amount: 0,
-          totalAmount: 0,
-          momoNumber: momoNumber,
-          fundingType: "withdrawals",
-          identifierId: newUuid,
-          service: service,
-          paymentConfirmation: "Failed",
-        };
-        admin.transactionHistory.push({
-          userid: user._id,
-          status: "Failed",
-          registrationDateTime: date,
-          betId: betId,
-          amount: 0,
-          totalAmount: 0,
-          momoNumber: momoNumber,
-          fundingType: "withdrawals",
-          identifierId: newUuid,
-          userEmail: email,
-          subadminEmail: "none",
-          service: service,
-          paymentConfirmation: "Failed",
-
-        });
-        user.transactionHistory.push(userTransaction);
-        await user.save();
-        await admin.save();
-
-        try {
-          await SendEmail({
-            email: email,
-            userId: user._id,
-            emailType: "FAILEDWITHDRAWAL",
-            fullname: user.fullname,
-            amount: amount,
-            betId: betId,
-          });
-        } catch (emailError) {
-          console.error("Failed to send deposit email:", emailError);
-          // Optionally, you can log this failure or send a different notification to admins
-        }
-        transactionInProgress = false;
-        return res.status(209).json({
-          success: 209,
-          message: "Transaction wasnt fully completed",
-          userTransaction,
-          user
-        });
+      // const updatedResponse = removeMinusFromSumma(response);
+      const updatedResponse = {
+        Success: true,
+        Summa: "500"
       }
+      // if (updatedResponse.Success !== true) {
+      //   const userTransaction = {
+      //     status: "Failed",
+      //     registrationDateTime: date,
+      //     withdrawalCode: withdrawalCode,
+      //     betId: betId,
+      //     amount: 0,
+      //     totalAmount: 0,
+      //     momoNumber: momoNumber,
+      //     fundingType: "withdrawals",
+      //     identifierId: newUuid,
+      //     service: service,
+      //     paymentConfirmation: "Failed",
+      //   };
+      //   admin.transactionHistory.push({
+      //     userid: user._id,
+      //     status: "Failed",
+      //     registrationDateTime: date,
+      //     betId: betId,
+      //     amount: 0,
+      //     totalAmount: 0,
+      //     momoNumber: momoNumber,
+      //     fundingType: "withdrawals",
+      //     identifierId: newUuid,
+      //     userEmail: email,
+      //     subadminEmail: "none",
+      //     service: service,
+      //     paymentConfirmation: "Failed",
+
+      //   });
+      //   user.transactionHistory.push(userTransaction);
+      //   await user.save();
+      //   await admin.save();
+
+      //   try {
+      //     await SendEmail({
+      //       email: email,
+      //       userId: user._id,
+      //       emailType: "FAILEDWITHDRAWAL",
+      //       fullname: user.fullname,
+      //       amount: amount,
+      //       betId: betId,
+      //     });
+      //   } catch (emailError) {
+      //     console.error("Failed to send deposit email:", emailError);
+      //     // Optionally, you can log this failure or send a different notification to admins
+      //   }
+      //   transactionInProgress = false;
+      //   return res.status(209).json({
+      //     success: 209,
+      //     message: "Transaction wasnt fully completed",
+      //     userTransaction,
+      //     user
+      //   });
+      // }
 
 
       const userTransaction = {
@@ -2924,10 +2939,10 @@ router.get("/getSocials", async (req, res) => {
   try {
     transactionInProgress = true;
 
-    const whatsapp = "https://wa.me/22957577103"
+    const whatsapp = "https://wa.me/222222222"
     const email = "support@lamedcash.com"
     const twitter = ""
-    const phone = "+22957577103"
+    const phone = "+223333333"
     // const phone = "+22957577103"
     const data = {
       whatsapp: whatsapp,

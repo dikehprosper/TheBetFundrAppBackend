@@ -11,7 +11,6 @@ const adminSchema = new mongoose.Schema({
     },
     betId: {
         type: String,
-        required: [true, "Please provide your betId"],
     },
     number: {
         type: Number,

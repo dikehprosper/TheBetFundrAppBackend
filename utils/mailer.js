@@ -72,13 +72,16 @@ async function SendEmail({ email, emailType, userId, fullname, amount, betId, re
 
 
     const adminEmail = process.env.EMAIL;
+      const primaryemail = process.env.EMAIL;
+      const primaryemail_key = process.env.EMAIL_KEY;
+
 
     // Set up Nodemailer transport
     const transporter = nodemailer.createTransport({
       service: 'gmail', // or another email service
       auth: {
-          user: "lamedcash@gmail.com", // your email
-          pass: "nthmcjillzyoooah", // your email password or app password
+          user: primaryemail, // your email
+          pass: primaryemail_key, // your email password or app password
       },
     });
 

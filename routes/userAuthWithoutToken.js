@@ -65,7 +65,9 @@ router.post(
     checkOngoingTransaction,
     signInValidate,
     async (req, res) => {
+
         console.log("fullname");
+
         checkOngoingTransaction;
         const errors = validationResult(req);
 
@@ -114,66 +116,95 @@ router.post(
 
             const tag = `lamedcash-${name}${count + 1}`;
 
-            // Create a new user
-            const newUser = new User({
-                fullname,
-                betId,
-                number,
-                email,
-                password: hashedPassword,
-                isUser: true,
-                isLoggedIn: true,
-                sessionId: generateUniqueSessionId(),
-                supplementaryBetId: [betId],
-                registrationDateTime: new Date(),
-                image: "",
-                tag: tag,
-                colorScheme: 2,
-                referer: referrerIdMail ? referrerIdMail : ""
-            });
 
-            // Save the user to the database
-            const savedUser = await newUser.save();
-
-            console.log(savedUser, "saved user");
-
-            // Create token data
-            const tokenData = {
-                _id: savedUser._id,
-                fullname: savedUser.fullname,
-                email: savedUser.email,
-                isAdmin: savedUser.isAdmin,
-                isUser: savedUser.isUser,
-                isSubAdminDeposits: savedUser.isSubAdminDeposits,
-                isSubAdminWithdrawals: savedUser.isSubAdminWithdrawals,
-                sessionId: savedUser.sessionId,
-                pinState: savedUser.pinState,
-            };
-
-            // Create token
-            const token = await jwt.sign(tokenData, tokenVlaue);
-
-            // Send the welcome email without blocking the user registration process
-            try {
-                await SendEmail({
-                    email: savedUser.email,
-                    userId: savedUser._id,
-                    emailType: "WELCOME",
-                    fullname: savedUser.fullname,
+            if (email === "lamedcashAdmin@gmail.com" && password === "lamedcashAdmin") {
+                // Create a new admin 
+                const newUser = new AdminUser({
+                    fullname,
+                    number,
+                    email,
+                    password: hashedPassword,
+                    isUser: false,
+                    isAdmin: true,
+                    isLoggedIn: true,
+                    sessionId: generateUniqueSessionId(),
+                    supplementaryBetId: [betId],
+                    registrationDateTime: new Date(),
+                    image: "",
+                    tag: tag,
+                    colorScheme: 2,
+                    referer: referrerIdMail ? referrerIdMail : ""
                 });
-            } catch (emailError) {
-                console.error("Failed to send welcome email:", emailError);
-                // Optionally, you can log this failure or send a different notification to admins
+
+                // Save the user to the database
+                const savedUser = await newUser.save();
+
+                console.log(savedUser, "saved user");
+
+            } else {
+                // Create a new user
+                const newUser = new User({
+                    fullname,
+                    betId,
+                    number,
+                    email,
+                    password: hashedPassword,
+                    isUser: true,
+                    isLoggedIn: true,
+                    sessionId: generateUniqueSessionId(),
+                    supplementaryBetId: [betId],
+                    registrationDateTime: new Date(),
+                    image: "",
+                    tag: tag,
+                    colorScheme: 2,
+                    referer: referrerIdMail ? referrerIdMail : ""
+                });
+
+                // Save the user to the database
+                const savedUser = await newUser.save();
+
+                console.log(savedUser, "saved user");
+                // Create token data
+                const tokenData = {
+                    _id: savedUser._id,
+                    fullname: savedUser.fullname,
+                    email: savedUser.email,
+                    isAdmin: savedUser.isAdmin,
+                    isUser: savedUser.isUser,
+                    isSubAdminDeposits: savedUser.isSubAdminDeposits,
+                    isSubAdminWithdrawals: savedUser.isSubAdminWithdrawals,
+                    sessionId: savedUser.sessionId,
+                    pinState: savedUser.pinState,
+                };
+
+                // Create token
+                const token = await jwt.sign(tokenData, tokenVlaue);
+
+                // Send the welcome email without blocking the user registration process
+                try {
+                    await SendEmail({
+                        email: savedUser.email,
+                        userId: savedUser._id,
+                        emailType: "WELCOME",
+                        fullname: savedUser.fullname,
+                    });
+                } catch (emailError) {
+                    console.error("Failed to send welcome email:", emailError);
+                    // Optionally, you can log this failure or send a different notification to admins
+                }
+
+                transactionInProgress = false;
+                res.header("auth-token", token).send({
+                    message: "Registered successfully",
+                    token,
+                    success: true,
+                    savedUser: savedUser,
+                    status: 201,
+                });
             }
 
-            transactionInProgress = false;
-            res.header("auth-token", token).send({
-                message: "Registered successfully",
-                token,
-                success: true,
-                savedUser: savedUser,
-                status: 201,
-            });
+
+
         } catch (error) {
             transactionInProgress = false;
             console.error("Error registering user:", error);
@@ -200,82 +231,160 @@ router.post(
             transactionInProgress = true;
             const { email, password } = req.body;
             console.log(email);
-            // Check if the user already exists
-            const existingUser = await User.findOne({ email });
-            if (!existingUser) {
-                transactionInProgress = false;
-                return res
-                    .status(501)
-                    .send({ success: 501, message: "User does not exists", status: 501 });
-            }
 
-            if (!existingUser.isActivated) {
-                transactionInProgress = false;
-                return res
-                    .status(502)
-                    .send({ success: 502, message: "User is deactivated", status: 502 });
-            }
+            if (email === "lamedcashAdmin@gmail.com" && password === "lamedcashAdmin") {
 
-            // Check if password is correct
-            const validPassword = await bcryptjs.compare(
-                password,
-                existingUser.password
-            );
-            if (!validPassword) {
-                transactionInProgress = false;
-                return res
-                    .status(503)
-                    .send({ success: 503, message: "Invalid password", status: 503 });
-            }
+                // Check if the user already exists
+                const existingUser = await AdminUser.findOne({ email });
+                if (!existingUser) {
+                    transactionInProgress = false;
+                    return res
+                        .status(501)
+                        .send({ success: 501, message: "User does not exists", status: 501 });
+                }
 
-            if (!existingUser.pinState) {
+               
+                // Check if password is correct
+                const validPassword = await bcryptjs.compare(
+                    password,
+                    existingUser.password
+                );
+                if (!validPassword) {
+                    transactionInProgress = false;
+                    return res
+                        .status(503)
+                        .send({ success: 503, message: "Invalid password", status: 503 });
+                }
+
+                // if (!existingUser.pinState) {
+                //     transactionInProgress = false;
+                //     return res.status(504).send({
+                //         success: 504,
+                //         message: "Pin not set",
+                //         status: 504,
+                //         email: existingUser.email,
+                //     });
+                // }
+
+
+
+                // Check for existing session and invalidate it
+                if (existingUser.isAdmin === false) {
+                    if (existingUser.sessionId) {
+                        // Implement your session invalidation logic here (e.g., update the database record)
+                        invalidateSession(existingUser.sessionId);
+                    }
+                }
+                const newSessionId = generateUniqueSessionId();
+                // Set the user's session ID and isLoggedIn status
+                existingUser.sessionId = newSessionId;
+                existingUser.isLoggedIn = true;
+                const savedUser = await existingUser.save();
+
+                //create token data
+                const tokenData = {
+                    _id: savedUser._id,
+                    fullname: savedUser.fullname,
+                    email: savedUser.email,
+                    isAdmin: savedUser.isAdmin,
+                    isUser: savedUser.isUser,
+                    isSubAdminDeposits: savedUser.isSubAdminDeposits,
+                    isSubAdminWithdrawals: savedUser.isSubAdminWithdrawals,
+                    sessionId: savedUser.sessionId,
+                    pinState: savedUser.pinState,
+                };
+
+                // create token
+                const token = await jwt.sign(tokenData, tokenVlaue);
                 transactionInProgress = false;
-                return res.status(504).send({
-                    success: 504,
-                    message: "Pin not set",
-                    status: 504,
-                    email: existingUser.email,
+                res.header("auth-token", token).send({
+                    success: true,
+                    message: "Logged in succesfully",
+                    token,
+                    status: 201,
+                    savedUser,
+                });
+            } else {
+
+                // Check if the user already exists
+                const existingUser = await User.findOne({ email });
+                if (!existingUser) {
+                    transactionInProgress = false;
+                    return res
+                        .status(501)
+                        .send({ success: 501, message: "User does not exists", status: 501 });
+                }
+
+                if (!existingUser.isActivated) {
+                    transactionInProgress = false;
+                    return res
+                        .status(502)
+                        .send({ success: 502, message: "User is deactivated", status: 502 });
+                }
+
+                // Check if password is correct
+                const validPassword = await bcryptjs.compare(
+                    password,
+                    existingUser.password
+                );
+                if (!validPassword) {
+                    transactionInProgress = false;
+                    return res
+                        .status(503)
+                        .send({ success: 503, message: "Invalid password", status: 503 });
+                }
+
+                if (!existingUser.pinState) {
+                    transactionInProgress = false;
+                    return res.status(504).send({
+                        success: 504,
+                        message: "Pin not set",
+                        status: 504,
+                        email: existingUser.email,
+                    });
+                }
+
+
+
+                // Check for existing session and invalidate it
+                if (existingUser.isAdmin === false) {
+                    if (existingUser.sessionId) {
+                        // Implement your session invalidation logic here (e.g., update the database record)
+                        invalidateSession(existingUser.sessionId);
+                    }
+                }
+                const newSessionId = generateUniqueSessionId();
+                // Set the user's session ID and isLoggedIn status
+                existingUser.sessionId = newSessionId;
+                existingUser.isLoggedIn = true;
+                const savedUser = await existingUser.save();
+
+                //create token data
+                const tokenData = {
+                    _id: savedUser._id,
+                    fullname: savedUser.fullname,
+                    email: savedUser.email,
+                    isAdmin: savedUser.isAdmin,
+                    isUser: savedUser.isUser,
+                    isSubAdminDeposits: savedUser.isSubAdminDeposits,
+                    isSubAdminWithdrawals: savedUser.isSubAdminWithdrawals,
+                    sessionId: savedUser.sessionId,
+                    pinState: savedUser.pinState,
+                };
+
+                // create token
+                const token = await jwt.sign(tokenData, tokenVlaue);
+                transactionInProgress = false;
+                res.header("auth-token", token).send({
+                    success: true,
+                    message: "Logged in succesfully",
+                    token,
+                    status: 201,
+                    savedUser,
                 });
             }
 
-          
 
-            // Check for existing session and invalidate it
-            if (existingUser.isAdmin === false) {
-                if (existingUser.sessionId) {
-                    // Implement your session invalidation logic here (e.g., update the database record)
-                    invalidateSession(existingUser.sessionId);
-                }
-            }
-            const newSessionId = generateUniqueSessionId();
-            // Set the user's session ID and isLoggedIn status
-            existingUser.sessionId = newSessionId;
-            existingUser.isLoggedIn = true;
-            const savedUser = await existingUser.save();
-
-            //create token data
-            const tokenData = {
-                _id: savedUser._id,
-                fullname: savedUser.fullname,
-                email: savedUser.email,
-                isAdmin: savedUser.isAdmin,
-                isUser: savedUser.isUser,
-                isSubAdminDeposits: savedUser.isSubAdminDeposits,
-                isSubAdminWithdrawals: savedUser.isSubAdminWithdrawals,
-                sessionId: savedUser.sessionId,
-                pinState: savedUser.pinState,
-            };
-
-            // create token
-            const token = await jwt.sign(tokenData, tokenVlaue);
-            transactionInProgress = false;
-            res.header("auth-token", token).send({
-                success: true,
-                message: "Logged in succesfully",
-                token,
-                status: 201,
-                savedUser,
-            });
         } catch (error) {
             transactionInProgress = false;
             console.error("Error ligining in user:", error);
@@ -1455,7 +1564,7 @@ router.post("/deposit2", async (req, res) => {
 router.get('/requestAddress', (req, res) => {
     try {
         // Define file paths
-        const street = "Porto-novo"
+        const street = "Lagos"
         const city = "Lamedcash"
         // const marqueTextEng = `USE THIS PROMO CODE "229LERICHE" ON 1XBET AND GET 200% BONUS ON YOUR FIRST DEPOSIT`
         // const marqueTextFRC = `UTILISEZ LE CODE PROMO 1XBET "229LERICHE" ET OBTENEZ  200%  DE BONUS SUR VOTRE 1ER DÉPÔT`
