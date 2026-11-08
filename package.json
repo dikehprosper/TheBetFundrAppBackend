@@ -1,0 +1,51 @@
+{
+  "name": "betfundr-api",
+  "version": "2.0.0",
+  "description": "LamedCash / BetFundr backend: PostgreSQL edition",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js | npx pino-pretty --colorize --messageKey=message",
+    "migrate": "node scripts/migrate.js up",
+    "migrate:status": "node scripts/migrate.js status",
+    "seed:admin": "node scripts/seed-admin.js",
+    "lint": "eslint .",
+    "test": "node --test --test-concurrency=1 test/*.test.js"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "aws-sdk": "^2.1693.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.3",
+    "express-slow-down": "^3.1.0",
+    "expo-server-sdk": "^3.9.0",
+    "fedapay": "^1.2.1",
+    "firebase-admin": "^12.6.0",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "joi": "^18.3.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.23.1",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "sequelize": "^6.37.8",
+    "sharp": "^0.33.5",
+    "socket.io": "^4.7.5"
+  },
+  "optionalDependencies": {
+    "@aws-sdk/client-rekognition": "^3.670.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "nodemon": "^3.1.14",
+    "pino-pretty": "^13.1.3"
+  }
+}

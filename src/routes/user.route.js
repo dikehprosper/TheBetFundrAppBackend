@@ -1,0 +1,36 @@
+const router = require('express').Router()
+const user = require('../controllers/user.controller')
+const tx = require('../controllers/transaction.controller')
+const { validate, schemas } = require('../middlewares/validate.middleware')
+const { moneyLimiter, authLimiter } = require('../middlewares/rateLimit.middleware')
+const { featureFlag } = require('../middlewares/flags.middleware')
+const { imageUpload } = require('../middlewares/upload.middleware')
+
+// Mounted behind verifyToken: every handler acts as req.user.
+router.post('/setPin', authLimiter, validate(schemas.setPin), user.setPin)
+router.post('/getUser', featureFlag('GET_USER'), validate(schemas.getUser), user.getUser)
+router.post('/verifyUserPin', authLimiter, validate(schemas.verifyPin), user.verifyUserPin)
+router.post('/getUpdatedData', user.getUpdatedData)
+router.post('/resetPasswordForLoggedInUser', authLimiter, validate(schemas.changePassword), user.changePassword)
+router.post('/requestPin', authLimiter, user.requestPin)
+router.post('/checkPin', authLimiter, validate(schemas.checkPinCode), user.checkPin)
+router.post('/changeUserPin', authLimiter, validate(schemas.changePin), user.changeUserPin)
+router.post('/changeColorScheme', validate(schemas.colorScheme), user.changeColorScheme)
+router.post('/setTag', validate(schemas.setTag), user.setTag)
+router.post('/getTotalReferral', user.getTotalReferral)
+router.post('/editProfileImage', imageUpload.single('image'), user.editProfileImage)
+router.post('/changeUserDetails', validate(schemas.details), user.changeUserDetails)
+router.get('/getSocials', user.getSocials)
+router.get('/privacy-policies', user.privacyPolicies)
+router.post('/submitDeleteAccountForm', authLimiter, validate(schemas.deleteAccount), user.submitDeleteAccountForm)
+router.post('/searchSendingPage', validate(schemas.search), user.searchSendingPage)
+router.post('/generateQRCode', moneyLimiter, validate(schemas.qrGenerate), user.generateQRCode)
+
+// money
+router.post('/deposit', featureFlag('DEPOSITS'), moneyLimiter, validate(schemas.deposit), tx.deposit)
+router.post('/depositWithFedapay', featureFlag('DEPOSITS'), moneyLimiter, validate(schemas.fedapayDeposit), tx.depositWithFedapay)
+router.post('/walletdeposit', featureFlag('DEPOSITS'), moneyLimiter, validate(schemas.walletDeposit), tx.walletDeposit)
+router.post('/withdrawal', featureFlag('WITHDRAWALS'), moneyLimiter, validate(schemas.withdrawal), tx.withdrawal)
+router.post('/walletSend', featureFlag('TRANSFERS'), moneyLimiter, validate(schemas.walletSend), tx.walletSend)
+
+module.exports = router

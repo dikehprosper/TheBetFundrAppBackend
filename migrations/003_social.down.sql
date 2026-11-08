@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS post_saves;
+DROP TABLE IF EXISTS post_views;
+DROP TABLE IF EXISTS post_likes;
+DROP TABLE IF EXISTS post_media;
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS follows;
